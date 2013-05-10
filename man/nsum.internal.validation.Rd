@@ -1,0 +1,92 @@
+\name{nsum.internal.validation}
+\alias{nsum.internal.validation}
+\title{nsum.internal.validation}
+\usage{
+  nsum.internal.validation(survey.data, known.popns = NULL,
+    total.popn.size = NULL, degrees = NULL, na.rm = FALSE,
+    kp.method = FALSE, weights = NULL, return.plot = TRUE,
+    verbose = FALSE, bootstrap = FALSE, ...)
+}
+\arguments{
+  \item{survey.data}{the dataframe with the survey results}
+
+  \item{known.popns}{if not NULL, a vector whose entries
+  are the size of the known populations, and whose names
+  are the variable names in the dataset corresponding to
+  each one. if NULL, then assume that the survey.data
+  dataframe has an attribute called 'known.popns'
+  containing this vector.}
+
+  \item{total.popn.size}{the size of the entire population.
+  if NA, this function works with proportions; if NULL, it
+  looks for the 'total.popn.size' attribute of the dataset
+  \code{survey.data}; if not NULL or NA, it works with
+  absolute numbers (ie, the proportions * total popn size)}
+
+  \item{degrees}{if not NULL, then the name or index of the
+  column in the datset containing the degree estimates. if
+  NULL, then use the known population method to estimate
+  the degrees (see \code{\link{kp.degree.estimator}})}
+
+  \item{na.rm}{if TRUE, disregard rows that have any
+  missingness in the known populations; otherwise, use an
+  adjusted estimator to produce those rows' degree
+  estimates}
+
+  \item{kp.method}{if TRUE, then we're using known
+  population method estimates of the degrees. this means we
+  have to recompute the degrees each time we hold out a
+  known subgroup. if the degrees come from another
+  estimator, like the summation method, then we don't need
+  to do that since we don't use the ARD questions in coming
+  up with the degree estimate.}
+
+  \item{weights}{if not NULL, weights to use in computing
+  the estimate. this should be the name of the column in
+  the survey.data which has the variable with the
+  appropriate weights. these weights should be construted
+  so that, eg, the mean of the degrees is estimated as
+  (1/n) * \\sum_i {w_i * d_i}}
+
+  \item{return.plot}{if TRUE, make and return a ggplot2
+  plot object}
+
+  \item{verbose}{if TRUE, report more detailed information
+  about what's going on}
+
+  \item{bootstrap}{if TRUE, use \code{bootstrap.estimates}
+  to take bootstrap resamples in order to obtain intervals
+  around each estimate. in this case, you are expected to
+  also pass in at least \code{bootstrap.fn},
+  \code{survey.design}, and \code{num.reps}}
+
+  \item{...}{additional arguments, which are passed on to
+  \code{bootstrap.estimates} if \code{bootstrap} is TRUE}
+}
+\value{
+  a list with a dataset containing the subpopn-specific
+  estimates, as well as several summaries of the accuracy
+  of those estimates, including mae (mean absolute error),
+  mse (mean squared error), rmse (root mean squared error),
+  and are (average relative error)
+}
+\description{
+  use a hold-one-out method to estimate the predictive
+  accuracy of the network scale-up estimator on the known
+  populations
+}
+\details{
+  given a set of estimated degrees, responses to a group of
+  ARD questions, and the total size of the populations that
+  the ARD questions ask about, this function estimates the
+  accuracy of the network scale-up method by dropping each
+  known population in turn, using the non-dropped
+  populations to compute the degree and an estimate of the
+  size of the known population, and comparing the result to
+  the actual size of the known population
+
+  TODO -- document bootstrap ci option better TODO -- add
+  example of usage to the comments...\cr TODO -- make
+  amenable to parallelization
+}
+

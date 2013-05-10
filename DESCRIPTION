@@ -1,0 +1,21 @@
+Package: networkreporting
+Title: Tools for using network reporting estimators.
+Description: networkreporting has a collection of functions useful
+    for producing estimates from data that were collected using network
+    reporting techniques like network scale-up, indirect sampling,
+    network reporting, and sibling history.
+Version: 0.0.1
+Maintainer: Dennis Feehan <dfeehan@princeton.edu>
+Author: Dennis Feehan, Matthew Salganik
+License: MIT
+VignetteBuilder: knitr
+Collate:
+    'variance_estimators.r'
+    'estimators.r'
+    'helper_functions.r'
+    'networksampling-package.r'
+    'indirect_sampling.r'
+    'known_population.r'
+    'network_reporting.r'
+    'scale_up.r'
+    'summation.r'

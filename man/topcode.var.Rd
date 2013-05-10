@@ -1,0 +1,31 @@
+\name{topcode.var}
+\alias{topcode.var}
+\title{topcode a vector of numerical values}
+\usage{
+  topcode.var(x, max, to.na = NULL, ignore = NA)
+}
+\arguments{
+  \item{x}{the vector of values to topcode}
+
+  \item{max}{the maximum value; all values > max are
+  recoded to max}
+
+  \item{to.na}{a vector of values to recode to NA (this
+  happens before topcoding)}
+
+  \item{ignore}{a vector of values to leave unchanged}
+}
+\value{
+  the topcoded vector
+}
+\description{
+  this function topcodes one vector; it's used by the
+  \code{topcode} function to topcode a set of columns in a
+  data frame
+}
+\examples{
+\dontrun{
+   ## TODO write example
+}
+}
+

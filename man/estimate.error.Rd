@@ -1,0 +1,26 @@
+\name{estimate.error}
+\alias{estimate.error}
+\title{given an estimated subpopn size or prevalence and the correct value,
+produce some measurements of how close the esimate is}
+\usage{
+  estimate.error(estimate, truth)
+}
+\arguments{
+  \item{estimate}{the estimate}
+
+  \item{truth}{the correct answer}
+}
+\value{
+  a vector whose entries have various summaries of fit
+}
+\description{
+  given an estimated subpopn size or prevalence and the
+  correct value, produce some measurements of how close the
+  esimate is
+}
+\examples{
+\dontrun{
+   ## TODO add example
+}
+}
+

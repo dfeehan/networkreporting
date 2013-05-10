@@ -1,0 +1,56 @@
+\name{nsum.estimator}
+\alias{nsum.estimator}
+\title{nsum.estimator}
+\usage{
+  nsum.estimator(survey.data, d.hat.vals = "d",
+    y.vals = "y", total.popn.size = NULL, deg.ratio = 1,
+    tx.rate = 1, weights = NULL, missing = "ignore",
+    verbose = FALSE, ...)
+}
+\arguments{
+  \item{survey.data}{the dataframe with survey results}
+
+  \item{d.hat.vals}{the name or index of the column that
+  contains each respondent's estimated degree}
+
+  \item{y.vals}{the name or index of the column that
+  contains the count of hidden popn members known}
+
+  \item{total.popn.size}{NULL, NA, or a size}
+
+  \item{weights}{if not NULL, weights to use in computing
+  the estimate. this should be the name of the column in
+  the survey.data which has the variable with the
+  appropriate weights. these weights should be construted
+  so that, eg, the mean of the degrees is estimated as
+  (1/n) * \\sum_i {w_i * d_i}}
+
+  \item{deg.ratio}{the degree ratio,
+  \\frac{\\bar{d_T}}{\\bar{d}}; defaults to 1}
+
+  \item{tx.rate}{the information transmission rate;
+  defaults to 1}
+
+  \item{missing}{if "ignore", then proceed with the
+  analysis without doing anything about missing values. if
+  "complete.obs" then only use rows that have no
+  missingness for the computations (listwise deletion).
+  care must be taken in using this second option}
+
+  \item{verbose}{if TRUE, print messages to the screen}
+
+  \item{...}{extra parameters to pass on to the bootstrap
+  fn, if applicable}
+}
+\value{
+  the nsum estimate of the hidden population's size (as a
+  prevalence or an absolute number, depending on
+  total.popn.size)
+}
+\description{
+  compute network scale-up (nsum) estimate of the hidden
+  population's size. if a degree ratio other than 1 is
+  passed in, this uses the gnsum estimator TODO -- refs to
+  deg ratio and tx rate stuff...
+}
+
