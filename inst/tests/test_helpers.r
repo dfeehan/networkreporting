@@ -1,10 +1,10 @@
 
 
 
-## TODO -- write test for get.var
+## tests for get.var and get.weights
 context("helpers - get.var")
 
-gv.tmp <- data.frame('A'=1:5, 'B'=5:1)
+gv.tmp <- data.frame('A'=1:5, 'B'=5:1, weights=10:14)
 
 expect_that(get.var(gv.tmp, 'A'), equals(1:5))
 expect_that(get.var(gv.tmp, 1), equals(1:5))
@@ -16,6 +16,9 @@ expect_that(get.var(gv.tmp, NULL), equals(rep(NA,5)))
 expect_that(get.var(gv.tmp, NULL, default=-1), equals(rep(-1,5)))
 
 expect_that(get.var(gv.tmp, 10), throws_error())
+
+expect_that(get.weights(gv.tmp, "weights"), equals(10:14))
+expect_that(get.weights(gv.tmp, NULL), equals(rep(1,5)))
 
 ## TODO -- write test for df.to.kpvec
 
