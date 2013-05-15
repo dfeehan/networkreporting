@@ -29,6 +29,17 @@ expect_that(get.weights(gv.tmp, NULL), equals(rep(1,5)))
 
 
 ## TODO -- write test for parse_design
+d1 <- parse_design( ~ a + b + strata(c + d))
+expect_that(d1$psu.formula, is_identical_to( ~ a + b))
+expect_that(d1$strata.formula, is_identical_to( ~ c + d))
+
+d2 <- parse_design( ~ a + b)
+expect_that(d2$psu.formula, is_identical_to( ~ a + b))
+expect_that(d2$strata.formula, is_identical_to(NULL))
+
+d3 <- parse_design( ~ a + strata(b))
+expect_that(d3$psu.formula, is_identical_to(~ a))
+expect_that(d3$strata.formula, is_identical_to(~ b))
 
 ## TODO -- write test for topcodev.var
 ## TODO -- write test for topcode.data
