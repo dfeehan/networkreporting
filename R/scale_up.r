@@ -254,13 +254,6 @@ nsum.internal.validation <- function(survey.data,
                  }
 
                  degsum <- sum(thisdat$deg.minus, na.rm=na.rm)
-                 
-                 ## using missing='complete.obs'
-                 ## in the call to nsum.estimator instead of
-                 ## this stuff...
-                 ##thisdat <- subset(thisdat,
-                 ##                  !(is.na(deg.minus)) &
-                 ##                  !(is.na(thisdat[,this.kp])))
 
                  ## note that this attribute could be NULL and we're
                  ## still OK here...
@@ -286,7 +279,7 @@ nsum.internal.validation <- function(survey.data,
                                   weights="weights.minus",
                                   missing="complete.obs",
                                   verbose=verbose)
-                 ##nsum.holdout.est <- eval(est.call)
+
                  nsum.holdout.res <- eval(est.call)
                  nsum.holdout.est <- nsum.holdout.res$estimate
                  nsum.holdout.sum.d.hat <- nsum.holdout.res$sum.d.hat
