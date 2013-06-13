@@ -258,9 +258,8 @@ rescaled.bootstrap.sample <- function(survey.data,
                                      ## TODO -- need to test that this works
                                      ## in a PSU design that involves more than
                                      ## one variable...
-                                     this.resample <- merge(subset(stratum.data,
-                                                                   select=c(all.vars(psu.vars),
-                                                                            ".internal_id")),
+                                     this.resample <- merge(stratum.data[, c(all.vars(psu.vars),
+                                                                             ".internal_id")],
                                                             psu.count,
                                                             by=all.vars(psu.vars))
 
@@ -290,7 +289,7 @@ rescaled.bootstrap.sample <- function(survey.data,
                  
                  return(this.rep)
                })
-
+  
   return(res)
 }
 
