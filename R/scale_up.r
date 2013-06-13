@@ -239,7 +239,6 @@ nsum.internal.validation <- function(survey.data,
                                                     known.popns=kp.minus,
                                                     total.popn.size=total.popn.size,
                                                     na.rm=na.rm,
-                                                    weights=weights,
                                                     verbose=verbose)
 
                    thisdat <- survey.data
