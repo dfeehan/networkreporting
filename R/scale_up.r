@@ -253,7 +253,7 @@ nsum.internal.validation <- function(survey.data,
                    
                  }
 
-                 degsum <- sum(thisdat$deg.minus)
+                 degsum <- sum(thisdat$deg.minus, na.rm=na.rm)
                  
                  ## using missing='complete.obs'
                  ## in the call to nsum.estimator instead of
