@@ -104,23 +104,24 @@ get.var <- function(survey.data, var, default=NA) {
     ## ... otherwise, see if the weights variable is referring
     ## to a column of the dataframe; try to
     ## grab sampling weights from survey dataframe
-    var.vals <- try(subset(survey.data,
-                           select=var),
+    var.vals <- try(survey.data[,var,drop=FALSE],
                     silent=TRUE)
 
+    ## if( inherits(var.vals, "try-error") ||
+    ##    ncol(var.vals) != 1 ||
+    ##    ! is.numeric(var.vals[,1]) ) {
     if( inherits(var.vals, "try-error") ||
-       ncol(var.vals) != 1 ||
-       ! is.numeric(var.vals[,1]) ) {
+       ncol(var.vals) != 1) {      
 
       stop(paste(var,
                  " does not identify a valid column in the data.\n"))
     }
 
-    var <- as.numeric(var.vals[,1])
+    var <- var.vals[,1]
 
     return(var)
     
-  } else if (is.numeric(var) & length(var) == nrow(survey.data)) {
+  } else if (length(var) == nrow(survey.data)) {
 
     ## if var a vector with one entry per row, then these
     ## are our values
