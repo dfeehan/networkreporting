@@ -32,22 +32,29 @@
 ##' @param total.popn.size the size of the entire population. if NULL,
 ##'                        this function returns proportions; if not NULL, it
 ##'                        returns absolute numbers (ie, the proportions * total popn size)
-##' @param na.rm if TRUE, disregard rows that have any missingness in
-##'              the known populations; otherwise, use an adjusted estimator
-##'              to produce those rows' degree estimates
+##' @param missing if "ignore", then proceed with the analysis without
+##'                doing anything about missing values. if "complete.obs"
+##'                then only use rows that have no missingness for the
+##'                computations (listwise deletion). care
+##'                must be taken in using this second option
 ##' @param verbose if TRUE, print messages to the screen
 ##' @return a vector with an estimate of the degree for each row
-##'         in survey.data. if na.rm=TRUE, then the degree for rows that have
+##'         in survey.data. if missing=="ignore", then the degree for rows that have
 ##'         missingness in the 'how many X' questions will be set
 ##'         to NA
 ##' @export
 kp.degree.estimator <- function(survey.data,
                                 known.popns=NULL,
                                 total.popn.size=NULL,
-                                na.rm=FALSE,
+                                missing="ignore",
                                 verbose=TRUE)
 {
 
+  if (! missing %in% c("ignore", "complete.obs")) {
+    stop("error in specifying procedure for handling missing values in kp.degree.estimator. invalid option.\n")
+  }
+
+  
   if (is.null(known.popns)) {
     known.popns <- attr(survey.data, "known.popns")
   }
@@ -56,7 +63,7 @@ kp.degree.estimator <- function(survey.data,
                                            survey.data,
                                            verbose=verbose)
 
-  if (! na.rm) {
+  if (missing == "complete.obs") {
 
     ## use the modified estimator: for each row, use the known
     ## population estimator, taking populations whose responses we
