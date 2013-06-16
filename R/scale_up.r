@@ -17,6 +17,59 @@
 ##         or perhaps have a (default) verbose mode?)
 ## TODO -- think about code to get 45q15 from these data...
 
+#####################################################
+##' total.degree
+##'
+##' estimate the total degree of the population network
+##' from sample degrees
+##'
+##' this computes the weighted sum of the respondents'
+##' estimated degrees.\cr
+##' TODO -- for now, it doesn't worry about missing values
+##' OR about differences between the frame and the universe
+##'
+##' @param survey.data the dataframe with survey results
+##' @param d.hat.vals the name or index of the column that contains
+##'                  each respondent's estimated degree
+##' @param weights if not NULL, weights to use in computing the estimate. this
+##'                should be the name of the column in the survey.data which has
+##'                the variable with the appropriate weights. these weights
+##'                should be construted so that, eg, the mean of the degrees is
+##'                estimated as (1/n) * \\sum_i {w_i * d_i}
+##' @param missing if "ignore", then proceed with the analysis without
+##'                doing anything about missing values. if "complete.obs"
+##'                then only use rows that have no missingness for the
+##'                computations (listwise deletion). care
+##'                must be taken in using this second option
+##' @return the estimated total degree
+##' @export
+total.degree.estimator <- function(survey.data,
+                                   d.hat.vals="d",
+                                   weights=NULL,
+                                   missing="ignore")
+{
+
+  ## get the weights;
+  ## weights will default to 1 for everyone, unless the user specified
+  ## a weights variable
+  weights <- get.weights(survey.data, weights)
+
+  ## get the estimated degrees
+  d.hat.vals <- get.var(survey.data, d.hat.vals)
+
+  if (missing == 'complete.obs') {
+    touse <- which(! is.na(d.hat.vals))
+    res <- sum(d.hat.vals[touse]*weights[touse])
+  } else if (missing == 'ignore') {
+    res <- sum(d.hat.vals*weights)
+  } else {
+    stop("error in specifying procedure for handling missing values in total.degree.estimator. invalid option.\n")
+  }
+
+  return(res)
+  
+}
+
 
 #####################################################
 ##' nsum.estimator
@@ -157,9 +210,11 @@ nsum.estimator <- function(survey.data,
 ##' @param degrees if not NULL, then the name or index of the column in the datset
 ##'                containing the degree estimates. if NULL, then use the known population
 ##'                method to estimate the degrees (see \code{\link{kp.degree.estimator}})
-##' @param na.rm if TRUE, disregard rows that have any missingness in
-##'              the known populations; otherwise, use an adjusted estimator
-##'              to produce those rows' degree estimates
+##' @param missing if "ignore", then proceed with the analysis without
+##'                doing anything about missing values. if "complete.obs"
+##'                then only use rows that have no missingness for the
+##'                computations (listwise deletion). care
+##'                must be taken in using this second option
 ##' @param kp.method if TRUE, then we're using known population method estimates of the
 ##'                  degrees. this means we have to recompute the degrees each time we
 ##'                  hold out a known subgroup. if the degrees come from another estimator,
@@ -187,7 +242,7 @@ nsum.internal.validation <- function(survey.data,
                                      known.popns=NULL,
                                      total.popn.size=NULL,
                                      degrees=NULL,
-                                     na.rm=FALSE,
+                                     missing="ignore",
                                      kp.method=FALSE,
                                      weights=NULL,
                                      return.plot=TRUE,
@@ -196,6 +251,10 @@ nsum.internal.validation <- function(survey.data,
                                      ...)
 {
 
+  if (! missing %in% c("ignore", "complete.obs")) {
+    stop("error in specifying procedure for handling missing values in nsum.internal.validation. invalid option.\n")
+  }
+  
   if (is.null(known.popns)) {
     known.popns <- attr(survey.data, "known.popns")
   }
@@ -225,6 +284,8 @@ nsum.internal.validation <- function(survey.data,
   res.all <- llply(names(known.popns),
                
                function(this.kp) {
+
+                 vcat(verbose, "staring known popn: ", this.kp)
                  
                  known.size <- known.popns[this.kp]
 
@@ -238,7 +299,7 @@ nsum.internal.validation <- function(survey.data,
                    deg.minus <- kp.degree.estimator(survey.data=survey.data,
                                                     known.popns=kp.minus,
                                                     total.popn.size=total.popn.size,
-                                                    na.rm=na.rm,
+                                                    missing=missing,
                                                     verbose=verbose)
 
                    thisdat <- survey.data
@@ -252,8 +313,10 @@ nsum.internal.validation <- function(survey.data,
                    
                  }
 
-                 degsum <- sum(thisdat$deg.minus, na.rm=na.rm)
-
+                 degsum <- total.degree.estimator(thisdat,
+                                                  d.hat.vals="deg.minus",
+                                                  missing=missing)
+                 
                  ## note that this attribute could be NULL and we're
                  ## still OK here...
                  tps <- attr(survey.data, 'total.popn.size')
