@@ -69,7 +69,7 @@ df.to.kpvec <- function(kp.data,
 ##'   # populations each time
 ##' }
 add.kp <- function(survey.data, kp.vec) {
-  attributes(survey.data, "") <- kp.vec
+  attr(survey.data, "known.popns") <- kp.vec
   return(survey.data)
 }
 
@@ -151,7 +151,7 @@ get.weights <- Curry(get.var, default=1)
 vcat <- function(verbose=TRUE, ...) {
 
   if(verbose) {
-    cat(...)
+    message(...)
   }
 
   invisible()
