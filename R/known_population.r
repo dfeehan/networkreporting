@@ -84,6 +84,7 @@ kp.degree.estimator <- function(survey.data,
                        .expand=FALSE)
 
     ind.tot.known <- (rowSums(kp.dat, na.rm=TRUE))
+    
     ## NB: THIS appears to take a (relatively) long time to run...    
     ind.overall.known <- aaply(miss.mask,
                                1,
