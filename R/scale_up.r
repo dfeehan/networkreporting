@@ -245,7 +245,7 @@ nsum.internal.validation <- function(survey.data,
                                      missing="ignore",
                                      kp.method=FALSE,
                                      weights=NULL,
-                                     return.plot=TRUE,
+                                     return.plot=FALSE,
                                      verbose=FALSE,
                                      bootstrap=FALSE,
                                      ...)
@@ -339,7 +339,7 @@ nsum.internal.validation <- function(survey.data,
                                   y.vals="y.val.minus",
                                   total.popn.size=total.popn.size,
                                   weights="weights.minus",
-                                  missing="complete.obs",
+                                  missing=missing,
                                   verbose=verbose)
 
                  nsum.holdout.res <- eval(est.call)
