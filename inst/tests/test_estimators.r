@@ -42,8 +42,8 @@ library(plyr)
 ## data aren't available without having to
 ## specify package=...
 ## (this could be a devtools thing?)
-data(toynetworks,package="networksampling")
-data(toynrnetworks,package="networksampling")
+data(toynetworks,package="networkreporting")
+data(toynrnetworks,package="networkreporting")
 
 ####################################
 ## multiplicity estimator

@@ -49,8 +49,12 @@
 }
 \description{
   compute network scale-up (nsum) estimate of the hidden
-  population's size. if a degree ratio other than 1 is
-  passed in, this uses the gnsum estimator TODO -- refs to
-  deg ratio and tx rate stuff...
+  population's size. if the degree ratio and information
+  transmission rate are both 1 (the defaults), this is the
+  Killworth estimator.
+}
+\details{
+  TODO -- cite Killworth estimator, our methods paper TODO
+  -- add refs to deg ratio and tx rate stuff...
 }
 

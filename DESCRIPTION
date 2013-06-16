@@ -11,11 +11,10 @@ License: MIT
 VignetteBuilder: knitr
 Collate:
     'variance_estimators.r'
-    'estimators.r'
     'helper_functions.r'
-    'networksampling-package.r'
     'indirect_sampling.r'
     'known_population.r'
     'network_reporting.r'
     'scale_up.r'
     'summation.r'
+    'networkreporting_package.r'

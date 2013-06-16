@@ -3,8 +3,7 @@
 \title{kp.degree.estimator}
 \usage{
   kp.degree.estimator(survey.data, known.popns = NULL,
-    total.popn.size = NULL, weights = NULL, na.rm = FALSE,
-    verbose = TRUE)
+    total.popn.size = NULL, na.rm = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{survey.data}{the dataframe with the survey results}
@@ -20,13 +19,6 @@
   if NULL, this function returns proportions; if not NULL,
   it returns absolute numbers (ie, the proportions * total
   popn size)}
-
-  \item{weights}{if not NULL, weights to use in computing
-  the estimate. this should be the name of the column in
-  the survey.data which has the variable with the
-  appropriate weights. these weights should be construted
-  so that, eg, the mean of the degrees is estimated as
-  (1/n) * \\sum_i {w_i * d_i}}
 
   \item{na.rm}{if TRUE, disregard rows that have any
   missingness in the known populations; otherwise, use an
@@ -44,5 +36,10 @@
 \description{
   compute an estimate of the respondents' degrees using the
   known population method\cr
+}
+\details{
+  note that this function does not take survey weights,
+  since these estimates are not for total degree, but just
+  for the individual degree of each respondent
 }
 

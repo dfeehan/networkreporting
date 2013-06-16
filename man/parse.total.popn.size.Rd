@@ -16,7 +16,7 @@ several functions}
   \item{verbose}{if TRUE, print messages to the screen}
 }
 \value{
-  a vector whose entries have various summaries of fit
+  the parsed total population size
 }
 \description{
   handle the total.popn.size argument in a uniform way
@@ -24,6 +24,15 @@ several functions}
   \code{\link{kp.degree.estimator}},
   \code{\link{nsum.internal.validation}}, and
   \code{\link{nsum.estimator}}.
+}
+\details{
+  The result depends upon the value that was passed in:
+  \item{NA} if total.popn.size is NA then work with
+  proportions \item{NULL} if total.popn.size is NULL
+  (nothing passed in), then assume that there's a
+  total.popn.size attribute associated with the dataset
+  we're using \item{numerical value} if an actual
+  total.popn.size was passed in, use that value
 }
 \keyword{internal}
 

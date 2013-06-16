@@ -1,7 +1,7 @@
 \name{alter.distn.estimator}
 \alias{alter.distn.estimator}
-\title{estimate the degree distribution of the set of alters using
-a direct approach.}
+\title{estimate the degree distribution of the multiset
+of alters using a direct approach.}
 \usage{
   alter.distn.estimator(resp.data, attribute.names,
     d.hat.vals = "d.hat", dropmiss = FALSE, weights = NULL)
@@ -40,7 +40,9 @@ a direct approach.}
   prevalence) broken down by the categories given
 }
 \description{
-  this function needs is the degree estimates for the
+  this function uses estimated degrees for each survey
+  respondent to estimate the degrees of the multiset of
+  alters. it must be given the degree estimates for the
   respondents, along with the *same* attributes for each
   respondent. for example, it requires a dataset like this
   to be passed in\cr \tabular{ccc}{ d.hat \tab age \tab sex

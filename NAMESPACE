@@ -1,6 +1,5 @@
 export(add.kp)
 export(alter.distn.estimator)
-export(attributes.to.long)
 export(bootstrap.estimates)
 export(df.to.kpvec)
 export(estimate.error)

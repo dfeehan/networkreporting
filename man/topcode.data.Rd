@@ -23,7 +23,9 @@
   the topcoded vector
 }
 \description{
-  TODO describe
+  this function uses \code{topcode.var} to topcode a set of
+  variables. it's useful for topcoding a whole set of "how
+  many X are you connected to?" questions in the same way.
 }
 \examples{
 \dontrun{
