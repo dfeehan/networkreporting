@@ -69,28 +69,22 @@ kp.degree.estimator <- function(survey.data,
     ## population estimator, taking populations whose responses we
     ## don't have (ie are missing) out of the numerator and
     ## denominator
-    
+
     kp.dat <- survey.data[, names(known.popns)]
 
     ## mask for missing values: this matrix has the same shape
     ## as kp.dat, but its entries are 1 if the entry in kp.dat is
     ## observed and 0 if missing
-    ## NB: THIS appears to take a (relatively) long time to run...
-    miss.mask <- aaply(kp.dat,
-                       1,
-                       function(row) {
-                         return(as.numeric(! is.na(row)))
-                       },
-                       .expand=FALSE)
+    miss.mask <- data.matrix(as.data.frame(llply(kp.dat,
+                                                 function(x) {
+                                                   as.numeric(!is.na(x))
+                                                 })))
+    
+    ## use the missing mask to get the sum of the N_k's for each
+    ## indiviudal respondent
+    tst <- miss.mask %*% known.popns
 
     ind.tot.known <- (rowSums(kp.dat, na.rm=TRUE))
-    
-    ## NB: THIS appears to take a (relatively) long time to run...    
-    ind.overall.known <- aaply(miss.mask,
-                               1,
-                               function(row) {
-                                 return(sum(row*known.popns))
-                               })
 
     res <- ind.tot.known/ind.overall.known
     
