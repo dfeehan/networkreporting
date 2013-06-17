@@ -82,7 +82,7 @@ kp.degree.estimator <- function(survey.data,
     
     ## use the missing mask to get the sum of the N_k's for each
     ## indiviudal respondent
-    tst <- miss.mask %*% known.popns
+    ind.overall.known <- miss.mask %*% known.popns
 
     ind.tot.known <- (rowSums(kp.dat, na.rm=TRUE))
 
