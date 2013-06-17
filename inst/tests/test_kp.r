@@ -28,6 +28,8 @@ data(toynrnetworks,package="networkreporting")
 context("estimators - known population")
 
 ## TODO
+## NOTE that the toy networks used in the estimator tests
+##      would also work here...
 
 ####################################
 ## total degree estimator
