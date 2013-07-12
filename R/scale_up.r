@@ -95,7 +95,7 @@ total.degree.estimator <- function(survey.data,
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
 ##' @param deg.ratio the degree ratio, \\frac{\\bar{d_T}}{\\bar{d}}; defaults to 1
 ##' @param tx.rate the information transmission rate; defaults to 1
-##' @param killworth.se if not NA, return the Killworth estimate of
+##' @param killworth.se if not NA, return the Killworth et al estimate of
 ##                 the standard error (not generally recommended)
 ##' @param missing if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values. if "complete.obs"
@@ -183,10 +183,10 @@ nsum.estimator <- function(survey.data,
       ## NOTE: this is not really defined for the case of
       ## non-trivial degree ratio or transmission rate
       ## we'll use unadjusted proportion in all cases
-      p.hat <- tot.connections / sum.d.hat
+      p.hat <- toret$tot.connections / toret$sum.d.hat
 
       ## see Killworth et al, 1998 (Evaluation Review)
-      kse <- sqrt((p.hat * (1-p.hat))/sum.d.hat)
+      kse <- sqrt((p.hat * (1-p.hat))/toret$sum.d.hat)
 
       if (! is.na(total.popn.size)) {
           kse <- kse * total.popn.size
@@ -248,6 +248,8 @@ nsum.estimator <- function(survey.data,
 ##'                the variable with the appropriate weights. these weights
 ##'                should be construted so that, eg, the mean of the degrees is
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
+##' @param killworth.se if TRUE, return the Killworth et al estimate
+##of the standard error
 ##' @param return.plot if TRUE, make and return a ggplot2 plot object
 ##' @param verbose if TRUE, report more detailed information about what's going on
 ##' @param bootstrap if TRUE, use \code{bootstrap.estimates} to take bootstrap resamples
@@ -268,6 +270,7 @@ nsum.internal.validation <- function(survey.data,
                                      missing="ignore",
                                      kp.method=FALSE,
                                      weights=NULL,
+                                     killworth.se=FALSE,
                                      return.plot=FALSE,
                                      verbose=FALSE,
                                      bootstrap=FALSE,
@@ -363,11 +366,18 @@ nsum.internal.validation <- function(survey.data,
                                   total.popn.size=total.popn.size,
                                   weights="weights.minus",
                                   missing=missing,
-                                  verbose=verbose)
+                                  verbose=verbose,
+                                  killworth.se=killworth.se)
 
                  nsum.holdout.res <- eval(est.call)
                  nsum.holdout.est <- nsum.holdout.res$estimate
                  nsum.holdout.sum.d.hat <- nsum.holdout.res$sum.d.hat
+
+                 nsum.holdout.kse <- NULL
+
+                 if (killworth.se) {
+                     nsum.holdout.kse <- nsum.holdout.res$killworth.se
+                 }
 
                  boot.res <- NULL
 
@@ -406,7 +416,8 @@ nsum.internal.validation <- function(survey.data,
                  return(list(data=data.frame(name=this.kp,
                                              nsum.holdout.est=nsum.holdout.est,
                                              known.size=known.size,
-                                             d.hat.sum=degsum),
+                                             d.hat.sum=degsum,
+                                             killworth.se=nsum.holdout.kse),
                              boot=list(name=this.kp,
                                        values=boot.res.ests,
                                        d.hat.sum=boot.res.d.hat.sum)))
