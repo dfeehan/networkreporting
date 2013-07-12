@@ -77,6 +77,9 @@ d_ply(tocheck,
 ## nsum estimator
 context("estimators - nsum")
 
+## TODO - add test for Killworth estimate of the
+##        standard error (both for proportions and for totals)
+
 ests <- ldply(toy.networks,
               function(tn) {
                 return(data.frame(nsum.estimator(tn,
@@ -116,7 +119,7 @@ ests <- ldply(toy.networks,
                 d.T.bar <- mean(subset(tn,hidden)$d)
                 d.bar <- mean(tn$d)
                 delta <- d.T.bar/d.bar
-                
+
                 return(data.frame(nsum.estimator(tn,
                                                  d.hat.col="d",
                                                  y.col="y",

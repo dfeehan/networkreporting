@@ -67,7 +67,7 @@ total.degree.estimator <- function(survey.data,
   }
 
   return(res)
-  
+
 }
 
 
@@ -95,6 +95,8 @@ total.degree.estimator <- function(survey.data,
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
 ##' @param deg.ratio the degree ratio, \\frac{\\bar{d_T}}{\\bar{d}}; defaults to 1
 ##' @param tx.rate the information transmission rate; defaults to 1
+##' @param killworth.se if not NA, return the Killworth estimate of
+##                 the standard error (not generally recommended)
 ##' @param missing if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values. if "complete.obs"
 ##'                then only use rows that have no missingness for the
@@ -112,6 +114,7 @@ nsum.estimator <- function(survey.data,
                            deg.ratio=1,
                            tx.rate=1,
                            weights=NULL,
+                           killworth.se=FALSE,
                            missing="ignore",
                            verbose=FALSE,
                            ...)
@@ -134,24 +137,24 @@ nsum.estimator <- function(survey.data,
 
   y.vals <- get.var(survey.data, y.vals)
 
-  #### compute the actual estimates  
+  #### compute the actual estimates
   y.vals <- y.vals * weights
   d.hat.vals <- d.hat.vals * weights
 
-  ## figure out if we have to only use non-missing entries  
+  ## figure out if we have to only use non-missing entries
   touse.idx <- 1:length(y.vals)
   if (missing == "complete.obs") {
     touse.idx <- which( (! is.na(y.vals) & ! is.na(d.hat.vals)))
 
     notused <- length(y.vals) - length(touse.idx)
-    
+
     if (verbose & notused > 0) {
       cat(str_c("missing=='complete.obs', so dropping ",
                 notused, " rows with missing data\n"))
     }
-    
+
   }
-  
+
   ## NB: for now, this will return NA if either the degrees or
   ##     the y_i's has any NAs
   res <- sum(y.vals[touse.idx])/sum(d.hat.vals[touse.idx])
@@ -168,11 +171,31 @@ nsum.estimator <- function(survey.data,
     res <- res * total.popn.size
   }
 
-  return(list(estimate=res,
-              tot.connections=sum(y.vals[touse.idx]) *
-                                 (1/deg.ratio) *
-                                 (1/tx.rate),
-              sum.d.hat=sum(d.hat.vals[touse.idx])))
+  toret <- list(estimate=res,
+                tot.connections=sum(y.vals[touse.idx]) *
+                (1/deg.ratio) *
+                (1/tx.rate),
+                sum.d.hat=sum(d.hat.vals[touse.idx]))
+
+  ## not recommended, but interesting in some cases:
+  ## the killworth estimate for the standard error
+  if (killworth.se) {
+      ## NOTE: this is not really defined for the case of
+      ## non-trivial degree ratio or transmission rate
+      ## we'll use unadjusted proportion in all cases
+      p.hat <- tot.connections / sum.d.hat
+
+      ## see Killworth et al, 1998 (Evaluation Review)
+      kse <- sqrt((p.hat * (1-p.hat))/sum.d.hat)
+
+      if (! is.na(total.popn.size)) {
+          kse <- kse * total.popn.size
+      }
+
+      toret$killworth.se <- kse
+  }
+
+  return(toret)
 
 }
 
@@ -254,7 +277,7 @@ nsum.internal.validation <- function(survey.data,
   if (! missing %in% c("ignore", "complete.obs")) {
     stop("error in specifying procedure for handling missing values in nsum.internal.validation. invalid option.\n")
   }
-  
+
   if (is.null(known.popns)) {
     known.popns <- attr(survey.data, "known.popns")
   }
@@ -262,7 +285,7 @@ nsum.internal.validation <- function(survey.data,
   if (bootstrap) {
 
     boot.call <- match.call()
-    
+
     ## for use below, in building up the call to the estimator fn
     boot.expected.args <- c("bootstrap.fn",
                             "survey.design",
@@ -275,25 +298,25 @@ nsum.internal.validation <- function(survey.data,
       stop("bootstrap was specified, but you are missing one of the required arguments")
     }
   }
-  
+
   total.popn.size <- parse.total.popn.size(total.popn.size,
                                            survey.data,
                                            verbose=verbose)
 
   ## go through each known population...
   res.all <- llply(names(known.popns),
-               
+
                function(this.kp) {
 
                  vcat(verbose, "staring known popn: ", this.kp)
-                 
+
                  known.size <- known.popns[this.kp]
 
                  ## if we're using the known population method, then
                  ## we need to recompute the degrees without using the
                  ## holdout variable
                  if( kp.method ) {
-                   
+
                    kp.minus <- known.popns[-match(this.kp,names(known.popns))]
 
                    deg.minus <- kp.degree.estimator(survey.data=survey.data,
@@ -310,13 +333,13 @@ nsum.internal.validation <- function(survey.data,
                    ##TODO -- handle NAs better in the near future...
                    thisdat <- survey.data
                    thisdat$deg.minus <- thisdat[,degrees]
-                   
+
                  }
 
                  degsum <- total.degree.estimator(thisdat,
                                                   d.hat.vals="deg.minus",
                                                   missing=missing)
-                 
+
                  ## note that this attribute could be NULL and we're
                  ## still OK here...
                  tps <- attr(survey.data, 'total.popn.size')
@@ -347,7 +370,7 @@ nsum.internal.validation <- function(survey.data,
                  nsum.holdout.sum.d.hat <- nsum.holdout.res$sum.d.hat
 
                  boot.res <- NULL
-                 
+
                  if (bootstrap) {
 
                    ## if we're using the bootstrap, build up
@@ -364,7 +387,7 @@ nsum.internal.validation <- function(survey.data,
                                            boot.other.args),
                                          names(boot.call),
                                          0L)
-                   
+
                    boot.args <- as.list(boot.call)[boot.arg.idx]
                    boot.args[["estimator.fn"]] <- "nsum.estimator"
                    boot.args <- c(boot.args, as.list(est.call[-1]))
@@ -396,7 +419,7 @@ nsum.internal.validation <- function(survey.data,
   res.boot <- NULL
   res.boot.summ <- NULL
   res.boot.d <- NULL
-  
+
   if (bootstrap) {
     res.boot <- llply(res.all,
                       function(x) {
@@ -410,12 +433,12 @@ nsum.internal.validation <- function(survey.data,
     names(res.boot.d) <- llply(res.all, function(x) { x$boot$name })
 
   }
-  
+
   ## now compute summaries of the prediction errors
   errs <- estimate.error(estimate=res$nsum.holdout.est,
                          truth=res$known.size)
   res <- cbind(res,errs)
-  
+
   mse <- mean(res$sqerr)
   rmse <- sqrt(mse)
   are <- mean(abs(res$relerr))
@@ -427,7 +450,7 @@ nsum.internal.validation <- function(survey.data,
                geom_text(aes(x=known.size, y=nsum.holdout.est, label=name),
                          ##color=alpha("red", 0.3), size=3) +
                          ##color="black",
-                         size=3) +                           
+                         size=3) +
                coord_equal(ratio=1) +
                xlim(with(res,
                          range(known.size,nsum.holdout.est,na.rm=TRUE))) +
@@ -440,7 +463,7 @@ nsum.internal.validation <- function(survey.data,
   } else {
     iv.plot <- NULL
   }
-  
+
   return(list(results=res,
               mse=mse,
               rmse=rmse,
@@ -470,7 +493,7 @@ nsum.internal.validation <- function(survey.data,
 ##'                should be the name of the column in the survey.data which
 ##'               has the variable with the appropriate weights. these weights
 ##'                should be construted so that, eg, the mean of the degrees
-##'                is estimated as (1/n) * \\sum_i {w_i * d_i} 
+##'                is estimated as (1/n) * \\sum_i {w_i * d_i}
 ##' @return a ggplot2 object with the relationship plot
 ##' @export
 mean.ties.truth <- function(survey.data, weights=NULL, known.popns=NULL)
@@ -501,5 +524,3 @@ mean.ties.truth <- function(survey.data, weights=NULL, known.popns=NULL)
 
   return(list(plot=resplot, data=res))
 }
-
-  
