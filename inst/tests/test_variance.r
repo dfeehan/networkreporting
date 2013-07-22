@@ -19,6 +19,7 @@
 ## unit tests...
 
 data(hhsurvey, package="networkreporting")
+data(mu284, package="networkreporting")
 
 set.seed(12345)
 
@@ -90,7 +91,6 @@ test.bootfn <- function(bfn) {
 
   ## be sure that the estimates, the numerator,
   ## and the denominator are always nonnegative
-
   expect_that(all(ests1 >= 0), is_true())
   expect_that(all(nums1 >= 0), is_true())
   expect_that(all(denoms1 >= 0), is_true())
@@ -105,23 +105,62 @@ test.bootfn <- function(bfn) {
 }
 
 #########################################
+## rescaled (Rao / Wu) bootstrap
+context("variance estimators - rescaled bootstrap - correctness")
+
+## TODO -- think about how many bootstrap reps
+## we should use in the unit tests...
+M <- 1000
+
+rbsfn <- Curry(bootstrap.estimates,
+               survey.design= ~ CL,
+               num.reps=M,
+               estimator.fn="MU284.estimator.fn",
+               weights="sample_weight",
+               bootstrap.fn="rescaled.bootstrap.sample")
+
+test.boot <- llply(MU284.surveys,
+                   function(svy) { do.call("rbind", rbsfn(survey.data=svy)) })
+
+test.boot.summ <- ldply(test.boot,
+                        summarize,
+                        mean.TS82.hat=mean(TS82.hat),
+                        mean.R.RMT85.P85.hat=mean(R.RMT85.P85.hat),
+                        sd.TS82.hat=sd(TS82.hat),
+                        sd.R.RMT85.P85.hat=sd(R.RMT85.P85.hat))
+
+## TODO -- how to figure out what tolerance to use?
+## for now, using .1 for everything, but this is pretty big; also,
+## we'd expect different tolerances for different qois, i think.
+qoi <- colnames(test.boot.summ)
+
+l_ply(qoi,
+      function(this.qoi) {
+          l_ply(1:nrow(test.boot.summ),
+                function(idx) {
+                    expect_that(test.boot.summ[idx,this.qoi],
+                                equals(MU284.boot.res.summ[idx,this.qoi],
+                                       tolerance=.05),
+                                label=paste0("qty: ", this.qoi,
+                                             "; MU284 survey #", idx))
+                })
+      })
+
+#########################################
 ## simple random sample (SRS) bootstrap
-context("variance estimators - srs bootstrap")
+context("variance estimators - srs bootstrap - sanity checks")
 
 tmp <- test.bootfn("srs.bootstrap.sample")
 
 
 #########################################
 ## rescaled (Rao / Wu) bootstrap
-context("variance estimators - rescaled bootstrap")
+context("variance estimators - rescaled bootstrap - sanity checks")
 
 tmp <- test.bootfn("rescaled.bootstrap.sample")
 
-## think about how to test the rescaled weights
-## think about different sampling designs to test:
-##    0, 1, 2, 3 strata
-##    1, 2, 10 clusters (?)
-##    others?
+
+
 
 
 
@@ -140,13 +179,3 @@ tmp <- test.bootfn("rescaled.bootstrap.sample")
 ## conduct the bootstrap resamples
 ## rw.rbs <- rw.befn(bootstrap.fn="rescaled.bootstrap.sample")
 ## rw.srs <- rw.befn(bootstrap.fn="srs.bootstrap.sample")
-
-
-
-              
-
-
-
-
-
-
