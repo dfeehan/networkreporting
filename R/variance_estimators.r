@@ -30,19 +30,19 @@ killworth.se <- function(estimates,
   stop("killworth.se is not yet implemented.")
 
   ## TODO -- code below this point not yet altered...
-  
+
   if (total & is.null(total.popn.size)) {
     stop("you must pass in total.popn.size to get the Killworth variance estimates of the total (rather than proportions).")
   }
 
   na.rm <- ifelse(missing == "ignore", TRUE, FALSE)
-  
+
   sum.d.hat <- sum(d.hat, na.rm=na.rm)
-  
+
   est.props <- ifelse(rep(total, length(estimates)),
                       estimates / total.popn.size,
                       estimates)
-  
+
   res <- aaply(est.props,
                1,
                function(est) {
@@ -50,11 +50,11 @@ killworth.se <- function(estimates,
                })
 
   names(res) <- names(estimates)
-  
+
   if (total) {
     res <- res*total.popn.size
   }
-  
+
   return(res)
 }
 
@@ -62,7 +62,6 @@ killworth.se <- function(estimates,
 #####################################################
 ##' bootstrap.estimates
 ##'
-##' rescaled bootstrap method\cr
 ##' this function contains the core of the rescaled bootstrap
 ##' method for estimating uncertainty in our estimates
 ##' it should be designed so that it can be passed in to
@@ -122,7 +121,7 @@ bootstrap.estimates <- function(survey.data,
 
   ## get the weights
   weights <- get.weights(survey.data, weights)
-  
+
   ## build up a single call to obtain an actual bootstrap
   ## replicate; we'll call this once for each one...
   boot.call <- match.call()
@@ -139,7 +138,7 @@ bootstrap.estimates <- function(survey.data,
 
   ## also build up a call to obtain an estimate from the data
   est.call <- match.call()
-  ##est.call <- match.call(expand.dots=TRUE)  
+  ##est.call <- match.call(expand.dots=TRUE)
 
   ## these are the args we *won't* use when we call the estimator
   ## (ie, we use them here or in the bootstrap fn instead)
@@ -164,7 +163,7 @@ bootstrap.estimates <- function(survey.data,
 
   ## produce our estimate for each one
   res <- llply(boot.idx,
-               
+
                function(this.rep) {
 
                  ## TODO -- this may be redundant; the way the rescaled
@@ -181,7 +180,7 @@ bootstrap.estimates <- function(survey.data,
                  ## add the information about which rows in the individual dataset
                  ## these resamples come from as an attribute
                  attr(tmpdat, "resampled.rows.orig.idx") <- this.rep$index
-                 
+
                  est.call[["survey.data"]] <- tmpdat
                  est.call[["weights"]] <- tmpweights
 
@@ -189,14 +188,14 @@ bootstrap.estimates <- function(survey.data,
 
                  ## produce estimate
                  return(this.est)
-                 
+
                },
                .parallel=parallel,
                .paropts=paropts)
 
   if (! is.null(summary.fn)) {
     res <- summary.fn(res)
-  }  
+  }
 
   return(res)
 
@@ -252,7 +251,7 @@ rescaled.bootstrap.sample <- function(survey.data,
 {
 
   survey.data$.internal_id <- 1:nrow(survey.data)
-  
+
   design <- parse_design(survey.design)
 
   ## drop the "~" at the start of the formula
@@ -302,7 +301,7 @@ rescaled.bootstrap.sample <- function(survey.data,
                                      psu.count$weight.scale <- 0
 
                                      psu.count[ r.hi$psu.row, "r.hi" ] <- r.hi$freq
-                                     
+
                                      ## this is the factor by which we
                                      ## need to multiply
                                      ## the sampling weights
@@ -341,10 +340,10 @@ rescaled.bootstrap.sample <- function(survey.data,
                  ##                     ".id"="stratum"))
                  this.rep <- rename(this.rep,
                                     c(".internal_id"="index"))
-                 
+
                  return(this.rep)
                })
-  
+
   return(res)
 }
 
@@ -381,7 +380,7 @@ srs.bootstrap.sample <- function(survey.data,
 {
 
   survey.data$.internal_id <- 1:nrow(survey.data)
-  
+
   res <- llply(1:num.reps,
                function(rep.idx) {
 
@@ -391,13 +390,13 @@ srs.bootstrap.sample <- function(survey.data,
 
                  ##r.hi <- count(these.samples)
                  ##r.hi$weight.scale <- r.hi$freq
-                                         
+
                  ##this.rep <- rename(r.hi,
                  ##                   c("x"="index"))
 
                  this.rep <- data.frame(index=these.samples,
                                         weight.scale=1)
-                 
+
                  return(this.rep)
                },
                .parallel=parallel,
