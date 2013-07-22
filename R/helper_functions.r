@@ -13,12 +13,12 @@
 ##' totals, and turns it into a known population vector. if the
 ##' names of the survey variables corresponding to each known population
 ##' are available, they can be passed in as well
-##' 
+##'
 ##' @param kp.data the known population dataset
 ##' @param kp.var the column of \code{kp.data} that has known population names;
 ##'               either a column name, a column index, or a vector of values
 ##' @param kp.value the column of \code{kp.data} that has known population sizes;
-##'               either a column name, a column index, or a vector of value 
+##'               either a column name, a column index, or a vector of value
 ##' @return a vector whose entries have the known population values and whose
 ##' names have the corresponding \code{kp.var} value
 ##' @export
@@ -26,7 +26,7 @@
 ##' @examples \dontrun{
 ##'   ## see example in add.kp
 ##' }
-##' 
+##'
 df.to.kpvec <- function(kp.data,
                         kp.var,
                         kp.value) {
@@ -38,7 +38,7 @@ df.to.kpvec <- function(kp.data,
   names(kp.vec) <- var
 
   return(kp.vec)
-  
+
 }
 
 
@@ -56,7 +56,7 @@ df.to.kpvec <- function(kp.data,
 ##' @export
 ##' @seealso \link{df.to.kpvec}
 ##' @examples \dontrun{
-##' 
+##'
 ##'   # if kp.dat is a dataframe with columns 'kp' with known popn names
 ##'   # and 'total.size' with the total size,
 ##'   # and my.survey is the dataframe with survey responses
@@ -82,7 +82,7 @@ add.kp <- function(survey.data, kp.vec) {
 ##' nothing (in which case, the weights should default to 1 for each
 ##' row in the dataset). for the special case of getting weights, look
 ##' at the curried fn get.weights (right below)
-##' 
+##'
 ##' @param survey.data the survey dataset
 ##' @param var either NULL, a column name, or a vector of values
 ##' @param default the default value to fill in if the variable
@@ -96,11 +96,11 @@ get.var <- function(survey.data, var, default=NA) {
   ## weights will default to 1 for everyone, unless the user specified
   ## a weights variable
   if (is.null(var)) {
-    
+
     return(rep(default, nrow(survey.data)))
-    
+
   } else if (length(var) == 1) {
-  
+
     ## ... otherwise, see if the weights variable is referring
     ## to a column of the dataframe; try to
     ## grab sampling weights from survey dataframe
@@ -111,7 +111,7 @@ get.var <- function(survey.data, var, default=NA) {
     ##    ncol(var.vals) != 1 ||
     ##    ! is.numeric(var.vals[,1]) ) {
     if( inherits(var.vals, "try-error") ||
-       ncol(var.vals) != 1) {      
+       ncol(var.vals) != 1) {
 
       stop(paste(var,
                  " does not identify a valid column in the data.\n"))
@@ -120,17 +120,17 @@ get.var <- function(survey.data, var, default=NA) {
     var <- var.vals[,1]
 
     return(var)
-    
+
   } else if (length(var) == nrow(survey.data)) {
 
     ## if var a vector with one entry per row, then these
     ## are our values
     return(var)
-  } else {    
+  } else {
     stop("can't determine what the values should be for ", var, ".")
   }
-    
-  
+
+
 }
 
 ##########################################################################
@@ -171,7 +171,7 @@ vcat <- function(verbose=TRUE, ...) {
 ##'  \item{}{check to be sure no response is included (or warn)}
 ##'  \item{}{check formulas for strata more carefully...}
 ##' }
-##' 
+##'
 ##' @param formula a formula describing the sample design (see above)
 ##' @return a list with entries \code{psu.formula} and \code{strata.formula}
 ##' @keywords internal
@@ -180,15 +180,15 @@ parse_design <- function(formula) {
   ## see http://stackoverflow.com/questions/10224805/how-to-select-a-part-of-formula-in-formula-in-r
   ## for some helpful info
 
-  psu.formula <- formula    
+  psu.formula <- formula
   strata.formula <- NULL
-  
+
   these.labels <- attr(terms(formula), "term.labels")
-  
+
   strata.idx <- grep("strata\\(", these.labels)
-  
+
   if (length(strata.idx) == 1) {
-  
+
     # grab the expression in the strata(...) part of the formula
     #strata.text <- str_match
 
@@ -199,18 +199,18 @@ parse_design <- function(formula) {
     ## the environment that the original formula was created in...
     strata.formula <- update(formula,
                              paste("~ ", strata.text))
-    
+
     psu.formula <- update.formula(formula,
                                   paste("~ . - strata(",strata.text,")"))
-    
+
   } else if (length(strata.idx > 1)) {
-    
+
     stop("Cannot have more than one strata() specification in the design formula.")
   }
 
   return(list(psu.formula=psu.formula,
               strata.formula=strata.formula))
-  
+
 }
 
 
@@ -238,9 +238,9 @@ topcode.var <- function(x, max, to.na=NULL, ignore=NA) {
   if (! is.null(to.na)) {
     x[x %in% to.na] <- NA
   }
-  
+
   x[(x > max) & (! x %in% ignore)] <- max
-  
+
   return(x)
 }
 
@@ -295,7 +295,7 @@ weighted.mean <- function(x, w, na.rm=FALSE) {
   } else {
     idx <- 1:length(x)
   }
-  
+
   return(sum(x[idx]*w[idx])/sum(w[idx]))
 }
 
@@ -312,11 +312,14 @@ weighted.mean <- function(x, w, na.rm=FALSE) {
 ##' \code{\link{nsum.estimator}}.
 ##'
 ##' The result depends upon the value that was passed in:
-##' \item{NA} if total.popn.size is NA then work with proportions
-##' \item{NULL} if total.popn.size is NULL (nothing passed in), then
+##' \itemize{
+##' \item NA if total.popn.size is NA then work with proportions
+##' \item NULL if total.popn.size is NULL (nothing passed in), then
 ##'          assume that there's a total.popn.size attribute
 ##'          associated with the dataset we're using
-##' \item{numerical value} if an actual total.popn.size was passed in, use that value
+##' \item numerical value if an actual total.popn.size was passed in,
+##        use that value
+##' }
 ##'
 ##' @param total.popn.size value to parse
 ##' @param survey.data the dataframe we're analyzing, which may or may not
@@ -331,7 +334,7 @@ parse.total.popn.size <- function(total.popn.size, survey.data, verbose=TRUE) {
   if ((! is.null(total.popn.size)) && is.na(total.popn.size)) {
 
     vcat(verbose, "working in proportions\n")
-    
+
   } else if (is.null(total.popn.size)) {
 
     total.popn.size <- attr(survey.data, "total.popn.size")
@@ -344,7 +347,7 @@ parse.total.popn.size <- function(total.popn.size, survey.data, verbose=TRUE) {
 
   } else {
     vcat(verbose, "working in absolute numbers\n")
-  }  
+  }
 
   return(total.popn.size)
 }
@@ -368,9 +371,5 @@ estimate.error <- function(estimate, truth) {
   relerr <- abserr/truth
 
   return(cbind(err=err,abserr=abserr,sqerr=sqerr,relerr=relerr))
-  
+
 }
-
-
-
-
