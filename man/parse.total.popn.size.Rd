@@ -27,12 +27,12 @@ several functions}
 }
 \details{
   The result depends upon the value that was passed in:
-  \item{NA} if total.popn.size is NA then work with
-  proportions \item{NULL} if total.popn.size is NULL
+  \itemize{ \item NA if total.popn.size is NA then work
+  with proportions \item NULL if total.popn.size is NULL
   (nothing passed in), then assume that there's a
   total.popn.size attribute associated with the dataset
-  we're using \item{numerical value} if an actual
-  total.popn.size was passed in, use that value
+  we're using \item numerical value if an actual
+  total.popn.size was passed in, }
 }
 \keyword{internal}
 

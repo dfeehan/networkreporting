@@ -3,8 +3,9 @@
 \title{nsum.internal.validation}
 \usage{
   nsum.internal.validation(survey.data, known.popns = NULL,
-    total.popn.size = NULL, degrees = NULL, na.rm = FALSE,
-    kp.method = FALSE, weights = NULL, return.plot = TRUE,
+    total.popn.size = NULL, degrees = NULL,
+    missing = "ignore", kp.method = FALSE, weights = NULL,
+    killworth.se = FALSE, return.plot = FALSE,
     verbose = FALSE, bootstrap = FALSE, ...)
 }
 \arguments{
@@ -28,10 +29,11 @@
   NULL, then use the known population method to estimate
   the degrees (see \code{\link{kp.degree.estimator}})}
 
-  \item{na.rm}{if TRUE, disregard rows that have any
-  missingness in the known populations; otherwise, use an
-  adjusted estimator to produce those rows' degree
-  estimates}
+  \item{missing}{if "ignore", then proceed with the
+  analysis without doing anything about missing values. if
+  "complete.obs" then only use rows that have no
+  missingness for the computations (listwise deletion).
+  care must be taken in using this second option}
 
   \item{kp.method}{if TRUE, then we're using known
   population method estimates of the degrees. this means we
@@ -47,6 +49,9 @@
   appropriate weights. these weights should be construted
   so that, eg, the mean of the degrees is estimated as
   (1/n) * \\sum_i {w_i * d_i}}
+
+  \item{killworth.se}{if TRUE, return the Killworth et al
+  estimate}
 
   \item{return.plot}{if TRUE, make and return a ggplot2
   plot object}

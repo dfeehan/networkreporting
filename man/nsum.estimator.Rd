@@ -4,8 +4,8 @@
 \usage{
   nsum.estimator(survey.data, d.hat.vals = "d",
     y.vals = "y", total.popn.size = NULL, deg.ratio = 1,
-    tx.rate = 1, weights = NULL, missing = "ignore",
-    verbose = FALSE, ...)
+    tx.rate = 1, weights = NULL, killworth.se = FALSE,
+    missing = "ignore", verbose = FALSE, ...)
 }
 \arguments{
   \item{survey.data}{the dataframe with survey results}
@@ -30,6 +30,9 @@
 
   \item{tx.rate}{the information transmission rate;
   defaults to 1}
+
+  \item{killworth.se}{if not NA, return the Killworth et al
+  estimate of}
 
   \item{missing}{if "ignore", then proceed with the
   analysis without doing anything about missing values. if

@@ -3,7 +3,8 @@
 \title{kp.degree.estimator}
 \usage{
   kp.degree.estimator(survey.data, known.popns = NULL,
-    total.popn.size = NULL, na.rm = FALSE, verbose = TRUE)
+    total.popn.size = NULL, missing = "ignore",
+    verbose = TRUE)
 }
 \arguments{
   \item{survey.data}{the dataframe with the survey results}
@@ -20,18 +21,19 @@
   it returns absolute numbers (ie, the proportions * total
   popn size)}
 
-  \item{na.rm}{if TRUE, disregard rows that have any
-  missingness in the known populations; otherwise, use an
-  adjusted estimator to produce those rows' degree
-  estimates}
+  \item{missing}{if "ignore", then proceed with the
+  analysis without doing anything about missing values. if
+  "complete.obs" then only use rows that have no
+  missingness for the computations (listwise deletion).
+  care must be taken in using this second option}
 
   \item{verbose}{if TRUE, print messages to the screen}
 }
 \value{
   a vector with an estimate of the degree for each row in
-  survey.data. if na.rm=TRUE, then the degree for rows that
-  have missingness in the 'how many X' questions will be
-  set to NA
+  survey.data. if missing=="ignore", then the degree for
+  rows that have missingness in the 'how many X' questions
+  will be set to NA
 }
 \description{
   compute an estimate of the respondents' degrees using the

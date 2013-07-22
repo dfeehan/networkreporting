@@ -3,7 +3,7 @@
 \title{killworth.se}
 \usage{
   killworth.se(estimates, d.hat, total.popn.size = NULL,
-    total = TRUE, na.rm = TRUE)
+    total = TRUE, missing = "ignore")
 }
 \arguments{
   \item{estimates}{TODO}
@@ -14,7 +14,7 @@
 
   \item{total}{TODO}
 
-  \item{na.rm}{TODO}
+  \item{missing}{TODO}
 }
 \value{
   the estimated standard error
