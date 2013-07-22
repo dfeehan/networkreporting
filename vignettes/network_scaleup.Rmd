@@ -1,4 +1,4 @@
-Analyzing network scale-up data using the **networksampling** package
+Analyzing network scale-up data using the **networkreporting** package
 =====================================================================
 <!--
 %\VignetteEngine{knitr}
@@ -10,7 +10,7 @@ Introduction
 
 This will be a broad overview of the package (short) and the network scale-up method.
 
-This introduction will assume that you already have the **networksampling** package installed. If you don't, please refer to the introductory vignette for instructions on how to do this. (TODO LINK TO OTHER VIGNETTE).
+This introduction will assume that you already have the **networkreporting** package installed. If you don't, please refer to the introductory vignette for instructions on how to do this. (TODO LINK TO OTHER VIGNETTE).
 
 
 Analytic strategy
@@ -51,10 +51,10 @@ Preparing data
 --------------
 The first step is to prepare the data.  We'll assume that we start with two datasets: the first is a survey containing information collected from respondents about their personal networks; the second is information about the sizes of several populations.
 
-The example data for this vignette are provided with the `networksampling` package, and can be loaded by typing
+The example data for this vignette are provided with the `networkreporting` package, and can be loaded by typing
 
 ```{r, message=FALSE}
-library(networksampling)
+library(networkreporting)
 library(plyr)
 library(ggplot2) # we'll use qplot from ggplot2 for plots
 theme_set(theme_minimal())
@@ -83,7 +83,7 @@ TODO -- topcoding functions in package
 Estimating network sizes
 ------------------------
 
-Now that we have finished preparing the data, we turn to esimating the sizes of each respondent's personal network.  The `networksampling` package can do this using the known population estimator [TODO CITE] and the `TODO` function.
+Now that we have finished preparing the data, we turn to esimating the sizes of each respondent's personal network.  The `networkreporting` package can do this using the known population estimator [TODO CITE] and the `TODO` function.
 
 ```{r}
 kp.vec <- knownpop.dat$size
@@ -140,7 +140,7 @@ This gives us both the estimate as well as the numerator and denominator.
 Variance estimation
 -------------------
 
-In order to estimate the sampling uncertainty of our estimated totals, we can use the rescaled bootstrap technique that is in the `networksampling` package. In order to do so, we need to be able to describe the sampling design of our study. In particular, we need to be able to describe the stratifcation (if any) and the primary sampling units used in the study.
+In order to estimate the sampling uncertainty of our estimated totals, we can use the rescaled bootstrap technique that is in the `networkreporting` package. In order to do so, we need to be able to describe the sampling design of our study. In particular, we need to be able to describe the stratifcation (if any) and the primary sampling units used in the study.
 
 ```{r, tidy=FALSE}
 idu.est <- bootstrap.estimates(## this describes the sampling design of the
