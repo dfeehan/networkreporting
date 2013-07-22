@@ -39,7 +39,12 @@ NULL
 ##' @docType data
 NULL
 
-
-
-
-
+##' MU284 population
+##'
+##' Data used in unit tests for variance estimation.
+##' See TODO-Sarndal TODO-sampling package
+##' TODO-doc describing unit tests
+##'
+##' @name MU284
+##' @docType data
+NULL
