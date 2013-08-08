@@ -373,7 +373,8 @@ nsum.internal.validation <- function(survey.data,
                  nsum.holdout.est <- nsum.holdout.res$estimate
                  nsum.holdout.sum.d.hat <- nsum.holdout.res$sum.d.hat
 
-                 nsum.holdout.kse <- NULL
+                 ##nsum.holdout.kse <- NULL
+                 nsum.holdout.kse <- NA
 
                  if (killworth.se) {
                      nsum.holdout.kse <- nsum.holdout.res$killworth.se
