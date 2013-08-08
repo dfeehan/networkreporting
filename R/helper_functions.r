@@ -327,7 +327,7 @@ weighted.mean <- function(x, w, na.rm=FALSE) {
 ##' @param verbose if TRUE, print messages to the screen
 ##' @return the parsed total population size
 ##' @keywords internal
-parse.total.popn.size <- function(total.popn.size, survey.data, verbose=TRUE) {
+parse.total.popn.size <- function(total.popn.size, survey.data, verbose=FALSE) {
 
   ## this is a little complicated.
   ## (see also kp.degree.estimator)
