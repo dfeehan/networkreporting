@@ -47,14 +47,14 @@ kp.degree.estimator <- function(survey.data,
                                 known.popns=NULL,
                                 total.popn.size=NULL,
                                 missing="ignore",
-                                verbose=TRUE)
+                                verbose=FALSE)
 {
 
   if (! missing %in% c("ignore", "complete.obs")) {
     stop("error in specifying procedure for handling missing values in kp.degree.estimator. invalid option.\n")
   }
 
-  
+
   if (is.null(known.popns)) {
     known.popns <- attr(survey.data, "known.popns")
   }
@@ -79,7 +79,7 @@ kp.degree.estimator <- function(survey.data,
                                                  function(x) {
                                                    as.numeric(!is.na(x))
                                                  })))
-    
+
     ## use the missing mask to get the sum of the N_k's for each
     ## indiviudal respondent
     ind.overall.known <- miss.mask %*% known.popns
@@ -87,12 +87,12 @@ kp.degree.estimator <- function(survey.data,
     ind.tot.known <- (rowSums(kp.dat, na.rm=TRUE))
 
     res <- ind.tot.known/ind.overall.known
-    
+
   } else {
 
     tot.known <- (rowSums(subset(survey.data,
-                                 select=names(known.popns))))    
-    
+                                 select=names(known.popns))))
+
     overall.known <- sum(known.popns)
 
     res <- tot.known/overall.known
@@ -106,4 +106,3 @@ kp.degree.estimator <- function(survey.data,
   return(res)
 
 }
-
