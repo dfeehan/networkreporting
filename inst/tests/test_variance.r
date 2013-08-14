@@ -106,11 +106,13 @@ test.bootfn <- function(bfn) {
 
 #########################################
 ## rescaled (Rao / Wu) bootstrap
-context("variance estimators - rescaled bootstrap - correctness")
 
 ## TODO -- think about how many bootstrap reps
 ## we should use in the unit tests...
-M <- 1000
+##M <- 1000
+M <- 2000
+
+context(paste0("variance estimators - rescaled bootstrap - correctness (M=", M, ")"))
 
 rbsfn <- Curry(bootstrap.estimates,
                survey.design= ~ CL,
