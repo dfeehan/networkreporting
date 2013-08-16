@@ -74,10 +74,6 @@ killworth.se <- function(estimates,
 ##' TODO -- write description block, including estimator.fn, bootstrap.fn,
 ##' summary.fn, more?
 ##' \cr
-##' TODO -- should check that estimator fn takes all the arguments
-##'         it is supposed to (for example, it needs to take a 'weights'
-##'         argument and a 'survey.data' argument)\cr
-##' TODO -- write example usage code for documentation...
 ##'
 ##' @param survey.data the dataset to use
 ##' @param survey.design a formula describing the design of the survey
@@ -89,8 +85,9 @@ killworth.se <- function(estimates,
 ##'                     bootstrap resamples; see below
 ##' @param num.reps the number of bootstrap replication samples to draw
 ##' @param weights weights to use in estimation (or NULL, if none)
-##' @param summary.fn an optional function which, given the set of estimates
-##'                   produced by estimator.fn, summarizes them
+##' @param summary.fn (optional) name of a function which, given the set of estimates
+##'                   produced by estimator.fn, summarizes them. if not specified, all of
+##'                   the estimates are returned in a list
 ##' @param parallel if TRUE, use the plyr library's .parallel argument to
 ##'                 produce bootstrap resamples and estimates in parallel
 ##' @param paropts if not NULL, additional arguments to pass along to the
@@ -191,7 +188,10 @@ bootstrap.estimates <- function(survey.data,
 
   ## if the user specified a summary function, use it
   if (! is.null(summary.fn)) {
-    res <- summary.fn(res)
+
+    this.sf <- get.fn(summary.fn)
+    res <- do.call(this.sf, list(res))
+
   }
 
   return(res)
