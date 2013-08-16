@@ -6,6 +6,47 @@
 ##
 
 ##########################################################################
+##' grab a function based on its name
+##'
+##' this is completely based on Hadley Wickham's response to an SO
+##post: http://stackoverflow.com/questions/14183766/match-fun-provide-error-with-functions-defined-inside-functions
+##'
+##' @param kp.data the known population dataset
+##' @param kp.var the column of \code{kp.data} that has known population names;
+##'               either a column name, a column index, or a vector of values
+##' @param kp.value the column of \code{kp.data} that has known population sizes;
+##'               either a column name, a column index, or a vector of value
+##' @return a vector whose entries have the known population values and whose
+##' names have the corresponding \code{kp.var} value
+##' @export
+##' @seealso \link{add.kp}
+##' @examples \dontrun{
+##'   ## see example in add.kp
+##' }
+##'
+get.fn <- function(fn, env = parent.frame()) {
+
+    ## base case: nothing left to search through
+    if (identical(env, emptyenv())) {
+        stop("Could not find function ", fn, "!")
+    }
+
+    ## base case: found function in env
+    if (exists(fn, env, inherits=FALSE) &&
+        is.function(env[[fn]])) {
+        return(env[[fn]])
+
+    ## recursive case: look through the environment
+    ## above env
+    } else {
+        return(get.fn(fn, parent.env(env)))
+    }
+
+}
+
+
+
+##########################################################################
 ##' turn a dataframe into a known population vector
 ##'
 ##' \code{df.to.kpvec} takes a dataframe which has a column with
