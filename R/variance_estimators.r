@@ -156,7 +156,7 @@ bootstrap.estimates <- function(survey.data,
                        names(est.call),
                        0L)
   est.call <- est.call[-est.arg.idx]
-  est.call[[1]] <- as.name(estimator.fn)
+  est.call[[1]] <- get.fn(estimator.fn)
 
   ## get the bootstrap samples
   boot.idx <- eval(boot.call, parent.frame())
