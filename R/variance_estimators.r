@@ -224,7 +224,7 @@ bootstrap.estimates <- function(survey.data,
 ##' datasets.
 ##'
 ##' We always take m_i = n_i - 1, according to the advice presented
-##' in Rao and Wu (1988).
+##' in Rao and Wu (1988) and Rust and Rao (1996).
 ##'
 ##' TODO -- need to handle the case where there are no PSUs
 ##'         (either SRS within strata or just SRS)
@@ -265,6 +265,12 @@ rescaled.bootstrap.sample <- function(survey.data,
   ## drop the "~" at the start of the formula
   psu.vars <- design$psu.formula[c(-1)][[1]]
 
+  ## in the special case where there are no PSU vars, treat each row as
+  ## its own PSU
+  if (length(psu.vars)==1 & psu.vars=="1") {
+    psu.vars <- as.name(".internal_id")
+  }
+  
   ## if no strata are specified, enclose the entire survey all in
   ## one stratum
   if (is.null(design$strata.formula)) {
@@ -279,14 +285,14 @@ rescaled.bootstrap.sample <- function(survey.data,
   bs <- llply(strata,
               function(stratum.data) {
 
-                ## TODO -- need to handle the case where there
-                ##         are no PSUs (SRS)
-
                 ## figure out how many PSUs we have in our sample
                 psu.count <- count(stratum.data,
                                    psu.vars)
 
                 n.h <- nrow(psu.count)
+
+                ## take m_h = n_h - 1, which is what the literature
+                ## most commonly recommends
                 m.h <- n.h - 1
 
                 resamples <- llply(1:num.reps,
@@ -317,13 +323,12 @@ rescaled.bootstrap.sample <- function(survey.data,
                                      psu.count[ r.hi$psu.row,
                                                 "weight.scale" ] <- r.hi$weight.scale
 
-                                     ## TODO -- need to test that this works
-                                     ## in a PSU design that involves more than
-                                     ## one variable...
-                                     this.resample <- merge(stratum.data[, c(all.vars(psu.vars),
-                                                                             ".internal_id")],
+                                     this.resample <- merge(stratum.data[,c(all.vars(psu.vars),
+                                                                            ".internal_id")],
                                                             psu.count,
                                                             by=all.vars(psu.vars))
+                                     this.resample$.internal_id.1 <- NULL
+
 
                                      return(this.resample)
                                    },
@@ -341,11 +346,6 @@ rescaled.bootstrap.sample <- function(survey.data,
                                      return(this.stratum.samples[[rep.idx]])
                                    })
 
-                 ##stopifnot(sum(this.rep$weight.scale)==nrow(survey.data))
-
-                 ##this.rep <- rename(this.rep,
-                 ##                   c("x"="index",
-                 ##                     ".id"="stratum"))
                  this.rep <- rename(this.rep,
                                     c(".internal_id"="index"))
 
