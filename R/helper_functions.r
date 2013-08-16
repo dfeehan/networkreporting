@@ -8,24 +8,24 @@
 ##########################################################################
 ##' grab a function based on its name
 ##'
-##' this is completely based on Hadley Wickham's response to an SO
+##' helper to grab a fn that is passed in as an argument
+##' 
+##' this is based on Hadley Wickham's response to an SO
 ##post: http://stackoverflow.com/questions/14183766/match-fun-provide-error-with-functions-defined-inside-functions
+##' with some minor modifications
 ##'
-##' @param kp.data the known population dataset
-##' @param kp.var the column of \code{kp.data} that has known population names;
-##'               either a column name, a column index, or a vector of values
-##' @param kp.value the column of \code{kp.data} that has known population sizes;
-##'               either a column name, a column index, or a vector of value
-##' @return a vector whose entries have the known population values and whose
-##' names have the corresponding \code{kp.var} value
-##' @export
-##' @seealso \link{add.kp}
-##' @examples \dontrun{
-##'   ## see example in add.kp
-##' }
+##' @param fn the function to search for
+##' @param env the environment to start searching in
+##' @return fn, if fn is already a function; otherwise, the first function found
+##'         in env or one of its parents whose name is fn
 ##'
 get.fn <- function(fn, env = parent.frame()) {
 
+    ## base case: fn is already a function
+    if (is.function(fn)) {
+      return(fn)
+    }
+  
     ## base case: nothing left to search through
     if (identical(env, emptyenv())) {
         stop("Could not find function ", fn, "!")
