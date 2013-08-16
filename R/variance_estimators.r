@@ -226,15 +226,6 @@ bootstrap.estimates <- function(survey.data,
 ##' We always take m_i = n_i - 1, according to the advice presented
 ##' in Rao and Wu (1988) and Rust and Rao (1996).
 ##'
-##' TODO -- need to handle the case where there are no PSUs
-##'         (either SRS within strata or just SRS)
-##'         (see note in code below)
-##'         note that this should include handling the case where
-##'         the design is something like ~ 1 \cr
-##' TODO -- need to test that this works in cases where the
-##'         PSU design has more than one variable specified
-##'         (see espsecially comment inline below)
-##'
 ##' @param survey.data the dataset to use
 ##' @param survey.design a formula describing the design of the survey (see below - TODO)
 ##' @param num.reps the number of bootstrap replication samples to draw
