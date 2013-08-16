@@ -218,6 +218,17 @@ bootstrap.estimates <- function(survey.data,
 ##' each PSU (as identified by the design formula) are from the same draw
 ##' of the PSU.
 ##'
+##' The rescaled bootstrap technique works by adjusting the
+##' estimation weights based on the number of times each
+##' row is included in the resamples. If a row is never selected,
+##' it is still included in the returned results, but its weight
+##' will be set to 0. It is therefore important to use estimators
+##' that make use of the estimation weights on the resampled
+##' datasets.
+##'
+##' We always take m_i = n_i - 1, according to the advice presented
+##' in Rao and Wu (1988).
+##'
 ##' TODO -- need to handle the case where there are no PSUs
 ##'         (either SRS within strata or just SRS)
 ##'         (see note in code below)
