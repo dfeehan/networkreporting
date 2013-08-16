@@ -134,7 +134,7 @@ bootstrap.estimates <- function(survey.data,
                         names(boot.call),
                         0L)
   boot.call <- boot.call[c(1,boot.arg.idx)]
-  boot.call[[1]] <- as.name(bootstrap.fn)
+  boot.call[[1]] <- get.fn(bootstrap.fn)
 
   ## also build up a call to obtain an estimate from the data
   est.call <- match.call()
