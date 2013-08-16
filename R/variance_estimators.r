@@ -373,9 +373,9 @@ rescaled.bootstrap.sample <- function(survey.data,
 ##' other bootstrap functions, which do require information about the survey design
 ##' @export
 srs.bootstrap.sample <- function(survey.data,
+                                 num.reps=1,
                                  parallel=FALSE,
                                  paropts=NULL,
-                                 num.reps=1,
                                  ...)
 {
 
