@@ -165,16 +165,13 @@ bootstrap.estimates <- function(survey.data,
 
                function(this.rep) {
 
-                 ## TODO -- this may be redundant; the way the rescaled
-                 ## bootstrap code works now, it will always return the
-                 ## whole dataset with just the weight.scale variable set to 0
-                 ## if the given row was not sampled
-                 ## (SRS may depend on this though, should go check)
+                 ## use the resampled indices to construct
+                 ## a full resampled dataset
                  tmpdat <- survey.data[this.rep$index,]
                  tmpweights <- weights[this.rep$index]
 
+                 ## apply the weight.scale to the estimation weights
                  tmpweights <- tmpweights * this.rep$weight.scale
-                 ##tmpdat[,weights] <- tmpdat[,weights] * this.rep$weight.scale
 
                  ## add the information about which rows in the individual dataset
                  ## these resamples come from as an attribute
@@ -183,15 +180,16 @@ bootstrap.estimates <- function(survey.data,
                  est.call[["survey.data"]] <- tmpdat
                  est.call[["weights"]] <- tmpweights
 
+                 ## call estimator.fn to produce an estimate from
+                 ## the bootstrap-resampled dataset
                  this.est <- eval(est.call, parent.frame(2))
 
-                 ## produce estimate
                  return(this.est)
-
                },
                .parallel=parallel,
                .paropts=paropts)
 
+  ## if the user specified a summary function, use it
   if (! is.null(summary.fn)) {
     res <- summary.fn(res)
   }
@@ -398,12 +396,6 @@ srs.bootstrap.sample <- function(survey.data,
                  these.samples <- sample(1:nrow(survey.data),
                                          nrow(survey.data),
                                          replace=TRUE)
-
-                 ##r.hi <- count(these.samples)
-                 ##r.hi$weight.scale <- r.hi$freq
-
-                 ##this.rep <- rename(r.hi,
-                 ##                   c("x"="index"))
 
                  this.rep <- data.frame(index=these.samples,
                                         weight.scale=1)
