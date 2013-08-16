@@ -137,8 +137,7 @@ bootstrap.estimates <- function(survey.data,
   boot.call[[1]] <- get.fn(bootstrap.fn)
 
   ## also build up a call to obtain an estimate from the data
-  est.call <- match.call()
-  ##est.call <- match.call(expand.dots=TRUE)
+  est.call <- match.call(expand.dots=TRUE)
 
   ## these are the args we *won't* use when we call the estimator
   ## (ie, we use them here or in the bootstrap fn instead)
@@ -369,11 +368,12 @@ rescaled.bootstrap.sample <- function(survey.data,
 ##'
 ##' @param survey.data the dataset to use
 ##' @param num.reps the number of bootstrap replication samples to draw
-##' @param survey.design not used here, but included for compatability with other
-##'                      bootstrap resamplers
 ##' @param parallel if TRUE, use parallelization (via \code{plyr})
 ##' @param paropts an optional list of arguments passed on to \code{plyr} to control
 ##'        details of parallelization
+##' @param ... ignored, but useful because it allows params like
+##\code{survey.design},
+##' which are used in other bootstrap designs, to be passed in without error
 ##' @return a list with \code{num.reps} entries. each entry is a dataset which has
 ##' at least the variables \code{index} (the row index of the original dataset that
 ##' was resampled) and \code{weight.scale} (the factor by which to multiply the
@@ -384,10 +384,10 @@ rescaled.bootstrap.sample <- function(survey.data,
 ##' other bootstrap functions, which do require information about the survey design
 ##' @export
 srs.bootstrap.sample <- function(survey.data,
-                                 survey.design=NULL,
                                  parallel=FALSE,
                                  paropts=NULL,
-                                 num.reps=1)
+                                 num.reps=1,
+                                 ...)
 {
 
   survey.data$.internal_id <- 1:nrow(survey.data)
