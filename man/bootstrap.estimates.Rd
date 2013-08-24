@@ -26,9 +26,10 @@
   \item{weights}{weights to use in estimation (or NULL, if
   none)}
 
-  \item{summary.fn}{an optional function which, given the
-  set of estimates produced by estimator.fn, summarizes
-  them}
+  \item{summary.fn}{(optional) name of a function which,
+  given the set of estimates produced by estimator.fn,
+  summarizes them. if not specified, all of the estimates
+  are returned in a list}
 
   \item{parallel}{if TRUE, use the plyr library's .parallel
   argument to produce bootstrap resamples and estimates in
@@ -57,11 +58,7 @@
   differently (one expects characters, one expects an
   actual fn. fix!)\cr \cr TODO -- write description block,
   including estimator.fn, bootstrap.fn, summary.fn, more?
-  \cr TODO -- should check that estimator fn takes all the
-  arguments it is supposed to (for example, it needs to
-  take a 'weights' argument and a 'survey.data'
-  argument)\cr TODO -- write example usage code for
-  documentation...
+  \cr
 }
 \examples{
 \donttest{

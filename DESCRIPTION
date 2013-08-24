@@ -18,3 +18,4 @@ Collate:
     'scale_up.r'
     'summation.r'
     'networkreporting_package.r'
+    'rds.r'

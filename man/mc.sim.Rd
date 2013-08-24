@@ -1,0 +1,26 @@
+\name{mc.sim}
+\alias{mc.sim}
+\title{run a markov model}
+\usage{
+  mc.sim(mm, start, n)
+}
+\arguments{
+  \item{mm}{the markov model object returned by
+  \code{estimate.mixing}}
+
+  \item{start}{the name of the state to start in}
+
+  \item{n}{the number of time-steps to run through}
+}
+\value{
+  a vector with the state visited at each time step. the
+  first entry has the starting state
+}
+\description{
+  run a given markov model for n time steps, starting at a
+  specified state
+}
+\details{
+  this uses the markov model produced by estimate.mixing
+}
+

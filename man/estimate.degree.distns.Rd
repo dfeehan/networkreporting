@@ -1,0 +1,39 @@
+\name{estimate.degree.distns}
+\alias{estimate.degree.distns}
+\title{estimate degree distributions by trait}
+\usage{
+  estimate.degree.distns(survey.data, d.hat.vals, traits)
+}
+\arguments{
+  \item{survey.data}{the respondent info}
+
+  \item{d.hat.vals}{the variable that contains the degrees
+  for each respondent}
+
+  \item{traits}{a vector of the names of the columns of
+  \code{survey.data} which refer to the traits}
+}
+\value{
+  an object with \itemize{ \item \code{distns} a list with
+  one entry per trait value; each \item
+  \code{draw.degrees.fn} a function which gets called with
+  one }
+}
+\description{
+  break down RDS degree distributions by trait, and return
+  an object which has the degrees for each trait as well as
+  functions to draw degrees from each trait.
+}
+\details{
+  one of the items returned as a result is a function,
+  \code{draw.degrees.fn}, which takes one argument,
+  \code{traits}. this is a vector of traits and, for each
+  entry in this vector, \code{draw.degress.fn} returns a
+  draw from the empirical distribution of degrees among
+  respondents with that trait. so,
+  \code{draw.degrees.fn(c("0.0", "0.1", "0.1")} would
+  return a degree drawn uniformly at random from among the
+  observed degrees of respondents with trait "0.0" and then
+  two degrees from respondents with trait "0.1"
+}
+

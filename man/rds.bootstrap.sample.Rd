@@ -1,8 +1,8 @@
-\name{srs.bootstrap.sample}
-\alias{srs.bootstrap.sample}
-\title{srs.bootstrap.sample}
+\name{rds.bootstrap.sample}
+\alias{rds.bootstrap.sample}
+\title{rds.bootstrap.sample}
 \usage{
-  srs.bootstrap.sample(survey.data, num.reps = 1,
+  rds.bootstrap.sample(survey.data, num.reps = 1,
     parallel = FALSE, paropts = NULL, ...)
 }
 \arguments{
@@ -30,13 +30,12 @@
   dataset).
 }
 \description{
-  given a survey dataset and a description of the survey
-  design (ie, which combination of vars determines primary
-  sampling units, and which combination of vars determines
-  strata), take a bunch of bootstrap samples under a simple
-  random sampling (with repetition) scheme
+  given an RDS dataset, take a bootstrap resample to be
+  used in variance estimation
 }
 \details{
+  TODO CITATION
+
   \code{survey.design} is not needed; it's included as an
   argument to make it easier to drop
   \code{srs.bootstrap.sample} into the place of other

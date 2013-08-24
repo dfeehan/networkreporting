@@ -4,7 +4,7 @@
 \usage{
   kp.degree.estimator(survey.data, known.popns = NULL,
     total.popn.size = NULL, missing = "ignore",
-    verbose = TRUE)
+    verbose = FALSE)
 }
 \arguments{
   \item{survey.data}{the dataframe with the survey results}

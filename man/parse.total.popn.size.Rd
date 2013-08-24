@@ -4,7 +4,7 @@
 several functions}
 \usage{
   parse.total.popn.size(total.popn.size, survey.data,
-    verbose = TRUE)
+    verbose = FALSE)
 }
 \arguments{
   \item{total.popn.size}{value to parse}

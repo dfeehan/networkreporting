@@ -1,0 +1,39 @@
+\name{rdsII.estimator}
+\alias{rdsII.estimator}
+\title{rdsII.estimator}
+\usage{
+  rdsII.estimator(survey.data, d.hat.vals, y.vals,
+    missing = "ignore", verbose = FALSE)
+}
+\arguments{
+  \item{survey.data}{the dataframe with RDS survey results}
+
+  \item{d.hat.vals}{the name or index of the column that
+  contains each respondent's estimated degree}
+
+  \item{y.vals}{the name or index of the column that
+  contains the quantity of interest. if this is a
+  dichotomous trait, it should be 0 / 1}
+
+  \item{missing}{if "ignore", then proceed with the
+  analysis without doing anything about missing values. if
+  "complete.obs" then only use rows that have no
+  missingness for the computations (listwise deletion).
+  care must be taken in using this second option}
+
+  \item{verbose}{if TRUE, print messages to the screen}
+}
+\value{
+  the RDS-II estimate of the average of the quantity of
+  interest
+}
+\description{
+  compute an estimate for the prevalence of a trait from an
+  RDS sample, using the estimator described in TODO [Volz +
+  Heckathorn '08]
+}
+\details{
+  NOTE: we have no weights for now, right? RDS doesn't get
+  used with weights?
+}
+

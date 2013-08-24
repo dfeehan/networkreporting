@@ -46,13 +46,16 @@
   within each PSU (as identified by the design formula) are
   from the same draw of the PSU.
 
-  TODO -- need to handle the case where there are no PSUs
-  (either SRS within strata or just SRS) (see note in code
-  below) note that this should include handling the case
-  where the design is something like ~ 1 \cr TODO -- need
-  to test that this works in cases where the PSU design has
-  more than one variable specified (see espsecially comment
-  inline below)
+  The rescaled bootstrap technique works by adjusting the
+  estimation weights based on the number of times each row
+  is included in the resamples. If a row is never selected,
+  it is still included in the returned results, but its
+  weight will be set to 0. It is therefore important to use
+  estimators that make use of the estimation weights on the
+  resampled datasets.
+
+  We always take m_i = n_i - 1, according to the advice
+  presented in Rao and Wu (1988) and Rust and Rao (1996).
 
   \code{survey.design} is a formula of the form\cr weight ~
   psu_vars + strata(strata_vars), where weight is the
