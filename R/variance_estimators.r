@@ -261,7 +261,7 @@ rescaled.bootstrap.sample <- function(survey.data,
   if (length(psu.vars)==1 & psu.vars=="1") {
     psu.vars <- as.name(".internal_id")
   }
-  
+
   ## if no strata are specified, enclose the entire survey all in
   ## one stratum
   if (is.null(design$strata.formula)) {
@@ -397,4 +397,264 @@ srs.bootstrap.sample <- function(survey.data,
                .paropts=paropts)
 
   return(res)
+}
+
+#####################################################
+##' rds.bootstrap.sample
+##'
+##' given an RDS dataset, take a bootstrap resample
+##' to be used in variance estimation
+##'
+##' TODO CITATION
+##'
+##' @param survey.data the dataset to use
+##' @param num.reps the number of bootstrap replication samples to draw
+##' @param parallel if TRUE, use parallelization (via \code{plyr})
+##' @param paropts an optional list of arguments passed on to \code{plyr} to control
+##'        details of parallelization
+##' @param ... ignored, but useful because it allows params like
+##\code{survey.design},
+##' which are used in other bootstrap designs, to be passed in without error
+##' @return a list with \code{num.reps} entries. each entry is a dataset which has
+##' at least the variables \code{index} (the row index of the original dataset that
+##' was resampled) and \code{weight.scale} (the factor by which to multiply the
+##' sampling weights in the original dataset).
+##'
+##' @details \code{survey.design} is not needed; it's included as an argument
+##' to make it easier to drop \code{srs.bootstrap.sample} into the place of
+##' other bootstrap functions, which do require information about the survey design
+##' @export
+rds.bootstrap.sample <- function(survey.data,
+                                 num.reps=1,
+                                 parallel=FALSE,
+                                 paropts=NULL,
+                                 ...)
+{
+
+  survey.data$.internal_id <- 1:nrow(survey.data)
+
+  ## algorithm outlined in SOM for Weir et al 2012:
+  ##
+  ## - partition dataset into A and B, where A is
+  ##   respondents who were recruited by people with trait
+  ##   and B is people who were recruited by others without trait
+  ##
+  ## for each iteration:
+  ##    - pick a bootstrap seed
+  ##    - set current respondent to seed
+  ##    while bootstrap resample not big enough:
+  ##      if current respondent has trait:
+  ##        - pick next respondent uniformly at random from A
+  ##      else:
+  ##        - pick next respondent uniformly at random from B
+  ##      - set current respondent to next respondent
+  ##
+
+  ## TODO BELOW NOT YET CHANGED
+  res <- llply(1:num.reps,
+               function(rep.idx) {
+
+                 these.samples <- sample(1:nrow(survey.data),
+                                         nrow(survey.data),
+                                         replace=TRUE)
+
+                 this.rep <- data.frame(index=these.samples,
+                                        weight.scale=1)
+
+                 return(this.rep)
+               },
+               .parallel=parallel,
+               .paropts=paropts)
+
+  return(res)
+}
+
+#####################################################
+##' draw RDS bootstrap resamples for one chain
+##'
+##' this function uses the algorithm described in the
+##' supporting online material for Weir et al 2012
+##' (TODO PROPER CITE) to take bootstrap resamples
+##' of one chain from an RDS dataset
+##'
+##' @param chain the chain to draw resamples for
+##' @param mm the mixing model to use
+##' @param dd the degree distns to use
+##' @param parent.trait a vector whose length is the number
+##' of bootstrap reps we want
+##' @param idvar the name of the variable used to label the
+##' columns of the output (presumably some id identifying the
+##' row in the original dataset they come from -- see below)
+##' @return a list with two entries
+##' \itemize{
+##'   \item trait the draws for the trait variable
+##'   \item degree the draws for the degrees (conditional on the drawn
+##trait variables)
+##' }
+##' each entry is a dataset whose columns are the name of the idvar
+##' specified in \code{idvar} and the value of that id, concatenated
+##' together with a '.'
+rds.boot.draw.chain <- function(chain, mm, dd, parent.trait, idvar="uid") {
+
+    thisid <- paste0(idvar, ".", chain$data[,idvar])
+
+    trait.draws <- mm$choose.next.state.fn(parent.trait)
+    toret.trait <- data.frame(trait.draws)
+
+    deg.draws <- dd$draw.degrees.fn(trait.draws)
+    toret.deg <- data.frame(deg.draws)
+
+    colnames(toret.deg) <- colnames(toret.trait) <- thisid
+
+    toret <- list(trait=toret.trait,
+                  degree=toret.deg)
+
+    if (is.null(chain$children)) {
+        return(toret)
+    }
+
+    child.draws <- llply(chain$children,
+                         rds.boot.draw.chain,
+                         mm=mm,
+                         dd=dd,
+                         parent.trait=trait.draws)
+
+    child.draws.trait <- do.call("cbind",
+                                 llply(child.draws, function (x) x$trait))
+    child.draws.deg <- do.call("cbind",
+                               llply(child.draws, function (x) x$degree))
+
+
+    return(list(trait = cbind(toret$trait, child.draws.trait),
+                degree = cbind(toret$degree, child.draws.deg)))
+
+}
+
+#####################################################
+##' draw RDS bootstrap resamples
+##'
+##' draw boostrap resamples for an RDS dataset, using
+##' the algorithm described in the supporting online
+##' material of Weir et al 2012 (TODO PROPER CITE)
+##'
+##' TODO -- consider constructing chains, mm from other args
+##'
+##' TODO be sure to comment the broken-out trait variables
+##'      (ie these could all be different from the originals)
+##'
+##' @param chains a list whose entries are the chains
+##' we want to resample
+##' @param mm the mixing model
+##' @param dd the degree distributions
+##' @param num.reps the number of bootstrap resamples we want
+##' @param keep.vars if not NULL, then the names of variables
+##' from the original dataset we want appended to each bootstrap
+##' resampled dataset (default is NULL)
+##' @return a list of length \code{num.reps}; each entry in
+##' the list has one bootstrap-resampled dataset
+rds.boot.draws <- function(chains,
+                           mm,
+                           dd,
+                           num.reps,
+                           keep.vars=NULL) {
+
+    traits <- mm$traits
+
+    res <- llply(chains,
+                 function(this.chain) {
+
+                     ## TODO -- should handle the case where there is
+                     ## missingness in a seed trait?
+
+                     seed.trait <- traits.to.string(this.chain$data[,traits,drop=FALSE],
+                                                    traits)$traits
+
+                     return(rds.boot.draw.chain(this.chain,
+                                                mm,
+                                                dd,
+                                                rep(seed.trait,num.reps)))
+                 })
+
+    ## put together bootstrap datasets from results for
+    ## each individual chain
+    res.dat <- llply(res,
+                     function(chain.res.td) {
+
+                         ## the results for trait
+                         chain.res <- chain.res.td$trait
+
+                         ## and for degree
+                         chain.res.deg <- chain.res.td$degree
+
+                         ## grab id indexes
+                         varidx <- aaply(colnames(chain.res),
+                                         1,
+                                         str_split,
+                                         pattern="\\.")
+                         varidx <- do.call("rbind", varidx)
+
+                         ## for each iteration, construct dataframe
+                         ## with appropriate trait value
+                         varname <- varidx[1,1]
+                         idx <- varidx[,2]
+
+                         id.dat <- data.frame(idx)
+                         colnames(id.dat) <- varname
+
+                         chain.boot.dat <- alply(1:nrow(chain.res),
+                                                 1,
+                                                 function(idx) {
+                                                     col <- chain.res[idx,]
+                                                     deg <- chain.res.deg[idx,]
+
+                                                     thisdraw <- cbind(id.dat,
+                                                                       t(col),
+                                                                       t(deg))
+                                                     colnames(thisdraw)[2:3] <- c("trait",
+                                                                                  "degree")
+
+                                                     ## unpack the trait
+                                                     thisdraw <- cbind(thisdraw,
+                                                                       unparse.trait(thisdraw$trait,
+                                                                                     traits))
+
+                                                     return(thisdraw)
+                                                 })
+
+                         return(chain.boot.dat)
+                     })
+
+    ## put all the chains together into a single dataset
+    res.all.chains <- llply(1:num.reps,
+                            function(boot.num) {
+                                this.all.dat <- ldply(res.dat,
+                                                      function(x, idx) {
+                                                          x[[idx]]
+                                                      },
+                                                      idx=boot.num)
+
+                                return(this.all.dat)
+                            })
+
+    ## if we are keeping variables from the uber dataset, do that now...
+    if (! is.null(keep.vars)) {
+
+        all.data <- ldply(chains,
+                          chain.data)
+
+        ## TODO -- I think this works, but it would be good to go
+        ## through this again and double-check with fresh eyes
+
+        toget.idx <- match(res.all.chains[[1]][,1],
+                           all.data[,colnames(res.all.chains[[1]])[1]])
+
+        res.all.chains <- llply(res.all.chains,
+                                function(bd, tokeep) {
+                                    return(cbind(bd, tokeep))
+                                },
+                                tokeep=all.data[toget.idx, keep.vars, drop=FALSE])
+    }
+
+    return(res.all.chains)
+
 }
