@@ -94,6 +94,7 @@ traits.to.string <- function(data, traits, na.action="drop", sep=".") {
                        1,
                        function(x) { return(! any(is.na(x))) },
                        .expand=FALSE)
+    touse.idx <- which(touse.idx)
   } else {
     touse.idx <- 1:nrow(data)
   }
@@ -104,7 +105,9 @@ traits.to.string <- function(data, traits, na.action="drop", sep=".") {
                       collapse=sep,
                       .expand=FALSE)
 
-  return(list(used.idx=touse.idx, traits=traits.str, sep=sep,
+  return(list(used.idx=touse.idx,
+              traits=traits.str,
+              sep=sep,
               names=traits))
 
 }
@@ -337,7 +340,7 @@ estimate.mixing <- function(survey.data, parent.data, traits) {
 mc.sim <- function(mm, start, n) {
 
   if (n <= 1) {
-    stop("must run for at least two time steps")
+      return(start)
   }
 
   if (is.null(mm) || is.null(mm$state) || is.null(mm$state[[ start ]])) {

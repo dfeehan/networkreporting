@@ -658,3 +658,74 @@ rds.boot.draws <- function(chains,
     return(res.all.chains)
 
 }
+
+#####################################################
+##' draw RDS bootstrap resamples using the
+##' algorithm in Salganik 2006 (TODO PROPER CITE)
+##'
+##' this algorithm picks respondents from the survey
+##' to be seeds uniformly at random. the seeds are used
+##' to make chains of the same length as the chains seen
+##' in the actual data. (so if there were chains of length
+##' 10, 20, and 30 in the original, this will also be what
+##' we get from each bootstrap replicate.)
+##'
+##' TODO -- consider constructing chains, mm from other args
+##'
+##' TODO be sure to comment the broken-out trait variables
+##'      (ie these could all be different from the originals)
+##'
+##' @param chains a list with the chains constructed from the survey
+##' using \code{\link{make.chain}}
+##' @param mm the mixing model
+##' @param dd the degree distributions
+##' @param num.reps the number of bootstrap resamples we want
+##' @param keep.vars if not NULL, then the names of variables
+##' from the original dataset we want appended to each bootstrap
+##' resampled dataset (default is NULL) [NB: NOT YET IMPLEMENTED]
+##' @return a list of length \code{num.reps}; each entry in
+##' the list has one bootstrap-resampled dataset
+rds.mc.boot.draws <- function(chains,
+                              mm,
+                              dd,
+                              num.reps,
+                              keep.vars=NULL) {
+
+    traits <- mm$traits
+
+    all.data <- ldply(chains,
+                      chain.data)
+
+    ## NB: only using traits that are nonmissing
+    all.traits <- traits.to.string(all.data[,traits,drop=FALSE], traits)
+    all.traits.str <- all.traits$traits
+
+    chain.sizes <- laply(chains,
+                         chain.size)
+
+    num.chains <- length(chain.sizes)
+
+    res <- llply(1:num.reps,
+                 function(this.rep) {
+                     ## draw seeds (with replacement, right?)
+                     these.seeds <- sample(all.traits.str, size=num.chains, replace=TRUE)
+
+                     these.traits <- unlist(llply(1:num.chains,
+                                                  function(x) {
+                                                      res <- mc.sim(mm,
+                                                                    these.seeds[x],
+                                                                    chain.sizes[x])
+                                                      return(res)
+                                                  }))
+
+                     these.degs <- dd$draw.degrees.fn(these.traits)
+
+                     return(cbind(data.frame(trait=these.traits,
+                                             degree=these.degs),
+                                  unparse.trait(these.traits, traits)))
+
+                 })
+
+    return(res)
+
+}
