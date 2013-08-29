@@ -1,0 +1,43 @@
+\name{rds.mc.boot.draws}
+\alias{rds.mc.boot.draws}
+\title{draw RDS bootstrap resamples using the
+algorithm in Salganik 2006 (TODO PROPER CITE)}
+\usage{
+  rds.mc.boot.draws(chains, mm, dd, num.reps,
+    keep.vars = NULL)
+}
+\arguments{
+  \item{chains}{a list with the chains constructed from the
+  survey using \code{\link{make.chain}}}
+
+  \item{mm}{the mixing model}
+
+  \item{dd}{the degree distributions}
+
+  \item{num.reps}{the number of bootstrap resamples we
+  want}
+
+  \item{keep.vars}{if not NULL, then the names of variables
+  from the original dataset we want appended to each
+  bootstrap resampled dataset (default is NULL) [NB: NOT
+  YET IMPLEMENTED]}
+}
+\value{
+  a list of length \code{num.reps}; each entry in the list
+  has one bootstrap-resampled dataset
+}
+\description{
+  this algorithm picks respondents from the survey to be
+  seeds uniformly at random. the seeds are used to make
+  chains of the same length as the chains seen in the
+  actual data. (so if there were chains of length 10, 20,
+  and 30 in the original, this will also be what we get
+  from each bootstrap replicate.)
+}
+\details{
+  TODO -- consider constructing chains, mm from other args
+
+  TODO be sure to comment the broken-out trait variables
+  (ie these could all be different from the originals)
+}
+
