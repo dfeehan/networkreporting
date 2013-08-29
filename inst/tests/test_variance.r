@@ -18,13 +18,13 @@
 ## to try and figure out the real way to include package data in
 ## unit tests...
 
-data(hhsurvey, package="networkreporting")
-data(mu284, package="networkreporting")
-
 set.seed(12345)
 
 #########################################
 ## setup
+data(hhsurvey, package="networkreporting")
+data(mu284, package="networkreporting")
+
 boot.example <- example.survey
 attr(boot.example, 'total.popn.size') <- tot.pop.size
 
@@ -160,10 +160,6 @@ tmp <- test.bootfn("srs.bootstrap.sample")
 context("variance estimators - rescaled bootstrap - sanity checks")
 
 tmp <- test.bootfn("rescaled.bootstrap.sample")
-
-
-
-
 
 
 ## TODO -- LEFT OFF HERE...
