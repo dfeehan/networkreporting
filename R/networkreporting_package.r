@@ -48,3 +48,13 @@ NULL
 ##' @name MU284
 ##' @docType data
 NULL
+
+##' Example game of contacts
+##'
+##' Example of a game of contacts dataset, collected via
+##' RDS; used in unit tests
+##' and vignettes for the \code{networkreporting} package.
+##'
+##' @name gocdata
+##' @docType data
+NULL
