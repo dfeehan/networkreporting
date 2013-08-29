@@ -337,6 +337,7 @@ estimate.mixing <- function(survey.data, parent.data, traits) {
 ##' @param n the number of time-steps to run through
 ##' @return a vector with the state visited at each time step. the first entry
 ##'         has the starting state
+##' @export
 mc.sim <- function(mm, start, n) {
 
   if (n <= 1) {
