@@ -31,6 +31,8 @@
 vignettes/network_scaleup.pdf
 vignettes/intro.pdf
 
+.build.timestamp
+
 # not positive about this one...
 inst/doc
 
