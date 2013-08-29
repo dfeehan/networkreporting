@@ -92,7 +92,7 @@ names(kp.vec) <- paste(knownpop.dat$known.popn)
 d.hat <- kp.degree.estimator(survey.data=example.survey,
                              known.popns=kp.vec,
                              total.popn.size=tot.pop.size,
-                             na.rm=TRUE)
+                             missing="complete.obs")
 ```
 
 Note that the function reports that it's working in absolute numbers (instead of, for example, proportions.)  We can examine the results with a histogram
