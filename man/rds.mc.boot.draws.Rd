@@ -27,16 +27,12 @@ algorithm in Salganik 2006 (TODO PROPER CITE)}
   has one bootstrap-resampled dataset
 }
 \description{
-  this algorithm picks respondents from the survey to be
-  seeds uniformly at random. the seeds are used to make
-  chains of the same length as the chains seen in the
-  actual data. (so if there were chains of length 10, 20,
-  and 30 in the original, this will also be what we get
-  from each bootstrap replicate.)
+  this algorithm picks a respondents from the survey to be
+  a seed uniformly at random. it then generates a bootstrap
+  draw by simulating the markov process forward for n
+  steps, where n is the size of the draw required.
 }
 \details{
-  TODO -- consider constructing chains, mm from other args
-
   TODO be sure to comment the broken-out trait variables
   (ie these could all be different from the originals)
 }
