@@ -593,14 +593,11 @@ rds.chain.boot.draws <- function(chains,
 ##' draw RDS bootstrap resamples using the
 ##' algorithm in Salganik 2006 (TODO PROPER CITE)
 ##'
-##' this algorithm picks respondents from the survey
-##' to be seeds uniformly at random. the seeds are used
-##' to make chains of the same length as the chains seen
-##' in the actual data. (so if there were chains of length
-##' 10, 20, and 30 in the original, this will also be what
-##' we get from each bootstrap replicate.)
-##'
-##' TODO -- consider constructing chains, mm from other args
+##' this algorithm picks a respondents from the survey
+##' to be a seed uniformly at random. it then generates
+##' a bootstrap draw by simulating the markov process
+##' forward for n steps, where n is the size of the draw
+##' required.
 ##'
 ##' TODO be sure to comment the broken-out trait variables
 ##'      (ie these could all be different from the originals)
@@ -637,16 +634,26 @@ rds.mc.boot.draws <- function(chains,
 
     res <- llply(1:num.reps,
                  function(this.rep) {
-                     ## draw seeds (with replacement, right?)
-                     these.seeds <- sample(all.traits.str, size=num.chains, replace=TRUE)
 
-                     these.traits <- unlist(llply(1:num.chains,
-                                                  function(x) {
-                                                      res <- mc.sim(mm,
-                                                                    these.seeds[x],
-                                                                    chain.sizes[x])
-                                                      return(res)
-                                                  }))
+                     ## draw chains with the same length as the
+                     ## empirically observed ones
+                     ## draw seeds (with replacement, right?)
+                     ## these.seeds <- sample(all.traits.str, size=num.chains, replace=TRUE)
+
+                     ## these.traits <- unlist(llply(1:num.chains,
+                     ##                              function(x) {
+                     ##                                  res <- mc.sim(mm,
+                     ##                                                these.seeds[x],
+                     ##                                                chain.sizes[x])
+                     ##                                  return(res)
+                     ##                              }))
+
+                     ## use only one chain
+                     this.seed <- sample(all.traits.str, size=1)
+
+                     these.traits <- mc.sim(mm,
+                                            this.seed,
+                                            sum(chain.sizes))
 
                      these.degs <- dd$draw.degrees.fn(these.traits)
 
