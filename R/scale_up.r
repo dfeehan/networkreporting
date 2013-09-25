@@ -340,8 +340,8 @@ nsum.internal.validation <- function(survey.data,
                  }
 
                  degsum <- total.degree.estimator(thisdat,
-                                                  d.hat.vals="deg.minus",
-                                                  missing=missing)
+                                                 d.hat.vals="deg.minus",
+                                                 missing=missing)
 
                  ## note that this attribute could be NULL and we're
                  ## still OK here...
