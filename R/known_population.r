@@ -34,9 +34,9 @@
 ##'                        returns absolute numbers (ie, the proportions * total popn size)
 ##' @param missing if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values. if "complete.obs"
-##'                then only use rows that have no missingness for the
-##'                computations (listwise deletion). care
-##'                must be taken in using this second option
+##'                then, for each row, use only the known populations
+##'                that have no missingness for the
+##'                computations. care must be taken in using this second option
 ##' @param verbose if TRUE, print messages to the screen
 ##' @return a vector with an estimate of the degree for each row
 ##'         in survey.data. if missing=="ignore", then the degree for rows that have
