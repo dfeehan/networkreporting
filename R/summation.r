@@ -23,9 +23,9 @@
 ##'              question. if NULL, then assume that
 ##'              the survey.data dataframe has an attribute called 'sum.qs'
 ##'              containing this vector.
-##' @param na.rm if TRUE, disregard rows that have any missingness in
-##'              the summation populations; otherwise, use an adjusted estimator
-##'              to produce those rows' degree estimates
+##' @param missing if "ignore", then proceed with the analysis without
+##'                doing anything about missing values. other options
+##'                are not yet implemented.
 ##' @return a vector with an estimate of the degree for each row
 ##'         in survey.data. if na.rm=TRUE, then the degree for rows that have
 ##'         missingness in the summation questions will be set
@@ -33,7 +33,7 @@
 ##' @export
 sum.degree.estimator <- function(survey.data,
                                  sum.q=NULL,
-                                 na.rm=FALSE)
+                                 missing="ignore")
 {
 
   if (is.null(sum.q)) {
@@ -43,7 +43,7 @@ sum.degree.estimator <- function(survey.data,
   if (is.null(sum.q)) {
     stop("no sum.q provided for computing degrees via the summation method.\n")
   }
-  if (! na.rm) {
+  if (missing != "ignore") {
 
     ## TODO -- FILL THIS IN
     stop("this is not yet implemented.\n")
