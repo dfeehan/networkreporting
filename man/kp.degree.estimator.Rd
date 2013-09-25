@@ -23,9 +23,10 @@
 
   \item{missing}{if "ignore", then proceed with the
   analysis without doing anything about missing values. if
-  "complete.obs" then only use rows that have no
-  missingness for the computations (listwise deletion).
-  care must be taken in using this second option}
+  "complete.obs" then, for each row, use only the known
+  populations that have no missingness for the
+  computations. care must be taken in using this second
+  option}
 
   \item{verbose}{if TRUE, print messages to the screen}
 }
