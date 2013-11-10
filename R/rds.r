@@ -172,6 +172,7 @@ unparse.trait <- function(trait.string, names, sep="\\.") {
 ##' the degrees for each respondent
 ##' @param traits a vector of the names of the columns
 ##' of \code{survey.data} which refer to the traits
+##' @param keep.vars additional vars to return along with degrees
 ##' @return an object with
 ##' \itemize{
 ##'   \item \code{distns} a list with one entry per trait value; each
@@ -182,16 +183,24 @@ unparse.trait <- function(trait.string, names, sep="\\.") {
 ##' }
 estimate.degree.distns <- function(survey.data,
                                    d.hat.vals,
-                                   traits) {
+                                   traits,
+                                   keep.vars=NULL) {
 
   st <- traits.to.string(survey.data,
                          traits)
 
   degs <- get.var(survey.data, d.hat.vals)
 
-  deg.dat <- data.frame(trait=st$traits, degree=degs[st$used.idx])
+  if (! is.null(keep.vars)) {
+      ## TODO -- should eventually make grabbing these others vars more robust
+      other.vars <- survey.data[st$used.idx, keep.vars]
+      deg.dat <- data.frame(trait=st$traits, degree=degs[st$used.idx],
+                            other.vars)
+  } else {
+      deg.dat <- data.frame(trait=st$traits, degree=degs[st$used.idx])
+  }
 
-  ## TODO -- for now, we can just represent the degrees with duplicats
+  ## TODO -- for now, we can just represent the degrees with duplicates
   ## and use SI sampling to pick one when we need to. if there are
   ## huge datasets, this might need to be changed later
 
@@ -209,14 +218,16 @@ estimate.degree.distns <- function(survey.data,
                               ##  http://adv-r.had.co.nz/Functions.html)
                               force(this.trait.deg)
                               return(function(n=1) {
-                                  return(sample(this.trait.deg$degree,
-                                                size=n, replace=TRUE))
+                                  idx <- sample(1:nrow(this.trait.deg), size=n, replace=TRUE)
+                                  return(this.trait.deg[idx,])
                               })
                           }))
 
   draw.degrees.fn <- function(traits) {
       tocall <- deg.fns[traits]
-      degs <- unlist(llply(tocall, do.call, args=list()))
+      degs <- llply(tocall, do.call, args=list())
+      degs <- do.call("rbind", degs)
+      rownames(degs) <- NULL
       return(degs)
   }
 

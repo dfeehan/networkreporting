@@ -657,9 +657,11 @@ rds.mc.boot.draws <- function(chains,
 
                      these.degs <- dd$draw.degrees.fn(these.traits)
 
-                     return(cbind(data.frame(trait=these.traits,
-                                             degree=these.degs),
+                     return(cbind(these.degs,
                                   unparse.trait(these.traits, traits)))
+                     ##return(cbind(data.frame(trait=these.traits,
+                     ##                        degree=these.degs),
+                     ##             unparse.trait(these.traits, traits)))
 
                  })
 
