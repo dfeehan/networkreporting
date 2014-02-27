@@ -114,7 +114,20 @@ TODO
 Internal valididty checks
 -------------------------
 
-TODO
+In order to run internal validation checks, you can use the
+`nsum.internal.validation` function. The example below makes use of the fact
+that we already attached the known populations to the `example.survey`
+dataframe using the `kp.vec` command above. We use `total.popn.size=NA` to indicate
+that we wish to get proportions instead of absolute numbers. We also specify that we wish to use only complete observations (ie, we will remove rows that have any missing values from our calculations).
+
+```{r}
+iv.result <- nsum.internal.validation(survey.data=example.survey,
+                                      missing="complete.obs",
+                                      total.popn.size=tot.pop.size)
+## TODO -- explain this more...
+iv.result$results
+
+```
 
 Estimating totals
 -----------------

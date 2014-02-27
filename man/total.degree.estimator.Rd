@@ -33,7 +33,7 @@
 }
 \details{
   this computes the weighted sum of the respondents'
-  estimated degrees.\cr TODO -- for now, it doesn't worry
+  estimated degrees.\cr ' TODO -- for now, it doesn't worry
   about missing values OR about differences between the
   frame and the universe
 }

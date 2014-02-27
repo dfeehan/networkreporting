@@ -2,7 +2,8 @@
 \alias{estimate.degree.distns}
 \title{estimate degree distributions by trait}
 \usage{
-  estimate.degree.distns(survey.data, d.hat.vals, traits)
+  estimate.degree.distns(survey.data, d.hat.vals, traits,
+    keep.vars = NULL)
 }
 \arguments{
   \item{survey.data}{the respondent info}
@@ -12,6 +13,9 @@
 
   \item{traits}{a vector of the names of the columns of
   \code{survey.data} which refer to the traits}
+
+  \item{keep.vars}{additional vars to return along with
+  degrees}
 }
 \value{
   an object with \itemize{ \item \code{distns} a list with

@@ -10,7 +10,6 @@
 ##         still don't use get.var)
 ## TODO -- perhaps an easy to use interface for nsum estimates
 ##         with bootstrap (and then use this in nsum.internal.validation)
-## TODO -- rename 'network rate' stuff to 'network reporting'
 ## TODO -- when using defaults (for example, taking
 ##         popn size info from dataframe attributes,
 ##         should we print out a message to the screen?
@@ -25,6 +24,7 @@
 ##'
 ##' this computes the weighted sum of the respondents'
 ##' estimated degrees.\cr
+##''
 ##' TODO -- for now, it doesn't worry about missing values
 ##' OR about differences between the frame and the universe
 ##'
@@ -133,13 +133,13 @@ nsum.estimator <- function(survey.data,
   ## a weights variable
   weights <- get.weights(survey.data, weights)
 
-  d.hat.vals <- get.var(survey.data, d.hat.vals)
+  raw.d.hat.vals <- get.var(survey.data, d.hat.vals)
 
-  y.vals <- get.var(survey.data, y.vals)
+  raw.y.vals <- get.var(survey.data, y.vals)
 
   #### compute the actual estimates
-  y.vals <- y.vals * weights
-  d.hat.vals <- d.hat.vals * weights
+  y.vals <- raw.y.vals * weights
+  d.hat.vals <- raw.d.hat.vals * weights
 
   ## figure out if we have to only use non-missing entries
   touse.idx <- 1:length(y.vals)
@@ -180,19 +180,25 @@ nsum.estimator <- function(survey.data,
   ## not recommended, but interesting in some cases:
   ## the killworth estimate for the standard error
   if (killworth.se) {
+
       ## NOTE: this is not really defined for the case of
       ## non-trivial degree ratio or transmission rate
       ## we'll use unadjusted proportion in all cases
-      p.hat <- toret$tot.connections / toret$sum.d.hat
+      ##p.hat <- toret$tot.connections / toret$sum.d.hat
+      p.hat <- sum(y.vals[touse.idx])/sum(d.hat.vals[touse.idx])
+      p.hat.raw <- sum(raw.y.vals[touse.idx])/sum(raw.d.hat.vals[touse.idx])
 
       ## see Killworth et al, 1998 (Evaluation Review)
       kse <- sqrt((p.hat * (1-p.hat))/toret$sum.d.hat)
+      kse.wgtdenom <- sqrt((p.hat.raw * (1-p.hat.raw))/sum(raw.d.hat.vals[touse.idx]))
 
       if (! is.na(total.popn.size)) {
           kse <- kse * total.popn.size
+          kse.wgtdenom <- kse.wgtdenom * total.popn.size
       }
 
       toret$killworth.se <- kse
+      toret$killworth.se.wgtdenom <- kse.wgtdenom
   }
 
   return(toret)
@@ -321,7 +327,6 @@ nsum.internal.validation <- function(survey.data,
                  if( kp.method ) {
 
                    kp.minus <- known.popns[-match(this.kp,names(known.popns))]
-
                    deg.minus <- kp.degree.estimator(survey.data=survey.data,
                                                     known.popns=kp.minus,
                                                     total.popn.size=total.popn.size,
@@ -378,6 +383,7 @@ nsum.internal.validation <- function(survey.data,
 
                  if (killworth.se) {
                      nsum.holdout.kse <- nsum.holdout.res$killworth.se
+                     nsum.holdout.kse.wgtdenom <- nsum.holdout.res$killworth.se.wgtdenom
                  }
 
                  boot.res <- NULL
@@ -418,7 +424,8 @@ nsum.internal.validation <- function(survey.data,
                                              nsum.holdout.est=nsum.holdout.est,
                                              known.size=known.size,
                                              d.hat.sum=degsum,
-                                             killworth.se=nsum.holdout.kse),
+                                             killworth.se=nsum.holdout.kse,
+                                             killworth.se.wgtdenom=nsum.holdout.kse.wgtdenom),
                              boot=list(name=this.kp,
                                        values=boot.res.ests,
                                        d.hat.sum=boot.res.d.hat.sum)))

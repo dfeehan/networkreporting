@@ -1,0 +1,116 @@
+Game of contacts estimates using the **networkreporting** package
+============================================================
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{goc}
+-->
+
+Introduction
+------------
+
+This document describes how to perform basic analysis of a game of contacts dataset, collected using respondent-driven sampling, using the tools from the `networkreporting` package.
+
+
+Example
+-------
+
+TOOD -- eventually, we'll add more narrative explanation to this example below.
+
+```{r, message=FALSE}
+library(networkreporting)
+library(plyr)
+library(ggplot2) # we'll use qplot from ggplot2 for plots
+library(stringr)
+theme_set(theme_minimal())
+
+data(hhsurvey) # this is a demo dataset included with the package
+```
+
+```{r}
+## load the example data
+data(goc)
+
+## take out the seeds
+seed.rows <- which(survey.data$in.coupon < 10)
+nonseed.survey.data <- survey.data[ -seed.rows, ]
+seed.survey.data <- survey.data[seed.rows,]
+
+## aggregate degree estimates
+bnet.cidx <- which(str_detect(colnames(survey.data), "netsize\\.\\d\\.bss"))
+gnet.cidx <- which(str_detect(colnames(survey.data), "netsize\\.\\d\\.game"))
+
+survey.data$netsize.bss <- aaply(as.matrix(survey.data[,bnet.cidx]),
+                                 1,
+                                 mean)
+survey.data$netsize.goc <- aaply(as.matrix(survey.data[,gnet.cidx]),
+                                 1,
+                                 mean)
+
+survey.data$checkuid <- survey.data$uid
+
+## build the nomination chains based on the
+## ids in the data
+seed.ids <- c("1", "2", "3", "4", "5")
+chains <- llply(seed.ids,
+                networkreporting:::make.chain,
+                survey.data)
+
+## pick a set of traits and estimate the mixing
+## info for them
+##these.traits <- c("use.crack", "female", "use.alcohol")
+##these.traits <- c("use.crack", "female")
+these.traits <- c("use.crack")
+
+num.reps <- 2500
+
+##load_all(pkg.dir)
+mm <- estimate.mixing(nonseed.survey.data, parent.data, these.traits)
+
+dd <- estimate.degree.distns(survey.data,
+                             d.hat.vals="netsize.bss",
+                             traits=these.traits)
+
+## take bootstrap resamples using the markov chain method
+boot.mc.dat <- rds.mc.boot.draws(chains, mm, dd, num.reps=num.reps)
+
+## take bootstrap resamples using the static chain method
+boot.chain.dat <- rds.chain.boot.draws(chains, mm, dd,
+                                       num.reps=num.reps,
+                                       keep.vars=c("netsize.bss","checkuid"))
+
+## use the RDS-II estimator on each bootstrap resample
+this.qoi <- "use.crack"
+##this.qoi <- "female"
+
+boot.mc.ests <- ldply(boot.mc.dat,
+                      rdsII.estimator,
+                      ## now we use the name of the resampled degree
+                      ## (degree) instead of the original one
+                      d.hat.vals="degree",
+                      y.vals=this.qoi,
+                      missing="complete.obs")
+boot.mc.ests <- data.frame(estimate=boot.mc.ests[,1],
+                           estimator="mc")
+
+boot.chain.ests <- ldply(boot.chain.dat,
+                         rdsII.estimator,
+                         ## now we use the name of the resampled degree
+                         ## (degree) instead of the original one
+                         d.hat.vals="degree",
+                         y.vals=this.qoi,
+                         missing="complete.obs")
+boot.chain.ests <- data.frame(estimate=boot.chain.ests[,1],
+                              estimator="chain")
+
+boot.ests <- rbind(boot.mc.ests,
+                   boot.chain.ests)
+
+est.distn <- ggplot(boot.ests) +
+             geom_density(aes(x=estimate, color=estimator, group=estimator)) +
+             xlab(this.qoi) +
+             xlim(0,1) + theme_minimal()
+
+print(est.distn)
+
+```
+
