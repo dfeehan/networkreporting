@@ -184,7 +184,7 @@ nsum.estimator <- function(survey.data,
       ## NOTE: this is not really defined for the case of
       ## non-trivial degree ratio or transmission rate
       ## we'll use unadjusted proportion in all cases
-      ##p.hat <- toret$tot.connections / toret$sum.d.hat
+      #p.hat <- toret$tot.connections / toret$sum.d.hat
       p.hat <- sum(y.vals[touse.idx])/sum(d.hat.vals[touse.idx])
       p.hat.raw <- sum(raw.y.vals[touse.idx])/sum(raw.d.hat.vals[touse.idx])
 
@@ -380,7 +380,7 @@ nsum.internal.validation <- function(survey.data,
 
                  ##nsum.holdout.kse <- NULL
                  nsum.holdout.kse <- NA
-
+                 nsum.holdout.kse.wgtdenom <- NA
                  if (killworth.se) {
                      nsum.holdout.kse <- nsum.holdout.res$killworth.se
                      nsum.holdout.kse.wgtdenom <- nsum.holdout.res$killworth.se.wgtdenom
