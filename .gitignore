@@ -28,8 +28,8 @@
 *.tex
 
 # compiled versions of vignettes
-vignettes/network_scaleup.pdf
-vignettes/intro.pdf
+#vignettes/network_scaleup.pdf
+#vignettes/intro.pdf
 
 .build.timestamp
 
