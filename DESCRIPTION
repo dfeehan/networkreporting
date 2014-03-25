@@ -9,6 +9,8 @@ Maintainer: Dennis Feehan <dfeehan@princeton.edu>
 Author: Dennis Feehan, Matthew Salganik
 License: MIT
 VignetteBuilder: knitr
+Suggests:
+    knitr
 Collate:
     'variance_estimators.r'
     'helper_functions.r'

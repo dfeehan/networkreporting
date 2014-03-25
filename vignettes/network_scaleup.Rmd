@@ -1,9 +1,9 @@
-Analyzing network scale-up data using the **networkreporting** package
-=====================================================================
 <!--
-%\VignetteEngine{knitr}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{network scale-up}
 -->
+Analyzing network scale-up data using the **networkreporting** package
+=====================================================================
 
 Introduction
 ------------
