@@ -1,0 +1,224 @@
+Analyzing network scale-up data using the **networkreporting** package
+=====================================================================
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{network scale-up}
+-->
+
+Introduction
+------------
+
+This will be a broad overview of the package (short) and the network scale-up method.
+
+This introduction will assume that you already have the **networkreporting**
+package installed. If you don't, please refer to the introductory vignette for
+instructions on how to do this. (TODO LINK TO OTHER VIGNETTE).
+
+
+Analytic strategy
+-----------------
+
+For the purposes of this vignette, we'll assume that we have conducted a survey
+using network scale-up questions to try and estimate the size of an important
+population.  Analytically, this involves two main steps: 
+
+* step 1: we need to estimate the size of the survey respondents' personal networks (their *degrees*)
+* step 2: we need to use the estimated degrees to produce estimates for the size of a hidden population.
+
+### Step 1: estimating network sizes
+
+Here, we will use the *known population* estimator for respondents' degrees. (TODO CITE). In order to estimate the degree of the $i$ th survey respondent, we use
+
+$$
+\begin{align}
+\label{eqn:kpdegree}
+\hat{d_i} = \sum_{j \in K} y_{ij} \frac{N}{\sum_{j \in K} N_j},
+\end{align}
+$$
+
+\noindent where $N$ is the total size of the population, $N_j$ is the size of the $j$ th population of known size, and $y_{ij}$ is the number of connections that survey respondent $i$ reports between herself and members of the $j$ th population of known size.
+
+### Step 2: estimating hidden population sizes
+
+Once we have the estimates of the respondents' degrees, we use them to produce an estimate for the size of the population of interest via TODO WRITE THIS BETTER
+
+$$
+\begin{align}
+\label{eqn:nsum}
+\hat{N}_h = \frac{ \sum_{i \in s} y_{ih} }{ \sum_{i \in s} \hat{d_i} },
+\end{align}
+$$
+
+\noindent where $N_h$ is the size of the population of interest (which we want to estimate), $s$ is the set of respondents in our sample, and $\hat{d_i}$ is the estimate of the size of respondent $i$'s degree, obtained using the known population method.
+
+Preparing data
+--------------
+The first step is to prepare the data.  We'll assume that we start with two datasets: the first is a survey containing information collected from respondents about their personal networks; the second is information about the sizes of several populations.
+
+The example data for this vignette are provided with the `networkreporting` package, and can be loaded by typing
+
+```{r, message=FALSE}
+library(networkreporting)
+library(plyr)
+library(ggplot2) # we'll use qplot from ggplot2 for plots
+theme_set(theme_minimal())
+
+data(hhsurvey) # this is a demo dataset included with the package
+```
+
+We can look at the survey dataset, which is called `example.survey`
+
+```{r}
+head(example.survey)
+```
+
+There are several columns: `cluster`, `region`, and `indweight` are variables related to the sampling design for the survey; `sex` and `age.cat` are demographic characteristics of the respondents; `widower`, ..., `mukandayisenga` are responses to questions about populations whose total size is known, and finally, `died`, ..., `clients` are responses to questions about hidden populations.
+
+In addition to the survey responses, we also have information about the sizes of the known populations in `knownpop.dat`:
+
+```{r}
+head(knownpop.dat)
+```
+
+### Topcoding
+
+TODO -- topcoding functions in package
+
+Estimating network sizes
+------------------------
+
+Now that we have finished preparing the data, we turn to esimating the sizes of each respondent's personal network.  The `networkreporting` package can do this using the known population estimator [TODO CITE] and the `TODO` function.
+
+```{r}
+kp.vec <- knownpop.dat$size
+names(kp.vec) <- paste(knownpop.dat$known.popn)
+
+d.hat <- kp.degree.estimator(survey.data=example.survey,
+                             known.popns=kp.vec,
+                             total.popn.size=tot.pop.size,
+                             missing="complete.obs")
+```
+
+Note that the function reports that it's working in absolute numbers (instead of, for example, proportions.)  We can examine the results with a histogram
+
+```{r}
+qplot(d.hat, binwidth=25)
+```
+
+Let's attach the degree estimates to the dataframe to keep track of them:
+
+```{r}
+example.survey$d.hat <- d.hat
+```
+
+### Missing data in known population questions
+
+TODO
+
+Internal valididty checks
+-------------------------
+
+In order to run internal validation checks, you can use the
+`nsum.internal.validation` function. The example below makes use of the fact
+that we already attached the known populations to the `example.survey`
+dataframe using the `kp.vec` command above. We use `total.popn.size=NA` to indicate
+that we wish to get proportions instead of absolute numbers. We also specify that we wish to use only complete observations (ie, we will remove rows that have any missing values from our calculations).
+
+```{r}
+iv.result <- nsum.internal.validation(survey.data=example.survey,
+                                      known.popns=kp.vec,
+                                      missing="complete.obs",
+                                      killworth.se=TRUE,
+                                      total.popn.size=tot.pop.size,
+                                      kp.method=TRUE,
+                                      return.plot=FALSE)
+```
+
+Now `iv.result` is a list that has a summary of the results in the entry `results`
+
+```{r}
+iv.result$results
+```
+
+Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
+```{r}
+print(iv.result$plot)
+```
+
+Estimating totals
+-----------------
+
+Now that we have estimated degrees, we can use them to produce estimates of the populations we're interested in. Here, we'll take the example of injecting drug users, `idu`
+
+```{r}
+idu.est <- nsum.estimator(survey.data=example.survey,
+                          d.hat.vals=d.hat,
+                          total.popn.size=tot.pop.size,
+                          y.vals="idu",
+                          missing="complete.obs")
+```
+
+Note that we had to specify that we should use only rows in our dataset with no missing values through the `missing = "complete.obs"` option, and also that we had to pass in the total population size using the `total.popn.size` option. The resulting estimate is
+
+```{r}
+idu.est
+```
+
+This gives us both the estimate as well as the numerator and denominator.
+
+Variance estimation
+-------------------
+
+In order to estimate the sampling uncertainty of our estimated totals, we can use the rescaled bootstrap technique that is in the `networkreporting` package. In order to do so, we need to be able to describe the sampling design of our study. In particular, we need to be able to describe the stratifcation (if any) and the primary sampling units used in the study.
+
+```{r, tidy=FALSE}
+idu.est <- bootstrap.estimates(## this describes the sampling design of the
+                               ## survey; here, the PSUs are given by the
+                               ## variable cluster, and the strata are given
+                               ## by the variable region
+                               survey.design = ~ cluster + strata(region),
+                               ## the number of bootstrap resamples to obtain
+                               num.reps=100,
+                               ## this is the name of the function
+                               ## we want to use to produce an estimate
+                               ## from each bootstrapped dataset
+                               estimator.fn="nsum.estimator",
+                               ## these are the sampling weights
+                               weights="indweight",
+                               ## this is the name of the type of bootstrap
+                               ## we wish to use
+                               bootstrap.fn="rescaled.bootstrap.sample",
+                               ## our dataset
+                               survey.data=example.survey,
+                               ## other parameters we need to pass
+                               ## to the nsum.estimator function
+                               d.hat.vals=d.hat,
+                               total.popn.size=tot.pop.size,
+                               y.vals="idu",
+                               missing="complete.obs")
+```
+
+By default, `bootstrap.estimates` produces a list with `num.reps` entries; each entry is the result of calling the estimator function on one bootstrap resample.  We can write a bit of code that will help us put all of these results together, for plotting and summarizing
+
+```{r}
+## combine the estimates together in one data frame
+## (bootstrap.estimates gives us a list)
+all.idu.estimates <- ldply(idu.est,
+                           function(x) { data.frame(estimate=x$estimate) })
+```
+
+We can examine the summarized results with a histogram or with `summarize`.
+
+```{r}
+## look at a histogram of the results
+qplot(all.idu.estimates$estimate, binwidth=50)
+
+## summarize the results
+summary(all.idu.estimates$estimate)
+```
+
+
+
+
+
+

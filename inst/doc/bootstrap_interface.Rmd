@@ -1,0 +1,77 @@
+Custom bootstrap code using the **networkreporting** package
+============================================================
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{bootstrap}
+-->
+
+Introduction
+------------
+
+This document describes the interface that bootstrap functions within `networkreporting` package are required to use. It is mostly intended to serve as a reference for the package's maintainers, though it might also be useful to someone who is interested in writing her own bootstrap sampler to use with the package.
+
+The function the user calls to obtain estimates based on bootstrap resamples is called `bootstrap.estimates`. Conceptually, it has three main parts:
+1. Choose bootstrap resamples according to the specified design
+2. Apply the estimator function to each boostrap resample
+3. (Optional) Combine the bootstrap results into a summary using a summary function
+
+This document will describe each of these parts in turn.
+
+Choose bootstrap resamples
+--------------------------
+
+The `bootstrap.estimates` function is passed an argument called `bootstrap.fn`. This should be a string with the name of the
+function or an actual function object.  This function is the one that should be used to take bootstrap resamples from the dataset. A valid bootstrap function has the properties described below.
+
+A bootstrap function takes at least three arguments:
+* `survey.data` - the dataset that is being bootstrapped
+* `num.reps` - the number of bootstrap samples requested
+* `...` - which allows it not to report an error if an argument used for other bootstrap resamplers is passed in
+
+A bootstrap function returns a list with one entry for each boostrap
+replication. Each entry in the list consists of a dataframe which describes which rows have been resampled. This dataframe
+can have different columns, depending on the bootstrap resampling method, but it has, at a minimum:
+* `index` - the index in the original dataset of each row that was resampled
+* `weight.scale` - the amount by which that row's weight should be scaled
+
+For each bootstrap resample, `boostrap.estimates` uses the `index` column to grab the appropriate rows of the original dataset,
+applies the `weight.scale` to the weights, and then applies the estimator.
+
+Note that different bootstrap resamplers may handle the case of a row that was never resampled differently; in some cases, the
+index of the row may be returned with `weight.scale` set to 0, and in others it may be omitted entirely. Similarly, if
+a row was resampled more than once, the bootstrap resampler may include it more than once in the results, or it may
+include it only once, with `weight.scale` adjusted appropriately. The estimation function has to be able to handle these situations.
+
+
+Apply the estimator function
+----------------------------
+
+`bootstrap.estimates` is also passed an argument called `estimator.fn`. This should be a string with the name of the function
+that should be used to produce an estimate, given a boostrap-resampled dataset.
+
+The estimator function must take, at a minimum, the following arguments:
+* `survey.data` - the data frame to produce an estimate from (generally, one bootstrap resample)
+* `weights` - the values of the estimation weights (a vector with one entry for each row in `survey.data`)
+
+Additionally, the estimator function *cannot* have arguments named `survey.design`, `estimator.fn`, `num.reps`, `summary.fn`, `bootstrap.fn`, `parallel`, or `paropts`. This could be relaxed with a bit more work, but it does not seem very constraining.
+
+
+Summarize the bootstrap results
+-------------------------------
+
+By default, `bootstrap.estimates` will return a list with one entry for each bootstrap estimate. If you don't wish to return all of that information, you can write a function that takes a list as its argument and summarizes it however you like. You can pass this argument to `bootstrap.estimates` as `summary.fn`.
+
+
+Example
+-------
+
+```{r, message=FALSE}
+## toDO SILENT SETUP CODE
+```
+
+We can look at the survey dataset, which is called `example.survey`
+
+```{r}
+## EXAMPLE CODE
+```
+
