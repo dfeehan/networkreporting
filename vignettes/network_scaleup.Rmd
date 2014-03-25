@@ -10,13 +10,17 @@ Introduction
 
 This will be a broad overview of the package (short) and the network scale-up method.
 
-This introduction will assume that you already have the **networkreporting** package installed. If you don't, please refer to the introductory vignette for instructions on how to do this. (TODO LINK TO OTHER VIGNETTE).
+This introduction will assume that you already have the **networkreporting**
+package installed. If you don't, please refer to the introductory vignette for
+instructions on how to do this. (TODO LINK TO OTHER VIGNETTE).
 
 
 Analytic strategy
 -----------------
 
-For the purposes of this vignette, we'll assume that we have conducted a survey using network scale-up questions to try and estimate the size of an important population.  Analytically, this involves two main steps: 
+For the purposes of this vignette, we'll assume that we have conducted a survey
+using network scale-up questions to try and estimate the size of an important
+population.  Analytically, this involves two main steps: 
 
 * step 1: we need to estimate the size of the survey respondents' personal networks (their *degrees*)
 * step 2: we need to use the estimated degrees to produce estimates for the size of a hidden population.
@@ -122,11 +126,23 @@ that we wish to get proportions instead of absolute numbers. We also specify tha
 
 ```{r}
 iv.result <- nsum.internal.validation(survey.data=example.survey,
+                                      known.popns=kp.vec,
                                       missing="complete.obs",
-                                      total.popn.size=tot.pop.size)
-## TODO -- explain this more...
-iv.result$results
+                                      killworth.se=TRUE,
+                                      total.popn.size=tot.pop.size,
+                                      kp.method=TRUE,
+                                      return.plot=FALSE)
+```
 
+Now `iv.result` is a list that has a summary of the results in the entry `results`
+
+```{r}
+iv.result$results
+```
+
+Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
+```{r}
+print(iv.result$plot)
 ```
 
 Estimating totals
