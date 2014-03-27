@@ -11,14 +11,14 @@
 ##' helper to grab a fn that is passed in as an argument
 ##' 
 ##' this is based on Hadley Wickham's response to an SO
-##post: http://stackoverflow.com/questions/14183766/match-fun-provide-error-with-functions-defined-inside-functions
+##' post: \url{http://stackoverflow.com/questions/14183766/match-fun-provide-error-with-functions-defined-inside-functions}
 ##' with some minor modifications
 ##'
 ##' @param fn the function to search for
 ##' @param env the environment to start searching in
 ##' @return fn, if fn is already a function; otherwise, the first function found
 ##'         in env or one of its parents whose name is fn
-##'
+##' @keywords internal 
 get.fn <- function(fn, env = parent.frame()) {
 
     ## base case: fn is already a function
@@ -43,8 +43,6 @@ get.fn <- function(fn, env = parent.frame()) {
     }
 
 }
-
-
 
 ##########################################################################
 ##' turn a dataframe into a known population vector
@@ -82,18 +80,31 @@ df.to.kpvec <- function(kp.data,
 
 }
 
-
 ##########################################################################
 ##' attach known populations to a dataframe
 ##'
+##' @description
 ##' take a known population vector (see \code{\link{df.to.kpvec}}) and
 ##' associate it with a survey dataframe. this makes it more convenient
 ##' to use some of the \code{networksampling} package's function
+##'
+##' @details
+##' The \code{total.popn.size} parameter is interpreted as follows:
+##' \itemize{
+##' \item NA if total.popn.size is NA then work with proportions
+##' \item NULL if total.popn.size is NULL (nothing passed in), then
+##'          assume that there's a total.popn.size attribute
+##'          associated with the dataset we're using
+##' \item numerical value if an actual total.popn.size was passed in,
+##'        use that value
+##' }
+##' 
 ##'
 ##' @param survey.data the survey dataframe
 ##' @param kp.vec the known population vector
 ##' @return the survey dataframe with the known population vector
 ##' attached as an attribute
+##' @param total.popn.size (optional) the total population size to use (see below)
 ##' @export
 ##' @seealso \link{df.to.kpvec}
 ##' @examples \dontrun{
@@ -109,8 +120,13 @@ df.to.kpvec <- function(kp.data,
 ##'   # kp.degree.estimator without having to specify known
 ##'   # populations each time
 ##' }
-add.kp <- function(survey.data, kp.vec) {
+add.kp <- function(survey.data, kp.vec, total.pop.size=NULL) {
   attr(survey.data, "known.popns") <- kp.vec
+
+  if (! is.null(total.pop.size)) {
+      attr(survey.data, "total.popn.size") <- total.pop.size
+  }
+    
   return(survey.data)
 }
 
@@ -289,8 +305,8 @@ topcode.var <- function(x, max, to.na=NULL, ignore=NA) {
 ##' topcode a group of variables
 ##'
 ##' this function uses \code{topcode.var} to topcode a set of variables.
-##' it's useful for topcoding a whole set of "how many X are you connected
-##' to?" questions in the same way.
+##' it's useful for topcoding a whole set of aggregated relational data
+##' ("how many X are you connected to?") questions in the same way.
 ##'
 ##' @param survey.data  the dataset with the survey responses
 ##' @param vars a vector with the names or indices of the columns in the
@@ -301,7 +317,10 @@ topcode.var <- function(x, max, to.na=NULL, ignore=NA) {
 ##' @return the topcoded vector
 ##' @export
 ##' @examples \dontrun{
-##'    ## write examples
+##'    data(hh.survey) # example data included with the package
+##'    example.survey <- topcode.data(example.survey,
+##'                                   vars=known.popn.vars,
+##'                                   max=30)
 ##' }
 topcode.data <- function(survey.data, vars, max, to.na=NULL, ignore=NA) {
 
