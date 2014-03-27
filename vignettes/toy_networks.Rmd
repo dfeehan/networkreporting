@@ -2,7 +2,7 @@ Toy networks in the **networkreporting** package
 =================================================
 <!--
 %\VignetteEngine{knitr}
-%\VignetteIndexEntry{network scale-up}
+%\VignetteIndexEntry{toy_networks}
 -->
 
 Overview
