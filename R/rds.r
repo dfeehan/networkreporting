@@ -180,6 +180,7 @@ unparse.trait <- function(trait.string, names, sep="\\.") {
 ##the given trait
 ##'   \item \code{draw.degrees.fn} a function which gets called with one
 ##argument, \code{traits}. See description above.
+##'   \item \code{keep.vars} the name of the other vars that are kept (if any)
 ##' }
 estimate.degree.distns <- function(survey.data,
                                    d.hat.vals,
@@ -191,10 +192,15 @@ estimate.degree.distns <- function(survey.data,
 
   degs <- get.var(survey.data, d.hat.vals)
 
+  ## NOTE: we need to guarantee that the order of deg.dat's columns is
+  ##      1: trait
+  ##      2: degree
+  ## [3...]: keep.vars
   if (! is.null(keep.vars)) {
       ## TODO -- should eventually make grabbing these others vars more robust
       other.vars <- survey.data[st$used.idx, keep.vars]
-      deg.dat <- data.frame(trait=st$traits, degree=degs[st$used.idx],
+      deg.dat <- data.frame(trait=st$traits, 
+                            degree=degs[st$used.idx],
                             other.vars)
   } else {
       deg.dat <- data.frame(trait=st$traits, degree=degs[st$used.idx])
@@ -231,7 +237,7 @@ estimate.degree.distns <- function(survey.data,
       return(degs)
   }
 
-  return(list(distns=deg.distns, draw.degrees.fn=draw.degrees.fn))
+  return(list(distns=deg.distns, draw.degrees.fn=draw.degrees.fn, keep.vars=keep.vars))
 
 }
 
