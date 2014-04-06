@@ -5,6 +5,9 @@
 ## package
 ##
 
+# needed for get.weights
+require(functional)
+
 ##########################################################################
 ##' grab a function based on its name
 ##'
