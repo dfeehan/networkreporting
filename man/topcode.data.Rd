@@ -24,12 +24,16 @@
 }
 \description{
   this function uses \code{topcode.var} to topcode a set of
-  variables. it's useful for topcoding a whole set of "how
-  many X are you connected to?" questions in the same way.
+  variables. it's useful for topcoding a whole set of
+  aggregated relational data ("how many X are you connected
+  to?") questions in the same way.
 }
 \examples{
 \dontrun{
-   ## write examples
+   data(hh.survey) # example data included with the package
+   example.survey <- topcode.data(example.survey,
+                                  vars=known.popn.vars,
+                                  max=30)
 }
 }
 

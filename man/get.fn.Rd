@@ -18,7 +18,9 @@
   helper to grab a fn that is passed in as an argument
 }
 \details{
-  this is based on Hadley Wickham's response to an SO with
-  some minor modifications
+  this is based on Hadley Wickham's response to an SO post:
+  \url{http://stackoverflow.com/questions/14183766/match-fun-provide-error-with-functions-defined-inside-functions}
+  with some minor modifications
 }
+\keyword{internal}
 

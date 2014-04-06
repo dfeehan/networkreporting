@@ -27,8 +27,8 @@ algorithm in Salganik 2006 (TODO PROPER CITE)}
   has one bootstrap-resampled dataset
 }
 \description{
-  this algorithm picks a respondents from the survey to be
-  a seed uniformly at random. it then generates a bootstrap
+  this algorithm picks a respondent from the survey to be a
+  seed uniformly at random. it then generates a bootstrap
   draw by simulating the markov process forward for n
   steps, where n is the size of the draw required.
 }
