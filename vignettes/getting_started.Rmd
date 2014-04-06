@@ -15,9 +15,9 @@ Instead, you can download the code from
 ```{r}
 ## require(devtools)
 
-## install_github('dhstools', 'dfeehan')
+## install_github('dfeehan/dhstools')
 
-## install_github('networkreporting', 'dfeehan')
+## install_github('dfeehan/networkreporting')
 ```
 
 Overview
