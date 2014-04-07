@@ -120,13 +120,39 @@ dd <- networkreporting:::estimate.degree.distns(survey.data,
 
 Finally, we take the actual bootstrap resamples using **rds.mc.boot.draws**. 
 ```{r}
-num.reps <- 10
+num.reps <- 100
 boot.mc.dat <- networkreporting:::rds.mc.boot.draws(chains,
                                                     mm,
                                                     dd,
                                                     num.reps=num.reps)
 ```
 
+Now that we have the bootstrap resamples, we can produce an estimate for each
+one.
+
+```{r}
+## use the RDS-II estimator on each bootstrap resample
+
+## get estimates of the total number of alters and the total number of
+## alters aware that the ego is a heavy drug user for each bootstrap rep
+boot.mc.total.ests <- ldply(boot.mc.dat,
+                            rdsII.estimator,
+                            ## now we use the name of the resampled degree
+                            ## (degree) instead of the original one
+                            d.hat.vals="degree",
+                            y.vals="total.alters",
+                            missing="complete.obs")
+
+boot.mc.aware.ests <- ldply(boot.mc.dat,
+                            rdsII.estimator,
+                            d.hat.vals="degree",
+                            y.vals="total.aware",
+                            missing="complete.obs")
+
+boot.mc.ests <- data.frame(estimate=boot.mc.aware.ests[,1] / boot.mc.total.ests[,1],
+                           estimator="mc")
+
+```
 
 Variance estimates form bootstrap of Weir et al [TODO CITE]
 -----------------------------------------------------------
@@ -146,12 +172,47 @@ We can obtain bootstrap resamples using thie technique by calling
 **rds.chain.boot.draws**.
 
 ```{r}
-num.reps <- 10
 boot.chain.dat <- networkreporting:::rds.chain.boot.draws(chains,
                                                           mm,
                                                           dd,
                                                           num.reps=num.reps)
 ```
+
+And we next produce an estimate for each one.
+
+```{r}
+## use the RDS-II estimator on each bootstrap resample
+
+## get estimates of the total number of alters and the total number of
+## alters aware that the ego is a heavy drug user for each bootstrap rep
+boot.chain.total.ests <- ldply(boot.chain.dat,
+                               rdsII.estimator,
+                               ## now we use the name of the resampled degree
+                               ## (degree) instead of the original one
+                               d.hat.vals="degree",
+                               y.vals="total.alters",
+                               missing="complete.obs")
+
+boot.chain.aware.ests <- ldply(boot.chain.dat,
+                               rdsII.estimator,
+                               d.hat.vals="degree",
+                               y.vals="total.aware",
+                               missing="complete.obs")
+
+boot.chain.ests <- data.frame(estimate=boot.chain.aware.ests[,1] / boot.chain.total.ests[,1],
+                              estimator="chain")
+
+```
+
+Now we can compare the estimated visibility using the two bootstraps.
+
+```{r}
+both.ests <- rbind(boot.chain.ests, boot.mc.ests)
+
+comp.plot <- ggplot(both.ests) +
+             geom_density(aes(x=estimate, color=estimator, group=estimator))
+```
+
 
 
 
