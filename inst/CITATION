@@ -1,0 +1,9 @@
+bibentry("Manual",
+         title="The networkreporting package",
+         year=2014,
+         url="http://www.github.com/dfeehan/networkreporting",
+         author=c(person(given=c("Dennis", "M.", "Feehan"),
+                         email="dfeehan@princeton.edu",
+                         role=c("aut", "cre")),
+                  person(given=c("Matthew", "J.", "Salganik"),
+                         role="ths")))
