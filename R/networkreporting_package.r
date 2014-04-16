@@ -8,7 +8,7 @@
 ##' @docType package
 ##' @name networkreporting
 ##' @aliases networkreporting package-networkreporting
-##' @import plyr reshape2 dhstools stringr functional ggplot2
+##' @import plyr reshape2 stringr functional ggplot2
 NULL
 
 ##' Example household survey data
