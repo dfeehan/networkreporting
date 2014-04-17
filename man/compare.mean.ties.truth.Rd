@@ -1,8 +1,8 @@
-\name{mean.ties.truth}
-\alias{mean.ties.truth}
-\title{mean.ties.truth}
+\name{compare.mean.ties.truth}
+\alias{compare.mean.ties.truth}
+\title{compare.mean.ties.truth}
 \usage{
-  mean.ties.truth(survey.data, weights = NULL,
+  compare.mean.ties.truth(survey.data, weights = NULL,
     known.popns = NULL)
 }
 \arguments{

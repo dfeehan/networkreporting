@@ -2,7 +2,7 @@
 \alias{unparse.trait}
 \title{unparse a collapsed trait string}
 \usage{
-  unparse.trait(trait.string, names, sep = "\\.")
+  unparse.trait(trait.string, names, sep = ".")
 }
 \arguments{
   \item{trait.string}{a vector whose values are collapsed

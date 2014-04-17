@@ -9,7 +9,7 @@
 
   \item{kp.vec}{the known population vector}
 
-  \item{total.popn.size}{(optional) the total population
+  \item{total.pop.size}{(optional) the total population
   size to use (see below)}
 }
 \value{

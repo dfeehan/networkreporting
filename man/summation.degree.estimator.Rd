@@ -1,8 +1,8 @@
-\name{sum.degree.estimator}
-\alias{sum.degree.estimator}
-\title{sum.degree.estimator}
+\name{summation.degree.estimator}
+\alias{summation.degree.estimator}
+\title{summation.degree.estimator}
 \usage{
-  sum.degree.estimator(survey.data, sum.q = NULL,
+  summation.degree.estimator(survey.data, sum.q = NULL,
     missing = "ignore")
 }
 \arguments{
