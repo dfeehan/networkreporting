@@ -10,12 +10,12 @@
 ##         (see also the tests for test_estimators.r)
 
 ## TODO -- I don't understand why @import plyr,
-## which is in the networksampling-help.R file,
+## which is in the networkreporting-help.R file,
 ## doesn't take care of this...
 library(plyr)
 
 ## these tests use the toy networks that come
-## packaged with the networksampling package
+## packaged with the networkreporting package
 ## TODO -- I don't understand why the package
 ## data aren't available without having to
 ## specify package=...

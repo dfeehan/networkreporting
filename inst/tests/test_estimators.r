@@ -32,7 +32,7 @@
 ##       estimators (this will likely be several tests)
 
 ## these tests use the toy networks that come
-## packaged with the networksampling package
+## packaged with the networkreporting package
 ## TODO -- I don't understand why the package
 ## data aren't available without having to
 ## specify package=...
@@ -143,4 +143,4 @@ d_ply(tocheck,
 ## network reporting estimator
 ##context("estimators - network reporting")
 
-## TODO (NB: see README from non-versioned networksampling folder)
+## TODO (NB: see README from non-versioned networkreporting folder)
