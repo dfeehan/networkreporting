@@ -154,7 +154,7 @@ df.to.kpvec <- function(kp.data,
 ##' @description
 ##' take a known population vector (see \code{\link{df.to.kpvec}}) and
 ##' associate it with a survey dataframe. this makes it more convenient
-##' to use some of the \code{networksampling} package's function
+##' to use some of the \code{networkreporting} package's function
 ##'
 ##' @details
 ##' The \code{total.popn.size} parameter is interpreted as follows:
@@ -170,9 +170,9 @@ df.to.kpvec <- function(kp.data,
 ##'
 ##' @param survey.data the survey dataframe
 ##' @param kp.vec the known population vector
+##' @param total.popn.size (optional) the total population size to use (see below)
 ##' @return the survey dataframe with the known population vector
 ##' attached as an attribute
-##' @param total.popn.size (optional) the total population size to use (see below)
 ##' @export
 ##' @seealso \link{df.to.kpvec}
 ##' @examples \dontrun{
