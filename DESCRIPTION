@@ -9,6 +9,8 @@ Maintainer: Dennis Feehan <dfeehan@princeton.edu>
 Author: Dennis Feehan, Matthew Salganik
 License: MIT
 VignetteBuilder: knitr
+Imports:
+    functional, ggplot2, plyr, reshape2, stringr
 Suggests:
     knitr
 Collate:
