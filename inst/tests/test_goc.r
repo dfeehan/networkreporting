@@ -92,7 +92,7 @@ dmeans <- ddply(survey.data,
 
 for(cur.trait in c("0.0", "0.1", "1.0", "1.1")) {
     res <- dd$draw.degrees.fn(rep(cur.trait, 10000))
-    expect_that(mean(res),
+    expect_that(mean(res[,'degree']),
                 equals(dmeans[paste(dmeans$tt)==cur.trait, "mean.degree"],
                        tol=.1),
                 label=paste0("draw from degree distn for trait ", cur.trait))
