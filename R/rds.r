@@ -130,7 +130,7 @@ traits.to.string <- function(data, traits, na.action="drop", sep=".") {
 ##' @return a dataframe whose rows correspond to the entries in
 ##' \code{trait.string}, with one column per trait
 ##' @keywords internal
-unparse.trait <- function(trait.string, names, sep="\\.") {
+unparse.trait <- function(trait.string, names, sep=".") {
 
     if (sep == ".") {
         sep <- "\\."
