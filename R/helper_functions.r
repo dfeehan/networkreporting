@@ -317,8 +317,8 @@ parse_design <- function(formula) {
     # grab the expression in the strata(...) part of the formula
     #strata.text <- str_match
 
-    strata.text <- str_match(these.labels[strata.idx],
-                             "strata\\((.+)\\)")[2]
+    strata.text <- stringr::str_match(these.labels[strata.idx],
+                                      "strata\\((.+)\\)")[2]
 
     ## updating instead of creating a new formula b/c this preserves
     ## the environment that the original formula was created in...
