@@ -21,7 +21,8 @@
   an object with \itemize{ \item \code{distns} a list with
   one entry per trait value; each \item
   \code{draw.degrees.fn} a function which gets called with
-  one }
+  one \item \code{keep.vars} the name of the other vars
+  that are kept (if any) }
 }
 \description{
   break down RDS degree distributions by trait, and return

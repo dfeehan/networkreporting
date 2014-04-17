@@ -3,8 +3,7 @@
 \title{draw RDS bootstrap resamples using the
 algorithm in Salganik 2006 (TODO PROPER CITE)}
 \usage{
-  rds.mc.boot.draws(chains, mm, dd, num.reps,
-    keep.vars = NULL)
+  rds.mc.boot.draws(chains, mm, dd, num.reps)
 }
 \arguments{
   \item{chains}{a list with the chains constructed from the
@@ -16,11 +15,6 @@ algorithm in Salganik 2006 (TODO PROPER CITE)}
 
   \item{num.reps}{the number of bootstrap resamples we
   want}
-
-  \item{keep.vars}{if not NULL, then the names of variables
-  from the original dataset we want appended to each
-  bootstrap resampled dataset (default is NULL) [NB: NOT
-  YET IMPLEMENTED]}
 }
 \value{
   a list of length \code{num.reps}; each entry in the list
@@ -33,6 +27,12 @@ algorithm in Salganik 2006 (TODO PROPER CITE)}
   steps, where n is the size of the draw required.
 }
 \details{
+  if you wish the bootstrap dataset to end up with
+  variables from the original dataset other than the traits
+  and degree, then you must specify this when you construct
+  \code{dd} using the '\code{\link{estimate.degree.distns}}
+  function.
+
   TODO be sure to comment the broken-out trait variables
   (ie these could all be different from the originals)
 }

@@ -20,12 +20,12 @@
   row in the original dataset they come from -- see below)}
 }
 \value{
-  a list with two entries \itemize{ \item trait the draws
-  for the trait variable \item degree the draws for the
-  degrees (conditional on the drawn } each entry is a
-  dataset whose columns are the name of the idvar specified
-  in \code{idvar} and the value of that id, concatenated
-  together with a '.'
+  a list of dataframes with one entry for each respondent
+  in the chain. each dataframe has one row for each
+  bootstrap replicate. so if we take 10 bootstrap resamples
+  of a chain of length 50, there will be 50 entries in the
+  list that is returned. each entry will be a dataframe
+  with 10 rows.
 }
 \description{
   this function uses the algorithm described in the
