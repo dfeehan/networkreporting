@@ -10,7 +10,11 @@ Author: Dennis Feehan, Matthew Salganik
 License: MIT
 VignetteBuilder: knitr
 Imports:
-    functional, ggplot2, plyr, reshape2, stringr
+    functional,
+    ggplot2,
+    plyr,
+    reshape2,
+    stringr
 Suggests:
     knitr
 Collate:
@@ -18,7 +22,6 @@ Collate:
     'helper_functions.r'
     'indirect_sampling.r'
     'known_population.r'
-    'network_reporting.r'
     'scale_up.r'
     'summation.r'
     'networkreporting_package.r'
