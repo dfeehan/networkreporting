@@ -22,6 +22,8 @@ set.seed(12345)
 
 #########################################
 ## setup
+## NB: see this for possible alternatives
+## http://stackoverflow.com/questions/8898469/is-it-possible-to-use-r-package-data-in-testthat-tests-or-run-examples
 data(hhsurvey, package="networkreporting")
 data(mu284, package="networkreporting")
 
@@ -114,12 +116,12 @@ M <- 2000
 
 context(paste0("variance estimators - rescaled bootstrap - correctness (M=", M, ")"))
 
-rbsfn <- Curry(bootstrap.estimates,
-               survey.design= ~ CL,
-               num.reps=M,
-               estimator.fn="MU284.estimator.fn",
-               weights="sample_weight",
-               bootstrap.fn="rescaled.bootstrap.sample")
+rbsfn <- functional::Curry(bootstrap.estimates,
+                           survey.design= ~ CL,
+                           num.reps=M,
+                           estimator.fn="MU284.estimator.fn",
+                           weights="sample_weight",
+                           bootstrap.fn="rescaled.bootstrap.sample")
 
 test.boot <- llply(MU284.surveys,
                    function(svy) { do.call("rbind", rbsfn(survey.data=svy)) })
