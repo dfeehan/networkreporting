@@ -20,7 +20,7 @@
   take a known population vector (see
   \code{\link{df.to.kpvec}}) and associate it with a survey
   dataframe. this makes it more convenient to use some of
-  the \code{networksampling} package's function
+  the \code{networkreporting} package's function
 }
 \details{
   The \code{total.popn.size} parameter is interpreted as
