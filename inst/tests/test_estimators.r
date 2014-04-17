@@ -31,11 +31,6 @@
 ##     * [NOT IMPLEMENTED YET] test the variance
 ##       estimators (this will likely be several tests)
 
-## TODO -- I don't understand why @import plyr,
-## which is in the networksampling-help.R file,
-## doesn't take care of this...
-library(plyr)
-
 ## these tests use the toy networks that come
 ## packaged with the networksampling package
 ## TODO -- I don't understand why the package
