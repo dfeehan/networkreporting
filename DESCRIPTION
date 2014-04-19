@@ -7,7 +7,7 @@ Description: networkreporting has a collection of functions useful
 Version: 0.0.1
 Maintainer: Dennis Feehan <dfeehan@princeton.edu>
 Author: Dennis Feehan, Matthew Salganik
-License: MIT
+License: MIT + file LICENSE
 VignetteBuilder: knitr
 Imports:
     functional,
