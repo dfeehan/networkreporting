@@ -312,6 +312,9 @@ nsum.internal.validation <- function(survey.data,
                                            survey.data,
                                            verbose=verbose)
 
+  known.size <- NULL
+  nsum.holdout.est <- NULL
+
   ## go through each known population...
   res.all <- llply(names(known.popns),
 
@@ -465,6 +468,9 @@ nsum.internal.validation <- function(survey.data,
 
   if(return.plot) {
 
+    # to propitiate R CMD CHECK
+    name <- NULL
+
     iv.plot <- ggplot(res) +
                geom_text(aes(x=known.size, y=nsum.holdout.est, label=name),
                          ##color=alpha("red", 0.3), size=3) +
@@ -517,6 +523,12 @@ nsum.internal.validation <- function(survey.data,
 ##' @export
 compare.mean.ties.truth <- function(survey.data, weights=NULL, known.popns=NULL)
 {
+
+
+  ## these are strictly to propitiate R CMD CHECK; see, for example, 
+  # http://stackoverflow.com/questions/9439256/how-can-i-handle-r-cmd-check-no-visible-binding-for-global-variable-notes-when
+  truth <- NULL
+  name <- NULL
 
   if (is.null(known.popns)) {
     known.popns <- attr(survey.data, "known.popns")

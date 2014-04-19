@@ -187,6 +187,10 @@ estimate.degree.distns <- function(survey.data,
                                    traits,
                                    keep.vars=NULL) {
 
+  # this is just to propitiate R CMD CHECK; see
+  # http://stackoverflow.com/questions/9439256/how-can-i-handle-r-cmd-check-no-visible-binding-for-global-variable-notes-when
+  trait <- NULL
+
   st <- traits.to.string(survey.data,
                          traits)
 
@@ -272,6 +276,11 @@ estimate.degree.distns <- function(survey.data,
 ##' by the transition probs.
 ##' }}
 estimate.mixing <- function(survey.data, parent.data, traits) {
+
+  # this is just to propitiate R CMD CHECK; see
+  # http://stackoverflow.com/questions/9439256/how-can-i-handle-r-cmd-check-no-visible-binding-for-global-variable-notes-when
+  parent.trait <- NULL
+
 
   ## reduce to dataframe with [ child trait, parent trait ]
   ## then basically do a cross tab
@@ -495,7 +504,7 @@ chain.vals <- function(chain, qoi.var="uid") {
 
     return(c(chain$data[,qoi.var],
              unlist(lapply(chain$children,
-                           chain.ids,
+                           chain.vals,
                            qoi.var=qoi.var))))
 }
 

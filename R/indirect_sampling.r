@@ -78,6 +78,10 @@ gwsm.estimator <- function(survey.data,
                           select=mult.col),
                    silent=TRUE)
 
+  # just to propitiate R CMD CHECK; see
+  # http://stackoverflow.com/questions/9439256/how-can-i-handle-r-cmd-check-no-visible-binding-for-global-variable-notes-when
+  mult.col <- NULL
+
   if( inherits(mult.vals, "try-error") ||
       ncol(mult.vals) != 1 ||
       ! is.numeric(mult.vals[,1]) ) {
