@@ -8,7 +8,7 @@
 ##'
 ##' compute an estimate for the prevalence of a trait
 ##' from an RDS sample, using the estimator described
-##' in TODO [Volz + Heckathorn '08]
+##' in Volz and Heckathorn 2008
 ##'
 ##' NOTE: we have no weights for now, right? RDS doesn't
 ##' get used with weights?
@@ -33,6 +33,7 @@ rdsII.estimator <- function(survey.data,
                             missing="ignore",
                             verbose=FALSE)
 {
+  # TODO -- fix text citation above to be an actual citation
 
   if (! missing %in% c("ignore", "complete.obs")) {
     stop("error in specifying procedure for handling missing values in rdsII.estimator. invalid option.\n")
@@ -392,7 +393,7 @@ mc.sim <- function(mm, start, n) {
 ##' this function allows us to determine which ids are
 ##' directly descended from which other ones. it is the only part
 ##' of the code that relies on the ID format used by the
-##' Curitiba study (TODO CITE); by modifying this function,
+##' Curitiba study (Salganik et al 2011); by modifying this function,
 ##' it shold be possible to adapt this code to another study
 ##'
 ##' @param id the id of the potential child
@@ -400,6 +401,8 @@ mc.sim <- function(mm, start, n) {
 ##' @return TRUE if \code{id} is the direct descendant of \code{seed.id}
 ##' and FALSE otherwise
 is.child.ct <- function(id, seed.id) {
+
+    # TODO - eventually turn text citation above into proper citation
 
     res <- str_locate(paste(id), paste(seed.id))
 
@@ -415,8 +418,7 @@ is.child.ct <- function(id, seed.id) {
 #####################################################
 ##' build an RDS seed's chain from the dataset
 ##'
-##' text
-##' TODO assumes that the chain is a tree (no loops)
+##' note that this assumes that the chain is a tree (no loops)
 ##'
 ##' @param seed.id the id of the seed whose chain we
 ##' wish to build from the dataset

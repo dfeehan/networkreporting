@@ -19,14 +19,12 @@
 #####################################################
 ##' total.degree
 ##'
-##' estimate the total degree of the population network
+##' Estimate the total degree of the population network
 ##' from sample degrees
 ##'
-##' this computes the weighted sum of the respondents'
-##' estimated degrees.\cr
-##''
-##' TODO -- for now, it doesn't worry about missing values
-##' OR about differences between the frame and the universe
+##' This computes the weighted sum of the respondents'
+##' estimated degrees. For now, this function doesn't worry about missing values
+##' OR about differences between the frame and the universe.
 ##'
 ##' @param survey.data the dataframe with survey results
 ##' @param d.hat.vals the name or index of the column that contains
@@ -48,6 +46,9 @@ total.degree.estimator <- function(survey.data,
                                    weights=NULL,
                                    missing="ignore")
 {
+  ## TODO -- for now, total.degree doesn't worry about
+  ##         missing values or about differences between the
+  ##         frame and the universe
 
   ## get the weights;
   ## weights will default to 1 for everyone, unless the user specified
@@ -77,10 +78,8 @@ total.degree.estimator <- function(survey.data,
 ##' compute network scale-up (nsum) estimate of the
 ##' hidden population's size. if the degree ratio
 ##' and information transmission rate are both 1
-##' (the defaults), this is the Killworth estimator.
-##'
-##' TODO -- cite Killworth estimator, our methods paper
-##' TODO -- add refs to deg ratio and tx rate stuff...
+##' (the defaults), this is the Killworth estimator
+##' (Killworth et al 1998, "A social network approach...")
 ##'
 ##' @param survey.data the dataframe with survey results
 ##' @param d.hat.vals the name or index of the column that contains
@@ -119,6 +118,7 @@ nsum.estimator <- function(survey.data,
                            verbose=FALSE,
                            ...)
 {
+  ## TODO -- eventually, add refs to our new methods paper
 
   if (! missing %in% c("ignore", "complete.obs")) {
     stop("error in specifying procedure for handling missing values in nsum.estimator. invalid option.\n")
@@ -221,10 +221,6 @@ nsum.estimator <- function(survey.data,
 ##' size of the known population, and comparing the result
 ##' to the actual size of the known population
 ##'
-##' TODO -- document bootstrap ci option better
-##' TODO -- add example of usage to the comments...\cr
-##' TODO -- make amenable to parallelization
-##'
 ##' @param survey.data the dataframe with the survey results
 ##' @param known.popns if not NULL, a vector whose entries are the size of the known
 ##'                    populations, and whose names are the variable names in the dataset
@@ -282,6 +278,10 @@ nsum.internal.validation <- function(survey.data,
                                      bootstrap=FALSE,
                                      ...)
 {
+
+  ## TODO -- document bootstrap ci option better
+  ## TODO -- add example of usage to the comments...\cr
+  ## TODO -- make amenable to parallelization
 
   if (! missing %in% c("ignore", "complete.obs")) {
     stop("error in specifying procedure for handling missing values in nsum.internal.validation. invalid option.\n")
@@ -506,8 +506,6 @@ nsum.internal.validation <- function(survey.data,
 ##' plot the relationship between the mean number of
 ##' ties in the survey dataset and the true popn sizes
 ##'
-##' TODO - more in-depth description of this function
-##'
 ##' @param survey.data the dataframe with the survey results
 ##' @param known.popns if not NULL, a vector whose entries are the
 ##' size of the known
@@ -524,6 +522,7 @@ nsum.internal.validation <- function(survey.data,
 compare.mean.ties.truth <- function(survey.data, weights=NULL, known.popns=NULL)
 {
 
+  # TODO - more in-depth description of this function in docs above
 
   ## these are strictly to propitiate R CMD CHECK; see, for example, 
   # http://stackoverflow.com/questions/9439256/how-can-i-handle-r-cmd-check-no-visible-binding-for-global-variable-notes-when

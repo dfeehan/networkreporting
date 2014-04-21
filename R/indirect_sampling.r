@@ -25,13 +25,15 @@
 ##' @param survey.data the dataframe with the survey results
 ##' @param mult.col the name or index of the column that contains, for each
 ##'             respondent, the individual value of the number known divided
-##'             by the sum of the multiplicities (TODO MORE DETAIL)
+##'             by the sum of the multiplicities 
 ##' @return the multiplicity estimate of the hidden
 ##'         population's size (as a prevalence)
 ##' @export
 multiplicity.estimator <- function(survey.data,
                                    mult.col="mult")
 {
+
+  # TODO -- more detail in description of mult.col param
 
   mult.vals <- try(subset(survey.data,
                           select=mult.col),
@@ -62,13 +64,14 @@ multiplicity.estimator <- function(survey.data,
 ##' @param survey.data the dataframe with the survey results
 ##' @param gwsm.col the name or index of the column that contains, for each
 ##'             respondent, the individual value of the number known divided
-##'             by the sum of the multiplicities (TODO MORE DETAIL)
+##'             by the sum of the multiplicities 
 ##' @return the multiplicity estimate of the hidden
 ##'         population's size (as a prevalence)
-##' @export
 gwsm.estimator <- function(survey.data,
                            gwsm.col="mult")
 {
+  # TODO -- once this is written, be sure to @export it
+  # TODO -- more detail in description of gwsm.col param
 
   stop("gwsm.estimator is not yet implemented.")
   

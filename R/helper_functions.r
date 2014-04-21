@@ -291,16 +291,15 @@ vcat <- function(verbose=TRUE, ...) {
 ##'  \item{"psu.formula"}{a formula describing the primary sampling unit vars}
 ##'  \item{"strata.formula"}{a formula describing the strata (if any)}
 ##' }\cr
-##' TODO
-##' \itemize{
-##'  \item{}{check to be sure no response is included (or warn)}
-##'  \item{}{check formulas for strata more carefully...}
-##' }
 ##'
 ##' @param formula a formula describing the sample design (see above)
 ##' @return a list with entries \code{psu.formula} and \code{strata.formula}
 ##' @keywords internal
 parse_design <- function(formula) {
+
+  # TODO -- potential future improvements
+  # check to be sure no response is included (or warn)
+  # check formulas for strata more carefully
 
   ## see http://stackoverflow.com/questions/10224805/how-to-select-a-part-of-formula-in-formula-in-r
   ## for some helpful info
@@ -351,10 +350,9 @@ parse_design <- function(formula) {
 ##' @param ignore a vector of values to leave unchanged
 ##' @return the topcoded vector
 ##' @export
-##' @examples \dontrun{
-##'    ## TODO write example
-##' }
 topcode.var <- function(x, max, to.na=NULL, ignore=NA) {
+
+  # TODO -- write example
 
   if (! is.numeric(x)) {
     stop("You can only topcode a numeric vector.")
@@ -488,10 +486,9 @@ parse.total.popn.size <- function(total.popn.size, survey.data, verbose=FALSE) {
 ##' @param truth the correct answer
 ##' @return a vector whose entries have various summaries of fit
 ##' @export
-##' @examples \dontrun{
-##'    ## TODO add example
-##' }
 estimate.error <- function(estimate, truth) {
+
+  # TODO -- write example
 
   err <- estimate - truth
   abserr <- abs(err)

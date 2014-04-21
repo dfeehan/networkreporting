@@ -65,15 +65,7 @@ killworth.se <- function(estimates,
 ##' this function contains the core of the rescaled bootstrap
 ##' method for estimating uncertainty in our estimates
 ##' it should be designed so that it can be passed in to
-##' estimation functions as an argument\cr
-##' OR\cr
-##' \cr
-##' TODO -- estimator.fn/bootstrap.fn and summary.fn are treated differently
-##' (one expects characters, one expects an actual fn. fix!)\cr
-##' \cr
-##' TODO -- write description block, including estimator.fn, bootstrap.fn,
-##' summary.fn, more?
-##' \cr
+##' estimation functions as an argument
 ##'
 ##' @param survey.data the dataset to use
 ##' @param survey.design a formula describing the design of the survey
@@ -98,11 +90,6 @@ killworth.se <- function(estimates,
 ##'         produced by estimator.fn; if summary.fn is specified, then return
 ##'         its output
 ##' @export
-##' @examples
-##' \donttest{
-##' # code goes here
-##' ...
-##' }
 bootstrap.estimates <- function(survey.data,
                                 survey.design,
                                 bootstrap.fn,
@@ -115,6 +102,11 @@ bootstrap.estimates <- function(survey.data,
                                 parallel=FALSE,
                                 paropts=NULL)
 {
+  ## TODO -- estimator.fn/bootstrap.fn and summary.fn are treated differently
+  ##         (one expects characters, one expects an actual fn. fix!)
+  ## TODO -- write description block, including estimator.fn, bootstrap.fn,
+  ##         summary.fn, more?
+  ## TODO -- add example code
 
   ## get the weights
   weights <- get.weights(survey.data, weights)
@@ -227,7 +219,7 @@ bootstrap.estimates <- function(survey.data,
 ##' in Rao and Wu (1988) and Rust and Rao (1996).
 ##'
 ##' @param survey.data the dataset to use
-##' @param survey.design a formula describing the design of the survey (see below - TODO)
+##' @param survey.design a formula describing the design of the survey (see below)
 ##' @param num.reps the number of bootstrap replication samples to draw
 ##' @param parallel if TRUE, use parallelization (via \code{plyr})
 ##' @param paropts an optional list of arguments passed on to \code{plyr} to control
@@ -404,7 +396,8 @@ srs.bootstrap.sample <- function(survey.data,
 ##'
 ##' this function uses the algorithm described in the
 ##' supporting online material for Weir et al 2012
-##' (TODO PROPER CITE) to take bootstrap resamples
+##' (Weir et al 2012, "A comparison of respondent-driven...")
+##' to take bootstrap resamples
 ##' of one chain from an RDS dataset
 ##'
 ##' @param chain the chain to draw resamples for
@@ -420,6 +413,8 @@ srs.bootstrap.sample <- function(survey.data,
 ##' bootstrap resamples of a chain of length 50, there will be 50 entries in
 ##' the list that is returned. each entry will be a dataframe with 10 rows.
 rds.boot.draw.chain <- function(chain, mm, dd, parent.trait, idvar="uid") {
+
+
 
     thisid <- paste0(idvar, ".", chain$data[,idvar])
 
@@ -456,12 +451,8 @@ rds.boot.draw.chain <- function(chain, mm, dd, parent.trait, idvar="uid") {
 ##'
 ##' draw boostrap resamples for an RDS dataset, using
 ##' the algorithm described in the supporting online
-##' material of Weir et al 2012 (TODO PROPER CITE)
-##'
-##' TODO -- consider constructing chains, mm from other args
-##'
-##' TODO be sure to comment the broken-out trait variables
-##'      (ie these could all be different from the originals)
+##' material of 
+##' (Weir et al 2012, "A comparison of respondent-driven...")
 ##'
 ##' @param chains a list whose entries are the chains
 ##' we want to resample
@@ -478,6 +469,9 @@ rds.chain.boot.draws <- function(chains,
                                  dd,
                                  num.reps,
                                  keep.vars=NULL) {
+
+    ## TODO be sure to comment the broken-out trait variables
+    ##      (ie these could all be different from the originals)
 
     traits <- mm$traits
 
@@ -534,7 +528,7 @@ rds.chain.boot.draws <- function(chains,
 
 #####################################################
 ##' draw RDS bootstrap resamples using the
-##' algorithm in Salganik 2006 (TODO PROPER CITE)
+##' algorithm in Salganik 2006, "Variance estimation..."
 ##'
 ##' this algorithm picks a respondent from the survey
 ##' to be a seed uniformly at random. it then generates
@@ -549,9 +543,6 @@ rds.chain.boot.draws <- function(chains,
 ##' '\code{\link{estimate.degree.distns}} function.
 ##'
 ##'
-##' TODO be sure to comment the broken-out trait variables
-##'      (ie these could all be different from the originals)
-##'
 ##' @param chains a list with the chains constructed from the survey
 ##' using \code{\link{make.chain}}
 ##' @param mm the mixing model
@@ -564,6 +555,9 @@ rds.mc.boot.draws <- function(chains,
                               dd,
                               num.reps) {
 
+    ## TODO be sure to comment the broken-out trait variables
+    ##      (ie these could all be different from the originals)
+    ## TODO turn text cite above into actual cite
     traits <- mm$traits
 
     all.data <- ldply(chains,

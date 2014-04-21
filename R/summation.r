@@ -8,9 +8,10 @@
 ##' summation.degree.estimator
 ##'
 ##' compute an estimate of the respondents' degrees using
-##' the summation method
+##' the summation method (McCarty et al 2001)
 ##'
-##' TODO -- cite summation method ref
+##' This is the method first described in McCarty et al 2001,
+##' "Comparing two methods for estimating network size"
 ##'
 ##' Note that the summation degree estimator for the
 ##' case where there is missing data is not yet implemented.
@@ -35,6 +36,8 @@ summation.degree.estimator <- function(survey.data,
                                        sum.q=NULL,
                                        missing="ignore")
 {
+
+  # TODO -- turn text cite above into actual cite
 
   if (is.null(sum.q)) {
     sum.q <- attr(survey.data, "sum.q")
