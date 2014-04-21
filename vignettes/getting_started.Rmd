@@ -1,36 +1,22 @@
-Getting started with the **networkreporting** package
-====================================================
 <!--
-%\VignetteEngine{knitr}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{getting started}
 -->
+Getting started with the **networkreporting** package
+====================================================
 
 Installation
 ------------
-For the time being, the **networkreporting** package is not available on CRAN.
-Instead, you can download the code from
-[github](http://www.github.com/dfeehan). The easiest way to do so is to use the
+You can install the package from CRAN. 
+
+For the time being, the most up-to-date, development version of
+the package will be available on [github](http://www.github.com/dfeehan). 
+The easiest way to do so is to use the
 **devtools** package:
 
 ```{r}
 ## require(devtools)
 
-## install_github('dfeehan/dhstools')
-
-## install_github('dfeehan/networkreporting')
+## install_github('dfeehan/networkreporting@dev')
 ```
 
-Overview
---------
-
-TODO
-
-Network scale-up estimation
-----------------------------
-
-TODO
-
-Indirect and multipliticy estimation
-------------------------------------
-
-TODO
