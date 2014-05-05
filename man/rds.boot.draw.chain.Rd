@@ -29,8 +29,8 @@
 }
 \description{
   this function uses the algorithm described in the
-  supporting online material for Weir et al 2012 (TODO
-  PROPER CITE) to take bootstrap resamples of one chain
-  from an RDS dataset
+  supporting online material for Weir et al 2012 (Weir et
+  al 2012, "A comparison of respondent-driven...") to take
+  bootstrap resamples of one chain from an RDS dataset
 }
 

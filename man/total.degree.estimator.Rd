@@ -28,13 +28,13 @@
   the estimated total degree
 }
 \description{
-  estimate the total degree of the population network from
+  Estimate the total degree of the population network from
   sample degrees
 }
 \details{
-  this computes the weighted sum of the respondents'
-  estimated degrees.\cr ' TODO -- for now, it doesn't worry
+  This computes the weighted sum of the respondents'
+  estimated degrees. For now, this function doesn't worry
   about missing values OR about differences between the
-  frame and the universe
+  frame and the universe.
 }
 

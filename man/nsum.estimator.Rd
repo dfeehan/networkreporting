@@ -54,10 +54,7 @@
   compute network scale-up (nsum) estimate of the hidden
   population's size. if the degree ratio and information
   transmission rate are both 1 (the defaults), this is the
-  Killworth estimator.
-}
-\details{
-  TODO -- cite Killworth estimator, our methods paper TODO
-  -- add refs to deg ratio and tx rate stuff...
+  Killworth estimator (Killworth et al 1998, "A social
+  network approach...")
 }
 

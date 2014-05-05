@@ -23,9 +23,4 @@
   \code{topcode} function to topcode a set of columns in a
   data frame
 }
-\examples{
-\dontrun{
-   ## TODO write example
-}
-}
 

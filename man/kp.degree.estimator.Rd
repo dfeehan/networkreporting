@@ -45,4 +45,13 @@
   since these estimates are not for total degree, but just
   for the individual degree of each respondent
 }
+\examples{
+data(hhsurvey)
+ kp.prop <- (attr(example.survey, "known.popns") /
+             attr(example.survey, "total.popn.size"))
+ d.hat <- kp.degree.estimator(example.survey,
+                              known.popns=kp.prop,
+                              missing="complete.obs",
+                              total.popn.size=NA)
+}
 

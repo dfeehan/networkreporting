@@ -20,6 +20,7 @@
   info
 }
 \description{
-  text TODO assumes that the chain is a tree (no loops)
+  note that this assumes that the chain is a tree (no
+  loops)
 }
 

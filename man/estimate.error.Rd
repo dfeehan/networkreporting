@@ -18,9 +18,4 @@ produce some measurements of how close the esimate is}
   correct value, produce some measurements of how close the
   esimate is
 }
-\examples{
-\dontrun{
-   ## TODO add example
-}
-}
 

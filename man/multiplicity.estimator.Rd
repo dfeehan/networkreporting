@@ -9,8 +9,8 @@
 
   \item{mult.col}{the name or index of the column that
   contains, for each respondent, the individual value of
-  the number known divided by the sum of the multiplicities
-  (TODO MORE DETAIL)}
+  the number known divided by the sum of the
+  multiplicities}
 }
 \value{
   the multiplicity estimate of the hidden population's size

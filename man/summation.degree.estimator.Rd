@@ -26,10 +26,11 @@
 }
 \description{
   compute an estimate of the respondents' degrees using the
-  summation method
+  summation method (McCarty et al 2001)
 }
 \details{
-  TODO -- cite summation method ref
+  This is the method first described in McCarty et al 2001,
+  "Comparing two methods for estimating network size"
 
   Note that the summation degree estimator for the case
   where there is missing data is not yet implemented. (In

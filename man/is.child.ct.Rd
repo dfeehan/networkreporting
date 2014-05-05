@@ -17,7 +17,8 @@
   this function allows us to determine which ids are
   directly descended from which other ones. it is the only
   part of the code that relies on the ID format used by the
-  Curitiba study (TODO CITE); by modifying this function,
-  it shold be possible to adapt this code to another study
+  Curitiba study (Salganik et al 2011); by modifying this
+  function, it shold be possible to adapt this code to
+  another study
 }
 

@@ -1,7 +1,7 @@
 \name{rds.mc.boot.draws}
 \alias{rds.mc.boot.draws}
 \title{draw RDS bootstrap resamples using the
-algorithm in Salganik 2006 (TODO PROPER CITE)}
+algorithm in Salganik 2006, "Variance estimation..."}
 \usage{
   rds.mc.boot.draws(chains, mm, dd, num.reps)
 }
@@ -32,8 +32,5 @@ algorithm in Salganik 2006 (TODO PROPER CITE)}
   and degree, then you must specify this when you construct
   \code{dd} using the '\code{\link{estimate.degree.distns}}
   function.
-
-  TODO be sure to comment the broken-out trait variables
-  (ie these could all be different from the originals)
 }
 

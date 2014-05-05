@@ -9,7 +9,7 @@
   \item{survey.data}{the dataset to use}
 
   \item{survey.design}{a formula describing the design of
-  the survey (see below - TODO)}
+  the survey (see below)}
 
   \item{num.reps}{the number of bootstrap replication
   samples to draw}

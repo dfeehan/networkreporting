@@ -17,10 +17,7 @@
   ... + strata(strata_v1 + strata_v2 + ...)}\cr \itemize{
   \item{"psu.formula"}{a formula describing the primary
   sampling unit vars} \item{"strata.formula"}{a formula
-  describing the strata (if any)} }\cr TODO \itemize{
-  \item{}{check to be sure no response is included (or
-  warn)} \item{}{check formulas for strata more
-  carefully...} }
+  describing the strata (if any)} }\cr
 }
 \keyword{internal}
 

@@ -27,12 +27,6 @@
 \description{
   draw boostrap resamples for an RDS dataset, using the
   algorithm described in the supporting online material of
-  Weir et al 2012 (TODO PROPER CITE)
-}
-\details{
-  TODO -- consider constructing chains, mm from other args
-
-  TODO be sure to comment the broken-out trait variables
-  (ie these could all be different from the originals)
+  (Weir et al 2012, "A comparison of respondent-driven...")
 }
 

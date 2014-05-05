@@ -30,7 +30,16 @@
 }
 \examples{
 \dontrun{
-  ## see example in add.kp
+  # if kp.dat is a dataframe with columns 'kp' with known popn names
+  # and 'total.size' with the total size,
+  # and my.survey is the dataframe with survey responses
+
+  my.kp.vec <- df.to.kpvec(kp.data, kp.var='kp', kp.value='total.size')
+  my.survey <- add.kp(my.survey, my.kp.vec)
+
+  # now we can call estimator functions like
+  # kp.degree.estimator without having to specify known
+  # populations each time
 }
 }
 \seealso{
