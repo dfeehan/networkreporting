@@ -43,6 +43,14 @@
 ##'         missingness in the 'how many X' questions will be set
 ##'         to NA
 ##' @export
+##' @examples
+##'  data(hhsurvey)
+##'  kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+##'  example.survey <- add.kp(example.survey, kp.vec)
+##'  d.hat <- kp.degree.estimator(example.survey,
+##'                               missing="complete.obs",
+##'                               total.popn.size=NA)
+##'  
 kp.degree.estimator <- function(survey.data,
                                 known.popns=NULL,
                                 total.popn.size=NULL,
