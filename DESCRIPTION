@@ -8,6 +8,7 @@ Version: 0.0.1
 Maintainer: Dennis Feehan <dfeehan@princeton.edu>
 Author: Dennis Feehan, Matthew Salganik
 License: MIT + file LICENSE
+URL: http://dfeehan.github.io/networkreporting
 VignetteBuilder: knitr
 Imports:
     functional,
