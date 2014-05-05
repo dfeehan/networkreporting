@@ -47,10 +47,9 @@
 }
 \examples{
 data(hhsurvey)
- kp.prop <- (attr(example.survey, "known.popns") /
-             attr(example.survey, "total.popn.size"))
+ kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+ example.survey <- add.kp(example.survey, kp.vec)
  d.hat <- kp.degree.estimator(example.survey,
-                              known.popns=kp.prop,
                               missing="complete.obs",
                               total.popn.size=NA)
 }

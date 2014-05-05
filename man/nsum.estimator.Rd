@@ -57,4 +57,19 @@
   Killworth estimator (Killworth et al 1998, "A social
   network approach...")
 }
+\examples{
+data(hhsurvey)
+ kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+ example.survey <- add.kp(example.survey, kp.vec)
+ d.hat <- kp.degree.estimator(example.survey,
+                              missing="complete.obs",
+                              total.popn.size=10e6)
+ example.survey$d.hat <- d.hat
+ sw.estimate <- nsum.estimator(example.survey,
+                               d.hat.vals="d.hat",
+                               y.vals="sex.workers",
+                               weights="indweight",
+                               missing="complete.obs",
+                               total.popn.size=10e6)
+}
 

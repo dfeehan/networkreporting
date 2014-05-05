@@ -37,4 +37,17 @@
   about missing values OR about differences between the
   frame and the universe.
 }
+\examples{
+data(hhsurvey)
+ kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+ example.survey <- add.kp(example.survey, kp.vec)
+ d.hat <- kp.degree.estimator(example.survey,
+                              missing="complete.obs",
+                              total.popn.size=NA)
+ example.survey$d.hat <- d.hat
+ tot.d.hat <- total.degree.estimator(example.survey,
+                                     d.hat.vals="d.hat",
+                                     weights="indweight",
+                                     missing="complete.obs")
+}
 
