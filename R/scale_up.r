@@ -41,6 +41,19 @@
 ##'                must be taken in using this second option
 ##' @return the estimated total degree
 ##' @export
+##' @examples
+##'  data(hhsurvey)
+##'  kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+##'  example.survey <- add.kp(example.survey, kp.vec)
+##'  d.hat <- kp.degree.estimator(example.survey,
+##'                               missing="complete.obs",
+##'                               total.popn.size=NA)
+##'  example.survey$d.hat <- d.hat
+##'  tot.d.hat <- total.degree.estimator(example.survey,
+##'                                      d.hat.vals="d.hat",
+##'                                      weights="indweight",
+##'                                      missing="complete.obs")
+##'  
 total.degree.estimator <- function(survey.data,
                                    d.hat.vals="d",
                                    weights=NULL,
@@ -106,6 +119,20 @@ total.degree.estimator <- function(survey.data,
 ##' @return the nsum estimate of the hidden population's size (as a prevalence or
 ##'         an absolute number, depending on total.popn.size)
 ##' @export
+##' @examples
+##'  data(hhsurvey)
+##'  kp.vec <- df.to.kpvec(knownpop.dat, kp.var='known.popn', kp.value='size')
+##'  example.survey <- add.kp(example.survey, kp.vec)
+##'  d.hat <- kp.degree.estimator(example.survey,
+##'                               missing="complete.obs",
+##'                               total.popn.size=10e6)
+##'  example.survey$d.hat <- d.hat
+##'  sw.estimate <- nsum.estimator(example.survey,
+##'                                d.hat.vals="d.hat",
+##'                                y.vals="sex.workers",
+##'                                weights="indweight",
+##'                                missing="complete.obs",
+##'                                total.popn.size=10e6)
 nsum.estimator <- function(survey.data,
                            d.hat.vals="d",
                            y.vals="y",
