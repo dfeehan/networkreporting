@@ -49,7 +49,7 @@ summation.degree.estimator <- function(survey.data,
   if (missing != "ignore") {
 
     ## TODO -- FILL THIS IN
-    stop("this is not yet implemented.\n")
+    stop("this is not implemented for the case where missing != 'ignore'.\n")
 
   } else {
 
