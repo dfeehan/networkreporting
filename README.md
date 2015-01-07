@@ -15,3 +15,6 @@ Branches
 * `dev` - will have the most recent development release
 * other branches will exist as needed
 
+Wish list
+---------
+* make it easy to get uncertainty intervals for the IV checks
