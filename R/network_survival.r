@@ -1,7 +1,7 @@
 #####################################################
-## network_reporting.r
+## network_survival.r
 ##
-## the network reporting method for estimating the
+## the network survival method for estimating the
 ## size and characteristics of a hidden population
 ##
 ## TODO -- this may get renamed; network reporting is
@@ -21,7 +21,7 @@
 
 
 #####################################################
-##' networkreporting.estimator
+##' networkreporting.survival
 ##'
 ##' compute the network reporting estimate of the
 ##' hidden population's size.
@@ -94,13 +94,13 @@
 ##'         (as a prevalence)
 ##'         broken down by the categories given
 ##' @export
-networkreporting.estimator <- function(resp.data,
-                                       attribute.data,
-                                       attribute.names=NULL,
-                                       resp.attribute.names=NULL,
-                                       d.hat.vals=NULL,
-                                       weights=NULL,
-                                       attribute.weights=NULL)
+networksurvival.estimator <- function(resp.data,
+                                      attribute.data,
+                                      attribute.names=NULL,
+                                      resp.attribute.names=NULL,
+                                      d.hat.vals=NULL,
+                                      weights=NULL,
+                                      attribute.weights=NULL)
  
 {
 
