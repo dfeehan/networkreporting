@@ -13,6 +13,10 @@
 # Example code in package build process
 *-Ex.R
 
+# files ending in -dev.r are used for developing / testing new code
+# and don't need to end up in repo
+*-dev.r
+
 .DS_Store
 
 # R check directory
