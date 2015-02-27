@@ -142,6 +142,8 @@ networkreporting.estimator <- function(resp.data,
   ## at this point, tot.known should have the estimated
   ## degree distribution of the set of alters
 
+  N.F.hat <- sum(1/weights)
+
   #######################################################  
   ## summarize attribute distribution in the reported alters
   ## (eg, outmigrants, deaths, etc)
@@ -150,9 +152,17 @@ networkreporting.estimator <- function(resp.data,
                      as.quoted(attribute.names),
                      function(x) {
                        res <- sum(x$.internal_att_weight)
+                       ##res <- sum(1/x$.internal_att_weight)
+
+                       altercount <- nrow(x)
 
                        ## res <- sum(x[,attribute.weight.col])
-                       return(data.frame(tot.known=res))
+                       return(data.frame(tot.known=res,
+                                         altercount=altercount,
+                                         mean.known=mean(x$.internal_att_weight),
+                                         hajek.mean.known=res/N.F.hat))
+                       #return(data.frame(tot.known=res,
+                       #                  hajek.mean.known=res/N.F.hat))
                      })  
 
   ## TODO -- we should do more housekeeping to be sure that the
@@ -191,8 +201,12 @@ networkreporting.estimator <- function(resp.data,
 
   ## and produce the estimate...
   comb <- transform(comb,
-                    estimate=tot.known/sum.degree)
-##browser()
+                    ##estimate=tot.known/sum.degree,
+                    ## NB: avg number of connections to deaths in group
+                    ## is the number of alters in the group / wgt number
+                    ## of *survey respondents*
+                    estimate=(altercount/wgt.num.obs)/mean.degree)
+
   return(comb)
 
 }
@@ -302,17 +316,22 @@ alter.distn.estimator <- function(resp.data,
                        ##return(data.frame(mean.degree=NA,
                        ##                  sum.degree=NA))
                        return(data.frame(mean.degree=0,
-                                         sum.degree=0))                       
+                                         sum.degree=0,
+                                         wgt.num.obs=0,
+                                         num.obs=0))                       
                      } else {
                        ##res.sum <- sum(x[,'.weighted_degree'],na.rm=TRUE)
                        ##res.mean <- sum(x[,'.weighted_degree'],na.rm=TRUE)
                        touse <- ! is.na(x$.d.val)
                        res.sum <- sum(x$.d.val[touse] * x$.weights[touse])
+                       ## this is a Hajek-type estimate for the mean degree
                        res.mean <- sum(x$.d.val[touse] * x$.weights[touse])/
                                    sum(x$.weights[touse])
+                       res.wgt.sum <- sum(x$.weights[touse])
 
                        return(data.frame(mean.degree=res.mean,
                                          sum.degree=res.sum,
+                                         wgt.num.obs=res.wgt.sum,
                                          num.obs=nrow(x)))
                      }
                     },
