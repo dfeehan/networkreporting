@@ -258,8 +258,8 @@ networksurvival.estimator <- function(resp.data,
 ##'                the variable with the appropriate weights. these weights
 ##'                should be construted so that, eg, the mean of the degrees is
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
-##' @return the dansum estimate of the hidden population's size (as a prevalence)
-##'         broken down by the categories given
+##' @return the estimated average degree for respondents in each
+##'         of the categories given by \code{attribute.names}
 ##' @export
 ##' @examples
 ##'
