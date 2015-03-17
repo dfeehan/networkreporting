@@ -145,36 +145,21 @@ context("estimators - network survival")
 
 ## TODO (NB: see README from non-versioned networksampling folder)
 
-this.nrnet <- toy.nr.networks[[1]]
-this.nrnet$weight <- 1
-
-this.attrib <- toy.nr.long.networks[[1]]
-this.attrib$ego.weight <- 1
-
-netrate.new.meal <- network.survival.estimator_(resp.data=this.nrnet,
-                                                attribute.data=this.attrib,
-                                                attribute.names=c("age", "sex"),
-                                                known.populations="d",
-                                                weights="weight",
-                                                attribute.weights="ego.weight",
-                                                total.kp.size=nrow(this.nrnet))
-
-tocheck <- llply(1:length(toy.nr.networks),
+## NB: for now, we're just testing the first network, since
+##     the others have missing values, which we're not handling yet
+#tocheck <- llply(1:length(toy.nr.networks),
+tocheck <- llply(c(1),
               function(this.nrnet.idx) {
 
                 this.nrnet <- toy.nr.networks[[this.nrnet.idx]]
 
+                ## no weights in toy network data, so give everyone a weight
+                ## of 1 for now
                 this.nrnet$weight <- 1
                 this.nrnet$nrid <- this.nrnet.idx
 
-                this.attrib <- attributes.to.long(this.nrnet,
-                                                  attribute.prefix=c('age'='alter.age', 
-                                                                     'sex'='alter.sex'),
-                                                  ego.vars=c('ego.id'='id',
-                                                             'ego.weight'='weight'),
-                                                  idvar="id",
-                                                  sep="",
-                                                  varname.first=TRUE)
+                this.attrib <- toy.nr.long.networks[[this.nrnet.idx]]
+                this.attrib$ego.weight <- 1
 
                 netsurv.est <- network.survival.estimator_(resp.data=this.nrnet,
                                                            attribute.data=this.attrib,
@@ -191,11 +176,6 @@ tocheck <- llply(1:length(toy.nr.networks),
 
                 return(netsurv.est)
               })
-
-## NB: for now, we're just testing the first network, since
-##     the others have missing values, which we're not handling yet
-
-tocheck <- tocheck[1]
 
 l_ply(tocheck,
       function(x) {
