@@ -141,6 +141,70 @@ d_ply(tocheck,
 
 ####################################
 ## network reporting estimator
-##context("estimators - network reporting")
+context("estimators - network survival")
 
 ## TODO (NB: see README from non-versioned networksampling folder)
+
+this.nrnet <- toy.nr.networks[[1]]
+this.nrnet$weight <- 1
+
+this.attrib <- toy.nr.long.networks[[1]]
+this.attrib$ego.weight <- 1
+
+netrate.new.meal <- network.survival.estimator_(resp.data=this.nrnet,
+                                                attribute.data=this.attrib,
+                                                attribute.names=c("age", "sex"),
+                                                known.populations="d",
+                                                weights="weight",
+                                                attribute.weights="ego.weight",
+                                                total.kp.size=nrow(this.nrnet))
+
+tocheck <- llply(1:length(toy.nr.networks),
+              function(this.nrnet.idx) {
+
+                this.nrnet <- toy.nr.networks[[this.nrnet.idx]]
+
+                this.nrnet$weight <- 1
+                this.nrnet$nrid <- this.nrnet.idx
+
+                this.attrib <- attributes.to.long(this.nrnet,
+                                                  attribute.prefix=c('age'='alter.age', 
+                                                                     'sex'='alter.sex'),
+                                                  ego.vars=c('ego.id'='id',
+                                                             'ego.weight'='weight'),
+                                                  idvar="id",
+                                                  sep="",
+                                                  varname.first=TRUE)
+
+                netsurv.est <- network.survival.estimator_(resp.data=this.nrnet,
+                                                           attribute.data=this.attrib,
+                                                           attribute.names=c("age", "sex"),
+                                                           known.populations="d",
+                                                           weights="weight",
+                                                           attribute.weights="ego.weight",
+                                                           total.kp.size=nrow(this.nrnet))
+
+                truth <- attr(this.nrnet, "ns.estimate")
+                truth <- rename(truth, c('est'='truth'))
+
+                netsurv.est <- join(netsurv.est, truth)
+
+                return(netsurv.est)
+              })
+
+## NB: for now, we're just testing the first network, since
+##     the others have missing values, which we're not handling yet
+
+tocheck <- tocheck[1]
+
+l_ply(tocheck,
+      function(x) {
+        expect_that(x$asdr.hat, equals(x$truth),
+                    info=paste("estimate is", paste(x$asdr.hat, collapse=""),
+                               "but it should be", paste(x$truth, collapse="")),
+                    label=paste("network survival estimate on toy network ",
+                                x$nrid[1]))
+      })
+
+
+
