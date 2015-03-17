@@ -10,7 +10,7 @@ Author: Dennis Feehan, Matthew Salganik
 License: MIT
 VignetteBuilder: knitr
 Imports:
-    functional, ggplot2, plyr, reshape2, stringr
+    functional, ggplot2, plyr, reshape2, stringr, dplyr
 Suggests:
     knitr
 Collate:
