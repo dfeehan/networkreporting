@@ -1,3 +1,7 @@
+networkreporting 0.0.2
+======================
+* rescaled bootstrap code now written in C++ for increased speed
+
 networkreporting 0.0.1
 ======================
 
