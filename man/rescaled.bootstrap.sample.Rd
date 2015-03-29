@@ -2,7 +2,7 @@
 % Please edit documentation in R/variance_estimators.r
 \name{rescaled.bootstrap.sample}
 \alias{rescaled.bootstrap.sample}
-\title{rescaled.bootstrap.sample}
+\title{rescaled.bootstrap.sample.cpp}
 \usage{
 rescaled.bootstrap.sample(survey.data, survey.design, parallel = FALSE,
   paropts = NULL, num.reps = 1)
@@ -27,7 +27,7 @@ dataset that was resampled) and \code{weight.scale}
 in the original dataset).
 }
 \description{
-given a survey dataset and a description of the survey
+C++ version: given a survey dataset and a description of the survey
 design (ie, which combination of vars determines primary sampling
 units, and which combination of vars determines strata), take
 a bunch of bootstrap samples for the rescaled bootstrap estimator

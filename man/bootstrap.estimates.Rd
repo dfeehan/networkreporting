@@ -51,12 +51,15 @@ it should be designed so that it can be passed in to
 estimation functions as an argument\cr
 OR\cr
 \cr
-TODO -- estimator.fn/bootstrap.fn and summary.fn are treated differently
-(one expects characters, one expects an actual fn. fix!)\cr
-\cr
-TODO -- write description block, including estimator.fn, bootstrap.fn,
-summary.fn, more?
-\cr
+}
+\section{TODO}{
+
+\itemize{
+  \item{estimator.fn/bootstrap.fn and summary.fn are treated differently
+        (one expects characters, one expects an actual fn. fix!)}
+  \item{write description block, including estimator.fn, bootstrap.fn,
+        summary.fn, more?}
+}
 }
 \examples{
 \donttest{
