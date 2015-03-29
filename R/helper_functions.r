@@ -50,6 +50,13 @@ get.var <- function(survey.data, var, default=NA) {
 
     var <- as.numeric(var.vals[,1])
 
+    ## NB: this is a workaround -- may want to rethink this in the future.
+    ## see
+    ## http://stackoverflow.com/questions/21618423/extract-a-dplyr-tbl-column-as-a-vector
+    if (inherits(var, "tbl_df")) {
+      var <- collect(select(var, 1))[[1]]
+    }
+
     return(var)
     
   } else if (is.numeric(var) & length(var) == nrow(survey.data)) {
@@ -243,6 +250,10 @@ get.var <- function(survey.data, var, default=NA) {
     }
 
     var <- var.vals[,1]
+
+    if (inherits(var.vals, "tbl_df")) {
+        var <- collect(select(var.vals, 1))[[1]]
+    }
 
     return(var)
 
