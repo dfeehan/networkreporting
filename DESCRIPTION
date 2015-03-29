@@ -4,22 +4,18 @@ Description: networkreporting has a collection of functions useful
     for producing estimates from data that were collected using network
     reporting techniques like network scale-up, indirect sampling,
     network reporting, and sibling history.
-Version: 0.0.1
+Version: 0.0.1.9000
 Maintainer: Dennis Feehan <dfeehan@princeton.edu>
 Author: Dennis Feehan, Matthew Salganik
+Depends:
+    R (>= 2.11.0),
+    Rcpp (>= 0.11.4)
 License: MIT
 VignetteBuilder: knitr
 Imports:
-    functional, ggplot2, plyr, reshape2, stringr, dplyr
+    functional, ggplot2, plyr, reshape2, stringr, dplyr, Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo
+SystemRequirements: GNU make
 Suggests:
     knitr
-Collate:
-    'variance_estimators.r'
-    'helper_functions.r'
-    'indirect_sampling.r'
-    'known_population.r'
-    'network_reporting.r'
-    'scale_up.r'
-    'summation.r'
-    'networkreporting_package.r'
-    'rds.r'
+
