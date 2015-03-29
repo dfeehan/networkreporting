@@ -8,7 +8,11 @@
 ##' @docType package
 ##' @name networkreporting
 ##' @aliases networkreporting package-networkreporting
-##' @import plyr reshape2 stringr functional ggplot2 dplyr lazyeval
+##' @import plyr reshape2 stringr functional ggplot2 dplyr lazyeval Rcpp RcppArmadillo
+NULL
+
+##' @useDynLib networkreporting
+##' @importFrom Rcpp sourceCpp
 NULL
 
 ##' Example household survey data
