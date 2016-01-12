@@ -37,7 +37,7 @@
 ##'
 ##' @section Technical note:
 ##' This function assumes that the sampling weights are standard analysis weights
-##' and *not* relative weights; standard analysis weights should provide an estimate
+##' and *not* relative weights. Standard analysis weights should provide an estimate
 ##' for the size of the frame population when added up; relative weights, on the other hand,
 ##' will sum to the number of respondents in the sample.  Demographic and Health surveys
 ##' typically have relative weights, which must be converted into standard sampling weights
