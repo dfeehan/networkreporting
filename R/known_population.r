@@ -94,7 +94,7 @@ kp.estimator_ <- function(resp.data,
                    as.symbol)
 
   res <- select_(agg, .dots=tograb) %>%
-         mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
+         dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
                 ## here, we estimate N_F / N_{F_\alpha} by dividing the
                 ## total of all respondents' weights by the sum of
                 ## the weights for respondents in each cell \alpha

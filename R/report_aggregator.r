@@ -44,7 +44,7 @@ report.aggregator_ <- function(resp.data,
   dots <- lapply(grouping.cols, as.symbol)
 
   df.summ <- df %>% group_by_(.dots=dots) %>%
-             summarise_(mean.qoi = interp(~weighted.mean(a, w=b), a=qoi.col, b=wgt.col),
+             dplyr::summarise_(mean.qoi = interp(~weighted.mean(a, w=b), a=qoi.col, b=wgt.col),
                         sum.qoi = interp(~sum(a*b), a=qoi.col, b=wgt.col),
                         wgt.total = interp(~sum(b), b=wgt.col),
                         wgt.inv.total = interp(~sum(1/b), b=wgt.col),
@@ -57,7 +57,7 @@ report.aggregator_ <- function(resp.data,
   newnames <- paste0(c("mean.", "sum.", "wgt.total.", 
                        "wgt.inv.total.", "num.obs."), qoi.name)
 
-  df.summ <- rename_(df.summ,
+  df.summ <- dplyr::rename_(df.summ,
                      .dots=setNames(toren, newnames))
 
   return(df.summ)

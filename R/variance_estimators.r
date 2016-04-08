@@ -471,7 +471,7 @@ rescaled.bootstrap.sample.pureR <- function(survey.data,
                                      return(this.stratum.samples[[rep.idx]])
                                    })
 
-                 this.rep <- rename(this.rep,
+                 this.rep <- plyr::rename(this.rep,
                                     c(".internal_id"="index"))
 
                  return(this.rep)

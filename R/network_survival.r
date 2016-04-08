@@ -117,7 +117,7 @@ network.survival.estimator_ <- function(resp.data,
     ## (these are done implicitly here because some of the factors cancel --
     ##  see TODO vignette)
     tog.df <- tog.df %>%
-              mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
+              dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
 
     return(tog.df)
 
