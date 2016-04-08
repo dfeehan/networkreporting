@@ -131,7 +131,7 @@ kp.estimator <- function(resp.data,
 ##'
 ##' In most situations, the known population method will be
 ##' used to estimate the average personal network size;
-##' this can be done with \code{\link{kp.estimator}}. If, instead, you wish
+##' this can be done with \code{\link{kp.estimator_}}. If, instead, you wish
 ##' to estimate the personal network size of each individual
 ##' respondent, then you can use this function.
 ##'

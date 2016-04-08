@@ -13,9 +13,16 @@ Depends:
 License: MIT
 VignetteBuilder: knitr
 Imports:
-    functional, ggplot2, plyr, reshape2, stringr, dplyr, Rcpp, RcppArmadillo
+    functional,
+    ggplot2,
+    plyr,
+    reshape2,
+    stringr,
+    dplyr,
+    Rcpp,
+    RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make
 Suggests:
     knitr
-
+RoxygenNote: 5.0.1
