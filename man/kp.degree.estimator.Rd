@@ -34,7 +34,7 @@ a vector with an estimate of the degree for each row
         to NA
 }
 \description{
-see \link{\code{kp.individual.estimator}} instead.
+see \code{\link{kp.individual.estimator}} instead.
 }
 \details{
 compute an estimate of the respondents' degrees using

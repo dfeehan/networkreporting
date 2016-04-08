@@ -197,7 +197,7 @@ kp.individual.estimator_ <- function(resp.data,
 #####################################################
 ##' kp.degree.estimator (DEPRECATED)
 ##'
-##' see \link{\code{kp.individual.estimator}} instead.
+##' see \code{\link{kp.individual.estimator}} instead.
 ##'
 ##' compute an estimate of the respondents' degrees using
 ##' the known population method\cr
