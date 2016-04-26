@@ -1,0 +1,13 @@
+Toy networks in the **networkreporting** package
+=================================================
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{toy_networks}
+-->
+
+Overview
+--------
+
+This vignette describes some of the toy networks that are used in the **networkreporting** package's unit tests and in the examples found in some of the help files.  These toy networks can be divided into two main categories based on whether or not the nodes they are composed of have attributes.
+
+

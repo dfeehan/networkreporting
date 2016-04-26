@@ -1,0 +1,25 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{generalized scale-up}
+-->
+Analyzing generalized network scale-up data using the **networkreporting** package
+==================================================================================
+
+Introduction
+------------
+
+The **networkreporting** package has several tools for analyzing survey data
+that have been collected using the generalized network scale-up method.
+
+This introduction will assume that you already have the **networkreporting**
+package installed. If you don't, please refer to the introductory vignette 
+("getting started") for instructions on how to do this. 
+
+Review of the generalized network scale-up method
+-------------------------------------------------
+
+TODO
+
+
+
+
