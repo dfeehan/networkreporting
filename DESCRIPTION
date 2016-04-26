@@ -4,7 +4,7 @@ Description: networkreporting has a collection of functions useful
     for producing estimates from data that were collected using network
     reporting techniques like network scale-up, indirect sampling,
     network reporting, and sibling history.
-Version: 0.0.3
+Version: 0.1
 Maintainer: Dennis Feehan <feehan@berkeley.edu>
 Author: Dennis Feehan, Matthew Salganik
 Depends:
