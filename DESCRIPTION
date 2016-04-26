@@ -15,6 +15,7 @@ VignetteBuilder: knitr
 Imports:
     functional,
     ggplot2,
+    lazyeval,
     plyr,
     reshape2,
     stringr,
