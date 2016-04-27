@@ -196,13 +196,20 @@ summary(d.hat)
 ```
 
 Note that the function reports that it's working in absolute numbers (instead
-of, for example, proportions.)  We can examine the results with a histogram
+of, for example, proportions.)  DENNIS, I DON'T UNDERSTAND THIS SENTENCE
+
+We can examine the results with a histogram
+
+```{r, message=FALSE}
+library(ggplot2) # we'll use qplot from ggplot2 for plots
+theme_set(theme_minimal())
+```
 
 ```{r}
 qplot(d.hat, binwidth=25)
 ```
 
-Let's attach the degree estimates to the dataframe to keep track of them:
+Now let's append the degree estimates to the survey reports dataframe:
 
 ```{r}
 example.survey$d.hat <- d.hat
