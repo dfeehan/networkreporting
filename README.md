@@ -31,7 +31,11 @@ You can install:
 
 Vignettes
 ---------
+
+The `networkreporting` package enables you to use several methods that many people currently think of as distinct.  Here are some vignettes for how to use the package:
+
 * [Analyzing network scale-up data using the networkreporting package]( https://cran.rstudio.com/web/packages/networkreporting/vignettes/network_scaleup.html)
+* Analyzing sibling method data using the networkreporting package] (Coming soon)
 
 Branches
 --------
