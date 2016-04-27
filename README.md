@@ -1,3 +1,7 @@
+[![Travis-CI Build
+Status](https://travis-ci.org/dfeehan/networkreporting.svg?branch=master)](https://travis-ci.org/dfeehan/networkreporting)
+
+
 networkreporting
 ================
 
