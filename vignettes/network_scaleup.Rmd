@@ -195,8 +195,8 @@ d.hat <- kp.degree.estimator(survey.data=example.survey,
 summary(d.hat)
 ```
 
-Note that the function reports that it's working in absolute numbers (instead
-of, for example, proportions.)  DENNIS, I DON'T UNDERSTAND THIS SENTENCE
+Note that the function alters you to the fact that it is working in absolute numbers,
+instead of proportions (i.e., it is estimating a count of idus, not the prevalence of idus).
 
 We can examine the results with a histogram
 
