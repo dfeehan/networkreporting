@@ -15,7 +15,8 @@ In traditional survey methods, respondents report about themselves.  In network 
 Although many of the methods that rely on indirect reporting have been regarded as distinct in the past, there is great value in developing a unified statistical framework to deal with common problems that all of these methods share.  This unified framework also enables us to develop new network reporting methods.  This package will help you use both existing network reporting methods and any new network reporting methods that you develop.
 
 
-For more information on network reporting methods see: Feehan, Dennis (2015) "Network reporting methods", Ph.D. Dissertation. Office of Population Research, Princeton University.
+For more information on network reporting methods see: 
+- Feehan, Dennis (2015) "Network reporting methods", Ph.D. Dissertation. Office of Population Research, Princeton University.
 
 The development of this software was supported by a grant from the National Institutes of Health (R01-HD075666).
 
