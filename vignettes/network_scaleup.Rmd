@@ -18,28 +18,26 @@ package installed. If you don't, please refer to the introductory vignette
 Review of the network scale-up method
 -------------------------------------
 
-For the purposes of this vignette, we'll assume that we have conducted a survey
-using network scale-up questions to try and estimate the size of an important
-population.  Analytically, this involves two main steps: 
+For the purposes of this vignette, we'll assume that you have conducted a survey
+using network scale-up questions in order to estimate the size of a hidden 
+population.  Analytically, using the scale-up estimator involves two steps:
 
-* step 1: we need to estimate the size of the survey respondents' personal
+* step 1: estimating the size of the survey respondents' personal
   networks (their *degrees*)
-* step 2: we need to use the estimated degrees to produce estimates for the
-  size of the hidden population.
+* step 2: estimating the size of the hidden population by combining the estimated network sizes (from step 1) with the number of connections to the hidden population
 
 We'll quickly review each of these steps, and then we'll show how to use
 the package to carry the estimation out.
 
 ### Step 1: estimating network sizes
 
-Here, we will use the *known population* estimator for respondents' degrees.
-(TODO CITE). In order to estimate the degree of the $i$ th survey respondent,
+Here, we will use the *known population* estimator for respondents' degrees (Killworth et al., 1998; Feehan and Salganik, 2016). In order to estimate the degree of the $i$ th survey respondent,
 we use
 
 $$
 \begin{align}
 \label{eqn:kpdegree}
-\hat{d_i} = \sum_{j=1}^{K} y_{ij} ~ 
+\hat{d_i} = \sum_{j=1}^{K} y_{ij} \times 
 \frac{N}{\sum_{j=1}^{K} N_j},
 \end{align}
 $$
