@@ -219,46 +219,11 @@ example.survey$d.hat <- d.hat
 
 TODO
 
-Internal valididty checks
--------------------------
-
-In order to run internal validation checks, you can use the
-`nsum.internal.validation` function. We specify that we wish to use only
-complete observations (ie, we will remove rows that have any missing values
-from our calculations).
-
-```{r, tidy=FALSE}
-iv.result <- nsum.internal.validation(survey.data=example.survey,
-                                      known.popns=kp.vec,
-                                      missing="complete.obs",
-                                      killworth.se=TRUE,
-                                      total.popn.size=tot.pop.size,
-                                      kp.method=TRUE,
-                                      return.plot=TRUE)
-```
-
-Now `iv.result` is a list that has a summary of the results in the entry `results`
-
-```{r}
-iv.result$results
-```
-
-Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
-```{r}
-print(iv.result$plot)
-```
-
-This is a `ggplot2` object, so we can customize it if we want. As a very simple 
-example, we can change the title:
-
-```{r}
-print(iv.result$plot + ggtitle("internal validation checks"))
-```
 
 Estimating hidden population size
 ---------------------------------
 
-Now that we have estimated degrees, we can use them to produce estimates of the
+Now that you have estimated degrees, you can use them to produce estimates of the
 populations we're interested in. Here, we'll take the example of injecting drug
 users, `idu`
 
@@ -341,6 +306,44 @@ qplot(all.idu.estimates$estimate, binwidth=50)
 ## summarize the results
 summary(all.idu.estimates$estimate)
 ```
+
+Internal valididty checks
+-------------------------
+
+If you want to run internal validation checks (see e.g. [Salganik et al., 2011, Fig 3](http://aje.oxfordjournals.org/content/174/10/1190.full)), you can use the
+`nsum.internal.validation` function. We specify that we wish to use only
+complete observations (ie, we will remove rows that have any missing values
+from our calculations).
+
+```{r, tidy=FALSE}
+iv.result <- nsum.internal.validation(survey.data=example.survey,
+                                      known.popns=kp.vec,
+                                      missing="complete.obs",
+                                      killworth.se=TRUE,
+                                      total.popn.size=tot.pop.size,
+                                      kp.method=TRUE,
+                                      return.plot=TRUE)
+```
+
+Now `iv.result` is a list that has a summary of the results in the entry `results`
+
+```{r}
+iv.result$results
+```
+Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
+```{r}
+print(iv.result$plot)
+```
+
+This plot is a `ggplot2` object, so we can customize it if we want. As a very simple 
+example, we can change the title:
+
+```{r}
+print(iv.result$plot + ggtitle("internal validation checks"))
+```
+
+The [ggplot2 website](http://ggplot2.org/) has more information on modifying ggplot2 objects.
+
 
 Attaching known population totals to the dataframe
 --------------------------------------------------
