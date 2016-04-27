@@ -62,4 +62,4 @@ Citation
 
 If you use our package for your research, please cite it so that we can continue to develop it.
 
-Feehan, Dennis M. and Salganik, Matthew J. (2014) "The networkreporting package." http://cran.r-project.org/package=networkreporting
+- Feehan, Dennis M. and Salganik, Matthew J. (2014) "The networkreporting package." http://cran.r-project.org/package=networkreporting
