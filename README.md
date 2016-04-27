@@ -52,10 +52,9 @@ The `networkreporting` package enables you to use several methods that many peop
 * Analyzing sibling method data using the networkreporting package (Coming soon)
 
 
-Wish list
+Issues
 ---------
-* if you would like to suggest a feature, please create an
-  [issue](https://github.com/dfeehan/networkreporting/issues)
+If you would like to suggest a feature or report a bug, please create an [issue](https://github.com/dfeehan/networkreporting/issues)
 
 Citation
 -----------
