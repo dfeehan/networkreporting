@@ -18,28 +18,26 @@ package installed. If you don't, please refer to the introductory vignette
 Review of the network scale-up method
 -------------------------------------
 
-For the purposes of this vignette, we'll assume that we have conducted a survey
-using network scale-up questions to try and estimate the size of an important
-population.  Analytically, this involves two main steps: 
+For the purposes of this vignette, we'll assume that you have conducted a survey
+using network scale-up questions in order to estimate the size of a hidden 
+population.  Analytically, using the scale-up estimator involves two steps:
 
-* step 1: we need to estimate the size of the survey respondents' personal
+* step 1: estimating the size of the survey respondents' personal
   networks (their *degrees*)
-* step 2: we need to use the estimated degrees to produce estimates for the
-  size of the hidden population.
+* step 2: estimating the size of the hidden population by combining the estimated network sizes (from step 1) with the number of connections to the hidden population
 
 We'll quickly review each of these steps, and then we'll show how to use
 the package to carry the estimation out.
 
 ### Step 1: estimating network sizes
 
-Here, we will use the *known population* estimator for respondents' degrees.
-(TODO CITE). In order to estimate the degree of the $i$ th survey respondent,
+Here, we will use the *known population* estimator for respondents' degrees (Killworth et al., 1998; Feehan and Salganik, 2016). In order to estimate the degree of the $i$ th survey respondent,
 we use
 
 $$
 \begin{align}
 \label{eqn:kpdegree}
-\hat{d_i} = \sum_{j=1}^{K} y_{ij} ~ 
+\hat{d_i} = \sum_{j=1}^{K} y_{ij} \times 
 \frac{N}{\sum_{j=1}^{K} N_j},
 \end{align}
 $$
@@ -68,7 +66,7 @@ population method.
 
 Preparing data
 --------------
-The first step is to prepare the data.  We'll assume that we start with two
+In order to use the package, we will assume that you start with two
 datasets: the first is a survey containing information collected from
 respondents about their personal networks; the second is information about the
 sizes of several populations.
@@ -78,19 +76,14 @@ package, and can be loaded by typing
 
 ```{r, message=FALSE}
 library(networkreporting)
-library(plyr)
-library(ggplot2) # we'll use qplot from ggplot2 for plots
-theme_set(theme_minimal())
-
 data(hhsurvey) # this is a demo dataset included with the package
 ```
 
-The demo data include two datasets: one has all of the responses from a
+The example data include two datasets: one has all of the responses from a
 network scale-up survey, and the other has the known population sizes for
 use with the known population estimator.
 
 ### Preparing the known population data
-
 
 The demo known population data are in `knownpop.dat`: 
 
@@ -120,8 +113,6 @@ estimates about. In this case, let's assume that we're working in a country of
 tot.pop.size <- 10e6
 ```
 
-TODO -- attach known population example
-
 ### Preparing the survey data
 
 Now let's take a look at the demo survey dataset, which is called
@@ -131,7 +122,7 @@ Now let's take a look at the demo survey dataset, which is called
 head(example.survey)
 ```
 
-The columns fall into one of a few categories:
+The columns fall into a few categories:
 
 * an id variable for each respondent: `id`
 * information related to the sampling design of the survey: `cluster`, `region`, and `indweight`. 
@@ -140,19 +131,20 @@ The columns fall into one of a few categories:
 `mukandayisenga`
 * questions about hidden populations: `died`, ..., `clients` 
 
+This is the general form that your survey dataset should have.  DENNIS, MORE HERE?
+
 #### Topcoding
 
 Many network scale-up studies have topcoded the responses to the aggregate
 relational data questions. This means that researchers considered any responses
 above a certain value, called the topcode, to be implausible. Before proceeding
-with the analysis, they substitute the maximum plausible value in for the
-implausible ones. For example, in many studies, researchers assumed that
-responses more than 30 are implausible, so they replaced responses with the
-value 31 or higher with the value 30 before conducting their analysis.
+with the analysis, researchers substitute the maximum plausible value in for the
+implausible ones. For example, in many studies, researchers replaced responses with the
+value 31 or higher with the value 30 before conducting their analysis (see Zheng, Salganik, and Gelman 2006).
 
 We won't discuss whether or not this is advisable here, but this is currently a
 common practice in scale-up studies. If you wish to follow it, you can use the
-`topcode.data` function. As an example, let's topcode the responses to
+`topcode.data` function.  For example, let's topcode the responses to
 the questions about populations of known size to the value 30. First, we'll
 examine the distribution of the responses before topcoding:
 
@@ -204,13 +196,20 @@ summary(d.hat)
 ```
 
 Note that the function reports that it's working in absolute numbers (instead
-of, for example, proportions.)  We can examine the results with a histogram
+of, for example, proportions.)  DENNIS, I DON'T UNDERSTAND THIS SENTENCE
+
+We can examine the results with a histogram
+
+```{r, message=FALSE}
+library(ggplot2) # we'll use qplot from ggplot2 for plots
+theme_set(theme_minimal())
+```
 
 ```{r}
 qplot(d.hat, binwidth=25)
 ```
 
-Let's attach the degree estimates to the dataframe to keep track of them:
+Now let's append the degree estimates to the survey reports dataframe:
 
 ```{r}
 example.survey$d.hat <- d.hat
@@ -220,47 +219,12 @@ example.survey$d.hat <- d.hat
 
 TODO
 
-Internal valididty checks
--------------------------
-
-In order to run internal validation checks, you can use the
-`nsum.internal.validation` function. We specify that we wish to use only
-complete observations (ie, we will remove rows that have any missing values
-from our calculations).
-
-```{r, tidy=FALSE}
-iv.result <- nsum.internal.validation(survey.data=example.survey,
-                                      known.popns=kp.vec,
-                                      missing="complete.obs",
-                                      killworth.se=TRUE,
-                                      total.popn.size=tot.pop.size,
-                                      kp.method=TRUE,
-                                      return.plot=TRUE)
-```
-
-Now `iv.result` is a list that has a summary of the results in the entry `results`
-
-```{r}
-iv.result$results
-```
-
-Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
-```{r}
-print(iv.result$plot)
-```
-
-This is a `ggplot2` object, so we can customize it if we want. As a very simple 
-example, we can change the title:
-
-```{r}
-print(iv.result$plot + ggtitle("internal validation checks"))
-```
 
 Estimating hidden population size
 ---------------------------------
 
-Now that we have estimated degrees, we can use them to produce estimates of the
-populations we're interested in. Here, we'll take the example of injecting drug
+Now that you have estimated degrees, you can use them to produce estimates of the
+size of the hidden population. Here, we'll take the example of injecting drug
 users, `idu`
 
 ```{r, tidy=FALSE}
@@ -287,9 +251,8 @@ Variance estimation
 -------------------
 
 In order to estimate the sampling uncertainty of our estimated totals, we can
-use the rescaled bootstrap technique that is in the `networkreporting` package.
-In order to do so, we need to be able to describe the sampling design of our
-study. In particular, we need to be able to describe the stratifcation (if any)
+use the rescaled bootstrap technique; see Feehan and Salganik 2016 for more about the rescaled boostrap and how it can be applied to the network scale-up method.  In order to use the rescaled boostrap, you need to be able to specify the sampling design of your
+study. In particular, you need to be able to describe the stratifcation (if any)
 and the primary sampling units used in the study.
 
 ```{r, tidy=FALSE}
@@ -323,10 +286,13 @@ idu.est <- bootstrap.estimates(## this describes the sampling design of the
 
 By default, `bootstrap.estimates` produces a list with `num.reps` entries; each
 entry is the result of calling the estimator function on one bootstrap
-resample.  We can write a bit of code that will help us put all of these
+resample.  
+
+Next, you can write a bit of code that will help us put all of these
 results together, for plotting and summarizing
 
 ```{r}
+library(plyr)
 ## combine the estimates together in one data frame
 ## (bootstrap.estimates gives us a list)
 all.idu.estimates <- ldply(idu.est,
@@ -342,6 +308,50 @@ qplot(all.idu.estimates$estimate, binwidth=50)
 ## summarize the results
 summary(all.idu.estimates$estimate)
 ```
+
+To produce 95% intervals using the percentile method you can do something like this
+
+```{r}
+quantile(all.idu.estimates$estimate, probs=c(0.025, 0.975))
+```
+
+Internal valididty checks
+-------------------------
+
+If you want to run internal validation checks (see e.g. [Salganik et al., 2011, Fig 3](http://aje.oxfordjournals.org/content/174/10/1190.full)), you can use the
+`nsum.internal.validation` function. We specify that we wish to use only
+complete observations (ie, we will remove rows that have any missing values
+from our calculations).
+
+```{r, tidy=FALSE}
+iv.result <- nsum.internal.validation(survey.data=example.survey,
+                                      known.popns=kp.vec,
+                                      missing="complete.obs",
+                                      killworth.se=TRUE,
+                                      total.popn.size=tot.pop.size,
+                                      kp.method=TRUE,
+                                      return.plot=TRUE)
+```
+
+Now `iv.result` is a list that has a summary of the results in the entry `results`
+
+```{r}
+iv.result$results
+```
+Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
+```{r}
+print(iv.result$plot)
+```
+
+This plot is a `ggplot2` object, so we can customize it if we want. As a very simple 
+example, we can change the title:
+
+```{r}
+print(iv.result$plot + ggtitle("internal validation checks"))
+```
+
+The [ggplot2 website](http://ggplot2.org/) has more information on modifying ggplot2 objects.
+
 
 Attaching known population totals to the dataframe
 --------------------------------------------------
