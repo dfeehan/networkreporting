@@ -50,7 +50,7 @@ The `networkreporting` package enables you to use several methods that many peop
 
 * [Analyzing network scale-up data using the networkreporting package]( https://cran.rstudio.com/web/packages/networkreporting/vignettes/network_scaleup.html)
 * Analyzing sibling method data using the networkreporting package (Coming soon)
-
+* Analyzing generalized network scale-up data using the networkreporting package (Coming soon)
 
 Issues
 ---------
