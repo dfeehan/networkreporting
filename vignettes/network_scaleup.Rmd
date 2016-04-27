@@ -224,7 +224,7 @@ Estimating hidden population size
 ---------------------------------
 
 Now that you have estimated degrees, you can use them to produce estimates of the
-populations we're interested in. Here, we'll take the example of injecting drug
+size of the hidden population. Here, we'll take the example of injecting drug
 users, `idu`
 
 ```{r, tidy=FALSE}
@@ -251,9 +251,8 @@ Variance estimation
 -------------------
 
 In order to estimate the sampling uncertainty of our estimated totals, we can
-use the rescaled bootstrap technique that is in the `networkreporting` package.
-In order to do so, we need to be able to describe the sampling design of our
-study. In particular, we need to be able to describe the stratifcation (if any)
+use the rescaled bootstrap technique; see Feehan and Salganik 2016 for more about the rescaled boostrap and how it can be applied to the network scale-up method.  In order to use the rescaled boostrap, you need to be able to specify the sampling design of your
+study. In particular, you need to be able to describe the stratifcation (if any)
 and the primary sampling units used in the study.
 
 ```{r, tidy=FALSE}
@@ -287,10 +286,13 @@ idu.est <- bootstrap.estimates(## this describes the sampling design of the
 
 By default, `bootstrap.estimates` produces a list with `num.reps` entries; each
 entry is the result of calling the estimator function on one bootstrap
-resample.  We can write a bit of code that will help us put all of these
+resample.  
+
+Next, you can write a bit of code that will help us put all of these
 results together, for plotting and summarizing
 
 ```{r}
+library(plyr)
 ## combine the estimates together in one data frame
 ## (bootstrap.estimates gives us a list)
 all.idu.estimates <- ldply(idu.est,
@@ -305,6 +307,12 @@ qplot(all.idu.estimates$estimate, binwidth=50)
 
 ## summarize the results
 summary(all.idu.estimates$estimate)
+```
+
+To produce 95% intervals using the percentile method you can do something like this
+
+```{r}
+quantile(all.idu.estimates$estimate, probs=c(0.025, 0.975))
 ```
 
 Internal valididty checks
