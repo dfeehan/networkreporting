@@ -131,7 +131,7 @@ The columns fall into a few categories:
 `mukandayisenga`
 * questions about hidden populations: `died`, ..., `clients` 
 
-This is the general form that your survey dataset should have.  DENNIS, MORE HERE?
+This is the general form that your survey dataset should have.
 
 #### Topcoding
 
