@@ -27,6 +27,10 @@ You can install:
     devtools::install_github("dfeehan/networkreporting")
     ```
 
+Vignettes
+---------
+* [Analyzing network scale-up data using the networkreporting package]( https://cran.rstudio.com/web/packages/networkreporting/vignettes/network_scaleup.html)
+
 Branches
 --------
 * `cran` - will contain the version currently available on
