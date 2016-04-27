@@ -25,5 +25,6 @@ Imports:
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make
 Suggests:
-    knitr
+    knitr,
+    testthat
 RoxygenNote: 5.0.1
