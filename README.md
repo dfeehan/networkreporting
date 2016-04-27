@@ -41,7 +41,5 @@ Branches
 
 Wish list
 ---------
-* make it easy to get uncertainty intervals for the IV checks
-* for network survival, make it easy to use the two alternate estimators which
-  are appropriate when additional information about population distribution is
-  available (see Rwanda mortality paper)
+* if you would like to suggest a feature, please create an
+  [issue](https://github.com/dfeehan/networkreporting/issues)
