@@ -11,6 +11,7 @@ Depends:
     R (>= 2.11.0),
     Rcpp (>= 0.11.4)
 License: MIT
+LazyData: true
 VignetteBuilder: knitr
 Imports:
     functional,
