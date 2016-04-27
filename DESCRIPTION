@@ -1,5 +1,5 @@
 Package: networkreporting
-Title: Tools for using network reporting estimators.
+Title: Tools for using network reporting estimators
 Description: networkreporting has a collection of functions useful
     for producing estimates from data that were collected using network
     reporting techniques like network scale-up, indirect sampling,
@@ -20,7 +20,6 @@ Imports:
     reshape2,
     stringr,
     dplyr,
-    Rcpp,
     RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make
