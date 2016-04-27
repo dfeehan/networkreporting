@@ -42,7 +42,6 @@ average personal network size for the entire frame population.
 }
 \section{Technical note}{
 
-\cr
 The estimated average degree is 
 \eqn{(\sum y_{F_\alpha, A} / N_A) \times
      N_F / N_{F_\alpha}}

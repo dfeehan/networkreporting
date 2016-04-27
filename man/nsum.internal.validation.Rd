@@ -46,7 +46,7 @@ the variable with the appropriate weights. these weights
 should be construted so that, eg, the mean of the degrees is
 estimated as (1/n) * \\sum_i {w_i * d_i}}
 
-\item{killworth.se}{if TRUE, return the Killworth et al estimate}
+\item{killworth.se}{if TRUE, return the Killworth et al estimate of the standard error}
 
 \item{return.plot}{if TRUE, make and return a ggplot2 plot object}
 

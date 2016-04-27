@@ -102,7 +102,7 @@ killworth.se <- function(estimates,
 ##' @examples
 ##' \donttest{
 ##' # code goes here
-##' ...
+##' 
 ##' }
 bootstrap.estimates <- function(survey.data,
                                 survey.design,

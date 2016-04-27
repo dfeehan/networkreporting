@@ -72,7 +72,7 @@ dataset might look like:
   20   \tab   f  \tab  2.10   \tab 4           \tab  0          \tab ...  \cr
   44   \tab   m  \tab  1.65   \tab 0           \tab  2          \tab ...  \cr
   60   \tab   m  \tab  2.75   \tab 1           \tab  1          \tab ...  \cr
-}\cr
+}
 }
 \section{Technical note}{
 

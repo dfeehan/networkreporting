@@ -254,8 +254,7 @@ nsum.estimator <- function(survey.data,
 ##'                the variable with the appropriate weights. these weights
 ##'                should be construted so that, eg, the mean of the degrees is
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
-##' @param killworth.se if TRUE, return the Killworth et al estimate
-##of the standard error
+##' @param killworth.se if TRUE, return the Killworth et al estimate of the standard error
 ##' @param return.plot if TRUE, make and return a ggplot2 plot object
 ##' @param verbose if TRUE, report more detailed information about what's going on
 ##' @param bootstrap if TRUE, use \code{bootstrap.estimates} to take bootstrap resamples
