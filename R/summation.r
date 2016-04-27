@@ -5,7 +5,7 @@
 ## degrees
 
 #####################################################
-##' sum.degree.estimator
+##' summation.estimator
 ##'
 ##' compute an estimate of the respondents' degrees using
 ##' the summation method
@@ -31,9 +31,9 @@
 ##'         missingness in the summation questions will be set
 ##'         to NA
 ##' @export
-sum.degree.estimator <- function(survey.data,
-                                 sum.q=NULL,
-                                 missing="ignore")
+summation.estimator <- function(survey.data,
+                                sum.q=NULL,
+                                missing="ignore")
 {
 
   if (is.null(sum.q)) {

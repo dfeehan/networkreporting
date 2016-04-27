@@ -495,7 +495,7 @@ nsum.internal.validation <- function(survey.data,
 }
 
 #####################################################
-##' mean.ties.truth
+##' plot_meanties_truth
 ##'
 ##' plot the relationship between the mean number of
 ##' ties in the survey dataset and the true popn sizes
@@ -515,7 +515,7 @@ nsum.internal.validation <- function(survey.data,
 ##'                is estimated as (1/n) * \\sum_i {w_i * d_i}
 ##' @return a ggplot2 object with the relationship plot
 ##' @export
-mean.ties.truth <- function(survey.data, weights=NULL, known.popns=NULL)
+plot_meanties_truth <- function(survey.data, weights=NULL, known.popns=NULL)
 {
 
   if (is.null(known.popns)) {
