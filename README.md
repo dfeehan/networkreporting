@@ -11,6 +11,11 @@ In traditional survey methods, respondents report about themselves.  In network 
 
 - network scale-up method
 - sibling method
+- multiplicity sampling
+- network surivial method
+- generalized network scale-up method
+- confidant method
+- neighborhood method
 
 Although many of the methods that rely on indirect reporting have been regarded as distinct in the past, there is great value in developing a unified statistical framework to deal with common problems that all of these methods share.  This unified framework also enables us to develop new network reporting methods.  This package will help you use both existing network reporting methods and any new network reporting methods that you develop.
 
