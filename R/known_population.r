@@ -55,10 +55,6 @@ kp.estimator_ <- function(resp.data,
                           total.kp.size=NULL,
                           alter.popn.size=NULL) {
 
-  ## TODO - THINK ABOUT
-  ## HOW TO ELEGANTLY ADD OPTIONS FOR
-  ## dbar_{P,Q} vs dbar_{Q,P}
-
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
   adat <- select_(resp.data, .dots=attribute.names)
