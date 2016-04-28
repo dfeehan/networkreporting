@@ -210,6 +210,9 @@ estimate.degree.distns <- function(survey.data,
   ## and use SI sampling to pick one when we need to. if there are
   ## huge datasets, this might need to be changed later
 
+  ## to placate R CMD CHECK
+  trait <- NULL
+
   deg.distns <- dlply(deg.dat,
                       .(trait),
                       identity)
@@ -302,6 +305,9 @@ estimate.mixing <- function(survey.data, parent.data, traits) {
 
   ## we'll reutrn a dataframe which has the parameters we use to estimate the mixing pattern
   res$mixing.df <- as.data.frame(xtabs(~ child.trait + parent.trait, data=mix.data))
+
+  # to placate R CMD CHECK
+  parent.trait <- NULL
 
   ## return a fn which will give us the next step in the chain from each state
   ## based on these transition probabilities
@@ -495,7 +501,7 @@ chain.vals <- function(chain, qoi.var="uid") {
 
     return(c(chain$data[,qoi.var],
              unlist(lapply(chain$children,
-                           chain.ids,
+                           chain.vals,
                            qoi.var=qoi.var))))
 }
 

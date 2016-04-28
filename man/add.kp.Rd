@@ -11,7 +11,7 @@ add.kp(survey.data, kp.vec, total.pop.size = NULL)
 
 \item{kp.vec}{the known population vector}
 
-\item{total.popn.size}{(optional) the total population size to use (see below)}
+\item{total.pop.size}{(optional) the total population size to use (see below)}
 }
 \value{
 the survey dataframe with the known population vector

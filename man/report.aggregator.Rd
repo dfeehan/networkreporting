@@ -17,9 +17,13 @@ report.aggregator(resp.data, attribute.names = NULL, qoi, weights,
 \item{attribute.names}{the names of the variables that define
 the groups for which the qoi should be aggregated}
 
-\item{qoi}{the name of the quantity to aggregate}
+\item{qoi}{the variable with quantity to aggregate}
 
 \item{weights}{analysis weights}
+
+\item{qoi.name}{the name of the qoi}
+
+\item{dropmiss}{NOT YET IMPLEMENTED}
 }
 \value{
 the estimated average degree for respondents in each

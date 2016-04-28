@@ -68,6 +68,7 @@
 ##'         population sizes
 ##' @param weights the weights or weights column for the respondent data
 ##' @param attribute.weights the weights or weights column for the alter data
+##' @param dropmiss see \code{\link{report.aggregator}}
 ##' @param verbose if TRUE, print information to screen
 ##' @return the network reporting estimate of the hidden population's size
 ##'         (as a prevalence) broken down by the categories defined by all combinations
@@ -82,6 +83,7 @@ network.survival.estimator_ <- function(resp.data,
                                         total.kp.size=1,
                                         weights,
                                         attribute.weights,
+                                        dropmiss=NULL,
                                         verbose=TRUE) {
 
     ## estimate the average personal network size of the respondents
@@ -109,6 +111,10 @@ network.survival.estimator_ <- function(resp.data,
 
     vcat(verbose,
          "Taking N.F value implied by weights: ", N.F, "\n")
+
+    ## to placate R CMD CHECK
+    sum.deaths <- NULL
+    sum.y.kp.over.kptot <- NULL
 
     ## for each combination of attributes, divide the number of
     ## reported connections by the estimated network size to produce

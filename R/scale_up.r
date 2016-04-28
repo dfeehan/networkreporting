@@ -464,6 +464,11 @@ nsum.internal.validation <- function(survey.data,
 
   if(return.plot) {
 
+    ## to placate R CMD CHECK
+    name <- NULL
+    known.size <- NULL
+    nsum.holdout.est <-  NULL
+
     iv.plot <- ggplot(res) +
                geom_text(aes(x=known.size, y=nsum.holdout.est, label=name),
                          ##color=alpha("red", 0.3), size=3) +
@@ -534,6 +539,10 @@ plot_meanties_truth <- function(survey.data, weights=NULL, known.popns=NULL)
   colnames(res)[2] <- "truth"
   res <- data.frame(res)
   res$name <- rownames(res)
+
+  ## to placate R CMD CHECK
+  truth <- NULL
+  name <- NULL
 
   resplot <- ggplot(res) +
              geom_text(aes(x=truth, y=ard.means,label=name), size=4) +

@@ -75,13 +75,13 @@ gwsm.estimator <- function(survey.data,
   ## TODO -- this is just a skeleton; the stuff below has not
   ## been edited yet. think about the best way to set this up
   mult.vals <- try(subset(survey.data,
-                          select=mult.col),
+                          select=gwsm.col),
                    silent=TRUE)
 
   if( inherits(mult.vals, "try-error") ||
       ncol(mult.vals) != 1 ||
       ! is.numeric(mult.vals[,1]) ) {
-    stop(paste(mult.col,
+    stop(paste(gwsm.col,
                "does not identify a valid column for computing multiplicities.\n"))
   }
 

@@ -7,7 +7,7 @@
 \usage{
 network.survival.estimator_(resp.data, attribute.data, attribute.names,
   known.populations, total.kp.size = 1, weights, attribute.weights,
-  verbose = TRUE)
+  dropmiss = NULL, verbose = TRUE)
 
 network.survival.estimator(resp.data, attribute.data, attribute.names,
   known.populations, total.kp.size = 1, weights, attribute.weights,
@@ -37,6 +37,8 @@ population sizes}
 \item{weights}{the weights or weights column for the respondent data}
 
 \item{attribute.weights}{the weights or weights column for the alter data}
+
+\item{dropmiss}{see \code{\link{report.aggregator}}}
 
 \item{verbose}{if TRUE, print information to screen}
 }
