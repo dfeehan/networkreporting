@@ -179,7 +179,7 @@ df.to.kpvec <- function(kp.data,
 ##' @param kp.vec the known population vector
 ##' @return the survey dataframe with the known population vector
 ##' attached as an attribute
-##' @param total.popn.size (optional) the total population size to use (see below)
+##' @param total.pop.size (optional) the total population size to use (see below)
 ##' @export
 ##' @seealso \link{df.to.kpvec}
 ##' @examples \dontrun{
