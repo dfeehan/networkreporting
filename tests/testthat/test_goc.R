@@ -18,7 +18,7 @@
 ## to try and figure out the real way to include package data in
 ## unit tests...
 
-data(goc, package="networkreporting")
+load("goc.RData")
 
 set.seed(12345)
 

@@ -37,8 +37,10 @@
 ## data aren't available without having to
 ## specify package=...
 ## (this could be a devtools thing?)
-data(toynetworks,package="networkreporting")
-data(toynrnetworks,package="networkreporting")
+#data(toynetworks,package="networkreporting")
+#data(toynrnetworks,package="networkreporting")
+load("toynetworks.RData")
+load("toynrnetworks.RData")
 
 ####################################
 ## multiplicity estimator
