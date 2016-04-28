@@ -12,8 +12,7 @@ The **networkreporting** package has tools for analyzing data that were collecte
 using respondent-driven sampling (RDS).
 
 This introduction will assume that you already have the **networkreporting**
-package installed. If you don't, please refer to the introductory vignette 
-("getting started") for instructions on how to do this. 
+package installed. If you don't, please refer to the [README](https://github.com/dfeehan/networkreporting/blob/master/README.md). 
 
 Review of respondent driven sampling
 ------------------------------------
