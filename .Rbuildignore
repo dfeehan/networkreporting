@@ -3,3 +3,5 @@
 ^\.travis\.yml$
 
 data/scratch
+
+vignettes/draft

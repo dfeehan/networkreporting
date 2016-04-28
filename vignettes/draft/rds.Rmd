@@ -73,7 +73,7 @@ chains <- llply(seed.ids,
                 ## NB: make.chain is not currently exported, so we
                 ## have to specify the package namespace explicitly
                 networkreporting:::make.chain,
-                survey.data)
+                goc.survey.data)
 ```
 
 TODO - describe the trait we want to measure and the mixing setup
@@ -110,7 +110,7 @@ original data; we will need these to compute our estimates once we have the
 bootstrap resamples.
 
 ```{r}
-dd <- networkreporting:::estimate.degree.distns(survey.data,
+dd <- networkreporting:::estimate.degree.distns(goc.survey.data,
                                                 d.hat.vals="netsize.bss",
                                                 traits=these.traits,
                                                 keep.vars=c("total.alters",
