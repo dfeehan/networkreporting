@@ -5,3 +5,6 @@
 data/scratch
 
 vignettes/draft
+
+*-dev.R
+*-dev.r
