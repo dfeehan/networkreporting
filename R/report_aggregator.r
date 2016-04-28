@@ -14,8 +14,10 @@
 ##' @param resp.data the data 
 ##' @param attribute.names the names of the variables that define
 ##'          the groups for which the qoi should be aggregated
-##' @param qoi the name of the quantity to aggregate
+##' @param qoi the variable with quantity to aggregate
 ##' @param weights analysis weights
+##' @param qoi.name the name of the qoi
+##' @param dropmiss NOT YET IMPLEMENTED
 ##' @return the estimated average degree for respondents in each
 ##'         of the categories given by \code{attribute.names}
 ##' @rdname report.aggregator
