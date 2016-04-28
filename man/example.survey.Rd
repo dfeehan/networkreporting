@@ -4,7 +4,16 @@
 \name{example.survey}
 \alias{example.survey}
 \title{Example household survey data}
-\format{An object of class \code{data.frame} with 2406 rows and 36 columns.}
+\format{A data frame with 2,406 rows and 36 variables:
+\describe{
+  \item{id}{a unique identifier}
+  \item{cluster}{the cluster (part of the complex survey design)}
+  \item{region}{the region (part of the complex survey design)}
+  \item{indweight}{the individual weight (relative)}
+  \item{sex}{the sex of the respondent}
+  \item{age.cat}{the age category of the respondent}
+  \item{...}{all other rows are reported number of connections to various groups}
+}}
 \usage{
 example.survey
 }

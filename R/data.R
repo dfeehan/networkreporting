@@ -1,49 +1,30 @@
-##' Example game of contacts
-##'
-##' Example of a game of contacts dataset, collected via
-##' RDS; used in unit tests and vignettes for the \code{networkreporting} 
-##' package.
-##'
-##' @format a list with some stuff
-"goc"
 
 ##' Example household survey data
 ##'
 ##' Example of a household survey dataset, used in unit tests
 ##' and vignettes for the \code{networkreporting} package.
 ##'
+##' @format A data frame with 2,406 rows and 36 variables:
+##' \describe{
+##'   \item{id}{a unique identifier}
+##'   \item{cluster}{the cluster (part of the complex survey design)}
+##'   \item{region}{the region (part of the complex survey design)}
+##'   \item{indweight}{the individual weight (relative)}
+##'   \item{sex}{the sex of the respondent}
+##'   \item{age.cat}{the age category of the respondent}
+##'   \item{...}{all other rows are reported number of connections to various groups}
+##' }
 "example.survey"
-"hm.q"
-"knownpop.dat"
-"target.q"
-"tot.pop.size"
 
-##' Toy network data
+##' Example known population data
 ##'
-##' Toy network examples, useful for unit tests in the
-##' \code{networkreporting} package
+##' Example of a household survey dataset, used in unit tests
+##' and vignettes for the \code{networkreporting} package.
 ##'
-##' @name toynetworks
-##' @docType data
-NULL
-
-##' Toy network response networks
-##'
-##' Toy network examples with attributes attached to each
-##' node; useful for unit tests in the \code{networkreporting}
-##' package.
-##'
-##' @name toynrnetworks
-##' @docType data
-NULL
-
-##' MU284 population
-##'
-##' Data used in unit tests for variance estimation.
-##' See TODO-Sarndal TODO-sampling package
-##' TODO-doc describing unit tests
-##'
-##' @name MU284
-##' @docType data
-NULL
+##' @format A data frame with 22 rows and 2 variables:
+##' \describe{
+##'   \item{known.popn}{The name of the group}
+##'   \item{size}{The number of people in the group}
+##' }
+"example.knownpop.dat"
 
