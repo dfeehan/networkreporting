@@ -1,6 +1,6 @@
 library(testthat)
-library("networkreporting")
+library(networkreporting)
 library(plyr)
 library(functional)
 
-test_package("networkreporting")
+test_check("networkreporting")

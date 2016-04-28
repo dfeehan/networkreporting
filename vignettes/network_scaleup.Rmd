@@ -76,7 +76,26 @@ package, and can be loaded by typing
 
 ```{r, message=FALSE}
 library(networkreporting)
-data(hhsurvey) # this is a demo dataset included with the package
+
+## NB: these datasets should get loaded lazily
+#data(example.survey) # this is a demo dataset included with the package
+#data(example.knownpop.dat)
+
+
+## column names for connections to hidden population numbers
+hidden.q <- c("sex.workers", "msm", "idu", "clients")
+
+## column names for connections to groups of known size
+hm.q <- c("widower", "nurse.or.doctor", "male.community.health", "teacher", 
+          "woman.smoke", "priest", "civil.servant", "woman.gave.birth", 
+          "muslim", "incarcerated", "judge", "man.divorced", "treatedfortb", 
+          "nsengimana", "murekatete", "twahirwa", "mukandekezi", "nsabimana", 
+          "mukamana", "ndayambaje", "nyiraneza", "bizimana", "nyirahabimana", 
+          "ndagijimana", "mukandayisenga", "died")
+
+## size of the entire population
+tot.pop.size <- 10718378
+
 ```
 
 The example data include two datasets: one has all of the responses from a
@@ -85,13 +104,13 @@ use with the known population estimator.
 
 ### Preparing the known population data
 
-The demo known population data are in `knownpop.dat`: 
+The demo known population data are in `example.knownpop.dat`: 
 
 ```{r}
-knownpop.dat
+example.knownpop.dat
 ```
 
-`knownpop.dat` is very simple: one column has a name for each known population,
+`example.knownpop.dat` is very simple: one column has a name for each known population,
 and the other has its toal size. We expect that users will typically start with
 a small dataset like this one. When using the `networkreporting` package, it is
 more useful to have a vector whose entries are known population sizes and whose
@@ -99,7 +118,7 @@ names are the known population names. The `df.to.kpvec` function makes it easy
 for us to create it:
 
 ```{r}
-kp.vec <- df.to.kpvec(knownpop.dat, kp.var="known.popn", kp.value="size")
+kp.vec <- df.to.kpvec(example.knownpop.dat, kp.var="known.popn", kp.value="size")
 
 kp.vec
 ```
@@ -151,7 +170,7 @@ examine the distribution of the responses before topcoding:
 ```{r}
 ## make a vector with the list of known population names from
 ## our dataset of known population totals
-known.popn.vars <- paste(knownpop.dat$known.popn)
+known.popn.vars <- paste(example.knownpop.dat$known.popn)
 
 ## before topcoding: max. response for several popns is > 30
 summary(example.survey[,known.popn.vars])
