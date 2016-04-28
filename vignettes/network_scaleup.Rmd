@@ -77,11 +77,6 @@ package, and can be loaded by typing
 ```{r, message=FALSE}
 library(networkreporting)
 
-## NB: these datasets should get loaded lazily
-#data(example.survey) # this is a demo dataset included with the package
-#data(example.knownpop.dat)
-
-
 ## column names for connections to hidden population numbers
 hidden.q <- c("sex.workers", "msm", "idu", "clients")
 
