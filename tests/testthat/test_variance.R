@@ -24,9 +24,15 @@ set.seed(12345)
 ## setup
 ## NB: see this for possible alternatives
 ## http://stackoverflow.com/questions/8898469/is-it-possible-to-use-r-package-data-in-testthat-tests-or-run-examples
-data(example.survey, package="networkreporting")
-data(example.knownpop.dat, package="networkreporting")
-data(mu284, package="networkreporting")
+load("mu284.RData")
+
+
+## size of the entire population
+tot.pop.size <- 10718378
+
+## column names for connections to groups of known size
+kp.q <- paste(example.knownpop.dat$known.popn)
+
 
 boot.example <- example.survey
 attr(boot.example, 'total.popn.size') <- tot.pop.size
@@ -36,8 +42,12 @@ boot.example <- add.kp(boot.example,
                                    kp.var='known.popn',
                                    kp.value='size'))
 
-boot.example$d.hat <- kp.degree.estimator(survey.data=boot.example,
-                                          verbose=FALSE)
+knownpop.tot <- sum(example.knownpop.dat$size)
+
+boot.example$d.hat <- kp.individual.estimator_(boot.example, 
+                               known.populations=kp.q,
+                               total.kp.size=knownpop.tot,
+                               alter.popn.size=tot.pop.size)$dbar.Fcell.F
 
 M1 <- 10
 M2 <- 50
@@ -120,7 +130,7 @@ context(paste0("variance estimators - rescaled bootstrap - correctness (M=", M, 
 rbsfn <- functional::Curry(bootstrap.estimates,
                            survey.design= ~ CL,
                            num.reps=M,
-                           estimator.fn="MU284.estimator.fn",
+                           estimator.fn=MU284.estimator.fn,
                            weights="sample_weight",
                            bootstrap.fn="rescaled.bootstrap.sample")
 
