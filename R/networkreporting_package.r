@@ -8,10 +8,28 @@
 ##' @docType package
 ##' @name networkreporting
 ##' @aliases networkreporting package-networkreporting
-##' @import plyr reshape2 stringr functional ggplot2 dplyr lazyeval Rcpp RcppArmadillo
+##' @import reshape2 functional ggplot2 dplyr lazyeval RcppArmadillo
 NULL
 
 ##' @useDynLib networkreporting
 ##' @importFrom Rcpp sourceCpp
 NULL
 
+##' @importFrom plyr aaply
+##' @importFrom plyr ldply
+##' @importFrom plyr dlply
+##' @importFrom plyr llply
+##' @importFrom plyr laply
+##' @importFrom plyr alply
+##' @importFrom plyr colwise
+##' @importFrom plyr d_ply
+##' @importFrom plyr l_ply
+##' @importFrom plyr join
+##' @importFrom plyr .
+NULL
+
+##' @importFrom stringr str_match
+##' @importFrom stringr str_c
+##' @importFrom stringr str_locate
+##' @importFrom stringr str_split
+NULL

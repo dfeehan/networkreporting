@@ -104,7 +104,7 @@ network.survival.estimator_ <- function(resp.data,
                                         qoi.name="deaths",
                                         dropmiss)
 
-    tog.df <- join(deg.by.att, deaths.by.att, by=attribute.names)
+    tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
 
     ## NB: we're using the sum of the sampling weights as N.F
     N.F <- sum(tog.df$wgt.total.y.kp)

@@ -90,7 +90,7 @@ rdsII.estimator <- function(survey.data,
 traits.to.string <- function(data, traits, na.action="drop", sep=".") {
 
   if (na.action == "drop") {
-    touse.idx <- aaply(data[, traits],
+    touse.idx <- plyr::aaply(data[, traits],
                        1,
                        function(x) { return(! any(is.na(x))) },
                        .expand=FALSE)
@@ -99,7 +99,7 @@ traits.to.string <- function(data, traits, na.action="drop", sep=".") {
     touse.idx <- 1:nrow(data)
   }
 
-  traits.str <- aaply(data[touse.idx, traits],
+  traits.str <- plyr::aaply(data[touse.idx, traits],
                       1,
                       paste0,
                       collapse=sep,
@@ -138,9 +138,7 @@ unparse.trait <- function(trait.string, names, sep="\\.") {
 
     vals <- str_split(trait.string, sep)
 
-    ##vals <- ldply(vals, identity)
-
-    vals <- ldply(vals, as.numeric)
+    vals <- plyr::ldply(vals, as.numeric)
 
     colnames(vals) <- names
 
@@ -213,11 +211,11 @@ estimate.degree.distns <- function(survey.data,
   ## to placate R CMD CHECK
   trait <- NULL
 
-  deg.distns <- dlply(deg.dat,
+  deg.distns <- plyr::dlply(deg.dat,
                       .(trait),
                       identity)
 
-  deg.fns <- unlist(llply(deg.distns,
+  deg.fns <- unlist(plyr::llply(deg.distns,
                           function(this.trait.deg) {
                               ## if we don't force evaluation here,
                               ## R's lazy evaluation implies that only the
@@ -234,7 +232,7 @@ estimate.degree.distns <- function(survey.data,
 
   draw.degrees.fn <- function(traits) {
       tocall <- deg.fns[traits]
-      degs <- llply(tocall, do.call, args=list())
+      degs <- plyr::llply(tocall, do.call, args=list())
       degs <- do.call("rbind", degs)
       rownames(degs) <- NULL
       return(degs)
@@ -311,7 +309,7 @@ estimate.mixing <- function(survey.data, parent.data, traits) {
 
   ## return a fn which will give us the next step in the chain from each state
   ## based on these transition probabilities
-  res$states <- dlply(res$mixing.df,
+  res$states <- plyr::dlply(res$mixing.df,
                     .(parent.trait),
                     function(this.trait) {
 
@@ -332,11 +330,11 @@ estimate.mixing <- function(survey.data, parent.data, traits) {
   ## given a list of preceding states, this function obtains a
   ## succeeding state for each one
   res$choose.next.state.fn <- function(prev.states) {
-      tfns <- llply(res$states, function(x) { x$trans.fn })
+      tfns <- plyr::llply(res$states, function(x) { x$trans.fn })
 
       tocall <- tfns[prev.states]
 
-      next.states <- unlist(llply(tocall, do.call, args=list()))
+      next.states <- unlist(plyr::llply(tocall, do.call, args=list()))
       return(next.states)
 
   }
@@ -431,7 +429,7 @@ make.chain <- function(seed.id, survey.data, is.child.fn=is.child.ct) {
 
     these.data <- survey.data[keys==seed.id,]
 
-    child.ids <- keys[which(laply(keys, is.child, seed.id=seed.id))]
+    child.ids <- keys[which(plyr::laply(keys, is.child, seed.id=seed.id))]
 
     ## if no children of this seed, finish
     if (length(child.ids)==0) {
@@ -440,7 +438,7 @@ make.chain <- function(seed.id, survey.data, is.child.fn=is.child.ct) {
     }
 
     return(list(data=these.data,
-                children=llply(child.ids,
+                children=plyr::llply(child.ids,
                                make.chain,
                                survey.data=survey.data)))
 
@@ -458,7 +456,7 @@ max.depth <- function(chain) {
         return(1)
     }
 
-    return(1 + max(laply(chain$children,
+    return(1 + max(plyr::laply(chain$children,
                          max.depth)))
 }
 
@@ -521,6 +519,6 @@ chain.data <- function(chain) {
     }
 
     return(rbind(chain$data,
-                 ldply(chain$children,
+                 plyr::ldply(chain$children,
                        chain.data)))
 }

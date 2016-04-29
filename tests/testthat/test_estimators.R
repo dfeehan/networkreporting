@@ -148,7 +148,7 @@ context("estimators - network survival")
 ## NB: for now, we're just testing the first network, since
 ##     the others have missing values, which we're not handling yet
 #tocheck <- llply(1:length(toy.nr.networks),
-tocheck <- llply(c(1),
+tocheck <- plyr::llply(c(1),
               function(this.nrnet.idx) {
 
                 this.nrnet <- toy.nr.networks[[this.nrnet.idx]]
@@ -170,9 +170,10 @@ tocheck <- llply(c(1),
                                                            total.kp.size=nrow(this.nrnet))
 
                 truth <- attr(this.nrnet, "ns.estimate")
-                truth <- rename(truth, c('est'='truth'))
+                truth <- plyr::rename(truth, c('est'='truth'))
 
-                netsurv.est <- join(netsurv.est, truth)
+                netsurv.est <- dplyr::left_join(netsurv.est, truth,
+                                                by=c('age', 'sex'))
 
                 return(netsurv.est)
               })

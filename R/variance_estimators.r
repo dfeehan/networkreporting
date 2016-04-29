@@ -43,7 +43,7 @@ killworth.se <- function(estimates,
                       estimates / total.popn.size,
                       estimates)
 
-  res <- aaply(est.props,
+  res <- plyr::aaply(est.props,
                1,
                function(est) {
                  return(sqrt((est*(1-est))/sum.d.hat))
@@ -160,7 +160,7 @@ bootstrap.estimates <- function(survey.data,
   boot.idx <- eval(boot.call, parent.frame())
 
   ## produce our estimate for each one
-  res <- llply(boot.idx,
+  res <- plyr::llply(boot.idx,
 
                function(this.rep) {
 
@@ -274,7 +274,7 @@ rescaled.bootstrap.sample <- function(survey.data,
   if (is.null(design$strata.formula)) {
     strata <- list(survey.data)
   } else {
-    strata <- dlply(survey.data, design$strata.formula, identity)
+    strata <- plyr::dlply(survey.data, design$strata.formula, identity)
   }
 
   ## get num.reps bootstrap resamples within each stratum,
@@ -284,7 +284,7 @@ rescaled.bootstrap.sample <- function(survey.data,
   ## this llply call returns a list, with one entry for each stratum
   ## each stratum's entry contains a list with the bootstrap resamples
   ## (see the note for the inner llply call below)
-  bs <- llply(strata,
+  bs <- plyr::llply(strata,
               function(stratum.data) {
 
                 ## (this part is written in c++)
@@ -308,7 +308,7 @@ rescaled.bootstrap.sample <- function(survey.data,
 
   bs.all <- do.call("rbind", bs)
 
-  res <- alply(bs.all[,-1],
+  res <- plyr::alply(bs.all[,-1],
                2,
                function(this_col) {
                    return(data.frame(index=bs.all[,1],
@@ -391,7 +391,7 @@ rescaled.bootstrap.sample.pureR <- function(survey.data,
   if (is.null(design$strata.formula)) {
     strata <- list(survey.data)
   } else {
-    strata <- dlply(survey.data, design$strata.formula, identity)
+    strata <- plyr::dlply(survey.data, design$strata.formula, identity)
   }
 
   ## get num.reps bootstrap resamples within each stratum,
@@ -401,7 +401,7 @@ rescaled.bootstrap.sample.pureR <- function(survey.data,
   ## this llply call returns a list, with one entry for each stratum
   ## each stratum's entry contains a list with the bootstrap resamples
   ## (see the note for the inner llply call below)
-  bs <- llply(strata,
+  bs <- plyr::llply(strata,
               function(stratum.data) {
 
                 ## figure out how many PSUs we have in our sample
@@ -420,7 +420,7 @@ rescaled.bootstrap.sample.pureR <- function(survey.data,
                 ## and with colums for 
                 ## the survey design variables, the .internal_id,
                 ## r.hi, and weight.scale
-                resamples <- llply(1:num.reps,
+                resamples <- plyr::llply(1:num.reps,
                                    ## for each bootstrap rep, this function returns
                                    function(rep) {
 
@@ -464,9 +464,9 @@ rescaled.bootstrap.sample.pureR <- function(survey.data,
               })
 
   # now reassemble each stratum...
-  res <- llply(1:num.reps,
+  res <- plyr::llply(1:num.reps,
                function(rep.idx) {
-                 this.rep <- ldply(bs,
+                 this.rep <- plyr::ldply(bs,
                                    function(this.stratum.samples) {
                                      return(this.stratum.samples[[rep.idx]])
                                    })
@@ -515,7 +515,7 @@ srs.bootstrap.sample <- function(survey.data,
 
   survey.data$.internal_id <- 1:nrow(survey.data)
 
-  res <- llply(1:num.reps,
+  res <- plyr::llply(1:num.reps,
                function(rep.idx) {
 
                  these.samples <- sample(1:nrow(survey.data),
@@ -572,7 +572,7 @@ rds.boot.draw.chain <- function(chain, mm, dd, parent.trait, idvar="uid") {
 
     ## otherwise, if there are children, recursively get bootstrap
     ## draws for them
-    child.draws <- llply(chain$children,
+    child.draws <- plyr::llply(chain$children,
                          rds.boot.draw.chain,
                          mm=mm,
                          dd=dd,
@@ -616,7 +616,7 @@ rds.chain.boot.draws <- function(chains,
     traits <- mm$traits
 
     ## get the bootstrap resamples for each chain
-    res <- llply(chains,
+    res <- plyr::llply(chains,
                  function(this.chain) {
 
                      ## TODO -- should handle the case where there is
@@ -635,11 +635,11 @@ rds.chain.boot.draws <- function(chains,
     ## one for each repsondent, with one row for each bootstrap resample
     ## convert this into a list whose entries are dataframes, one for each
     ## bootstrap resample, and whose rows are respondents
-    res.byboot <- llply(res,
+    res.byboot <- plyr::llply(res,
                         function(this.chain.res) {
-                            by.rep <- llply(1:num.reps,
+                            by.rep <- plyr::llply(1:num.reps,
                                             function(this.rep.id) {
-                                                ldply(this.chain.res,
+                                                plyr::ldply(this.chain.res,
                                                       function(x) x[this.rep.id,])
                                             })
                             return(by.rep)
@@ -648,9 +648,9 @@ rds.chain.boot.draws <- function(chains,
     ## assemble the bootstrap resamples from each chain together
     ## to end up with a list whose entries are datasets, one for each bootstrap
     ## resample (across all chains)
-    res.dat <- llply(1:num.reps,
+    res.dat <- plyr::llply(1:num.reps,
                      function(this.rep.id) {
-                        ldply(res.byboot,
+                         plyr::ldply(res.byboot,
                               function(x) { 
                                   this.dat <- x[[this.rep.id]] 
                                   ## remove the .id column
@@ -700,19 +700,19 @@ rds.mc.boot.draws <- function(chains,
 
     traits <- mm$traits
 
-    all.data <- ldply(chains,
+    all.data <- plyr::ldply(chains,
                       chain.data)
 
     ## NB: only using traits that are nonmissing
     all.traits <- traits.to.string(all.data[,traits,drop=FALSE], traits)
     all.traits.str <- all.traits$traits
 
-    chain.sizes <- laply(chains,
+    chain.sizes <- plyr::laply(chains,
                          chain.size)
 
     num.chains <- length(chain.sizes)
 
-    res <- llply(1:num.reps,
+    res <- plyr::llply(1:num.reps,
                  function(this.rep) {
 
                      ## NB: an alternative would be do to the bootstrap this way,

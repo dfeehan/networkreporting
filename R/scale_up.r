@@ -312,7 +312,7 @@ nsum.internal.validation <- function(survey.data,
                                            verbose=verbose)
 
   ## go through each known population...
-  res.all <- llply(names(known.popns),
+  res.all <- plyr::llply(names(known.popns),
 
                function(this.kp) {
 
@@ -411,8 +411,8 @@ nsum.internal.validation <- function(survey.data,
                                           boot.args))
                    boot.res <- eval(boot.call)
 
-                   boot.res.ests <- laply(boot.res, function(x) { x$estimate })
-                   boot.res.d.hat.sum <- laply(boot.res,
+                   boot.res.ests <- plyr::laply(boot.res, function(x) { x$estimate })
+                   boot.res.d.hat.sum <- plyr::laply(boot.res,
                                                function(x) { x$sum.d.hat })
                  } else {
                    boot.res.ests <- NULL
@@ -431,7 +431,7 @@ nsum.internal.validation <- function(survey.data,
 
                })
 
-  res <- ldply(res.all,
+  res <- plyr::ldply(res.all,
                function(x) { x$data })
 
   res.boot <- NULL
@@ -439,16 +439,16 @@ nsum.internal.validation <- function(survey.data,
   res.boot.d <- NULL
 
   if (bootstrap) {
-    res.boot <- llply(res.all,
+    res.boot <- plyr::llply(res.all,
                       function(x) {
                         x$boot$values
                       })
-    res.boot.d <- llply(res.all,
+    res.boot.d <- plyr::llply(res.all,
                         function(x) {
                           x$boot$d.hat.sum
                         })
-    names(res.boot) <- llply(res.all, function(x) { x$boot$name })
-    names(res.boot.d) <- llply(res.all, function(x) { x$boot$name })
+    names(res.boot) <- plyr::llply(res.all, function(x) { x$boot$name })
+    names(res.boot.d) <- plyr::llply(res.all, function(x) { x$boot$name })
 
   }
 

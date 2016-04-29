@@ -405,7 +405,7 @@ topcode.data <- function(survey.data, vars, max, to.na=NULL, ignore=NA) {
 
   ## TODO -- eventually check that vars are found in the columns of survey.data
 
-  survey.data[,vars] <- colwise(topcode.var)(survey.data[,vars,drop=FALSE],
+  survey.data[,vars] <- plyr::colwise(topcode.var)(survey.data[,vars,drop=FALSE],
                                              max=max,
                                              to.na=to.na,
                                              ignore=ignore)
