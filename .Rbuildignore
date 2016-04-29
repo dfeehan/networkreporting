@@ -8,3 +8,9 @@ vignettes/draft
 
 ^.*-dev\\.R$
 ^.*-dev\\.r$
+
+data-dev.r
+netsurv-dev.r
+var-dev.r
+var-prof-dev.r
+
