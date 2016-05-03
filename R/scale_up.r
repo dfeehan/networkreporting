@@ -52,10 +52,10 @@ total.degree.estimator <- function(survey.data,
   ## get the weights;
   ## weights will default to 1 for everyone, unless the user specified
   ## a weights variable
-  weights <- get.weights(survey.data, weights)
+  weights <- surveybootstrap:::get.weights(survey.data, weights)
 
   ## get the estimated degrees
-  d.hat.vals <- get.var(survey.data, d.hat.vals)
+  d.hat.vals <- surveybootstrap:::get.var(survey.data, d.hat.vals)
 
   if (missing == 'complete.obs') {
     touse <- which(! is.na(d.hat.vals))
@@ -131,11 +131,11 @@ nsum.estimator <- function(survey.data,
   ## get the weights;
   ## weights will default to 1 for everyone, unless the user specified
   ## a weights variable
-  weights <- get.weights(survey.data, weights)
+  weights <- surveybootstrap:::get.weights(survey.data, weights)
 
-  raw.d.hat.vals <- get.var(survey.data, d.hat.vals)
+  raw.d.hat.vals <- surveybootstrap:::get.var(survey.data, d.hat.vals)
 
-  raw.y.vals <- get.var(survey.data, y.vals)
+  raw.y.vals <- surveybootstrap:::get.var(survey.data, y.vals)
 
   #### compute the actual estimates
   y.vals <- raw.y.vals * weights
@@ -356,8 +356,8 @@ nsum.internal.validation <- function(survey.data,
                  ## dataframe; this is useful because if we take
                  ## bootstrap samples below, we only have to worry about
                  ## the dataset and not other, parallel, vectors
-                 thisdat$y.val.minus <- get.var(survey.data, this.kp)
-                 thisdat$weights.minus <- get.weights(survey.data, weights)
+                 thisdat$y.val.minus <- surveybootstrap:::get.var(survey.data, this.kp)
+                 thisdat$weights.minus <- surveybootstrap:::get.weights(survey.data, weights)
 
                  ## build up a call to nsum.estimator
                  ## (we do this rather than just calling directly
@@ -528,7 +528,7 @@ plot_meanties_truth <- function(survey.data, weights=NULL, known.popns=NULL)
 
   ## weights will default to 1 for everyone, unless the user specified
   ## a weights variable
-  weights <- get.weights(survey.data, weights)
+  weights <- surveybootstrap:::get.weights(survey.data, weights)
 
   ard.q <- subset(survey.data, select=names(known.popns))
 

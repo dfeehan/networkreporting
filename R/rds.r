@@ -38,9 +38,9 @@ rdsII.estimator <- function(survey.data,
     stop("error in specifying procedure for handling missing values in rdsII.estimator. invalid option.\n")
   }
 
-  d.hat.vals <- get.var(survey.data, d.hat.vals)
+  d.hat.vals <- surveybootstrap:::get.var(survey.data, d.hat.vals)
 
-  y.vals <- get.var(survey.data, y.vals)
+  y.vals <- surveybootstrap:::get.var(survey.data, y.vals)
 
   #### compute the actual estimates
   num <- y.vals/d.hat.vals

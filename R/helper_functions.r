@@ -31,8 +31,8 @@ df.to.kpvec <- function(kp.data,
                         kp.var,
                         kp.value) {
 
-  vals <- get.var(kp.data, kp.value)
-  var <- get.var(kp.data, kp.var)
+  vals <- surveybootstrap:::get.var(kp.data, kp.value)
+  var <- surveybootstrap:::get.var(kp.data, kp.var)
 
   kp.vec <- vals
   names(kp.vec) <- var
