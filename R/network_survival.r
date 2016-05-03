@@ -109,7 +109,7 @@ network.survival.estimator_ <- function(resp.data,
     ## NB: we're using the sum of the sampling weights as N.F
     N.F <- sum(tog.df$wgt.total.y.kp)
 
-    vcat(verbose,
+    surveybootstrap:::vcat(verbose,
          "Taking N.F value implied by weights: ", N.F, "\n")
 
     ## to placate R CMD CHECK
