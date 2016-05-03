@@ -11,6 +11,8 @@
 ##' @import reshape2 functional ggplot2 dplyr lazyeval surveybootstrap
 NULL
 
+##' @importFrom stats setNames
+
 ##' @importFrom plyr aaply
 ##' @importFrom plyr ldply
 ##' @importFrom plyr dlply
