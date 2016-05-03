@@ -316,7 +316,7 @@ nsum.internal.validation <- function(survey.data,
 
                function(this.kp) {
 
-                 vcat(verbose, "staring known popn: ", this.kp)
+                 surveybootstrap:::vcat(verbose, "staring known popn: ", this.kp)
 
                  known.size <- known.popns[this.kp]
 

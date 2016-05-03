@@ -189,7 +189,7 @@ parse.total.popn.size <- function(total.popn.size, survey.data, verbose=FALSE) {
   ## (see also kp.degree.estimator)
   if ((! is.null(total.popn.size)) && is.na(total.popn.size)) {
 
-    vcat(verbose, "working in proportions\n")
+    surveybootstrap:::vcat(verbose, "working in proportions\n")
 
   } else if (is.null(total.popn.size)) {
 
@@ -198,11 +198,11 @@ parse.total.popn.size <- function(total.popn.size, survey.data, verbose=FALSE) {
     if(! is.numeric(total.popn.size)) {
       stop("error - no suitable attribute 'total.popn.size' for dataframe.\n")
     } else {
-      vcat(verbose, "using dataframe's attribute for total population size.\n")
+      surveybootstrap:::vcat(verbose, "using dataframe's attribute for total population size.\n")
     }
 
   } else {
-    vcat(verbose, "working in absolute numbers\n")
+    surveybootstrap:::vcat(verbose, "working in absolute numbers\n")
   }
 
   return(total.popn.size)
