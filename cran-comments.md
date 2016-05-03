@@ -8,8 +8,19 @@
 
 There were no ERRORs and no WARNINGs.
 
-There was 1 NOTE:
+There were 2 NOTEs:
 
+    1)
+    Maintainer: ‘Dennis Feehan <feehan@berkeley.edu>’
+
+    License components with restrictions and base license permitting such:
+      MIT + file LICENSE
+    File 'LICENSE':
+      YEAR: 2016
+      COPYRIGHT HOLDER: Dennis M. Feehan
+
+
+    2)
     checking dependencies in R code ... NOTE
     Unexported objects imported by ':::' calls:
       ‘surveybootstrap:::get.var’ ‘surveybootstrap:::get.weights’
