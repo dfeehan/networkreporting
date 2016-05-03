@@ -76,6 +76,7 @@ package, and can be loaded by typing
 
 ```{r, message=FALSE}
 library(networkreporting)
+library(surveybootstrap)
 
 ## column names for connections to hidden population numbers
 hidden.q <- c("sex.workers", "msm", "idu", "clients")
