@@ -1,6 +1,6 @@
 Package: networkreporting
 Title: Tools for using Network Reporting Estimators
-Description: networkreporting has a collection of functions useful
+Description: Functions useful
     for producing estimates from data that were collected using network
     reporting techniques like network scale-up, indirect sampling,
     network reporting, and sibling history.
