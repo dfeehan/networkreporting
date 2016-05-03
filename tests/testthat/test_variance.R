@@ -20,13 +20,6 @@
 
 set.seed(12345)
 
-#########################################
-## setup
-## NB: see this for possible alternatives
-## http://stackoverflow.com/questions/8898469/is-it-possible-to-use-r-package-data-in-testthat-tests-or-run-examples
-load("mu284.RData")
-
-
 ## size of the entire population
 tot.pop.size <- 10718378
 
@@ -116,50 +109,6 @@ test.bootfn <- function(bfn) {
   ## so return them
   return(list(boot1, boot2))
 }
-
-#########################################
-## rescaled (Rao / Wu) bootstrap
-
-## TODO -- think about how many bootstrap reps
-## we should use in the unit tests...
-##M <- 1000
-M <- 2000
-
-context(paste0("variance estimators - rescaled bootstrap - correctness (M=", M, ")"))
-
-rbsfn <- functional::Curry(bootstrap.estimates,
-                           survey.design= ~ CL,
-                           num.reps=M,
-                           estimator.fn=MU284.estimator.fn,
-                           weights="sample_weight",
-                           bootstrap.fn="rescaled.bootstrap.sample")
-
-test.boot <- llply(MU284.surveys,
-                   function(svy) { do.call("rbind", rbsfn(survey.data=svy)) })
-
-test.boot.summ <- ldply(test.boot,
-                        summarize,
-                        mean.TS82.hat=mean(TS82.hat),
-                        mean.R.RMT85.P85.hat=mean(R.RMT85.P85.hat),
-                        sd.TS82.hat=sd(TS82.hat),
-                        sd.R.RMT85.P85.hat=sd(R.RMT85.P85.hat))
-
-## TODO -- how to figure out what tolerance to use?
-## for now, using .1 for everything, but this is pretty big; also,
-## we'd expect different tolerances for different qois, i think.
-qoi <- colnames(test.boot.summ)
-
-l_ply(qoi,
-      function(this.qoi) {
-          l_ply(1:nrow(test.boot.summ),
-                function(idx) {
-                    expect_that(test.boot.summ[idx,this.qoi],
-                                equals(MU284.boot.res.summ[idx,this.qoi],
-                                       tolerance=.05),
-                                label=paste0("qty: ", this.qoi,
-                                             "; MU284 survey #", idx))
-                })
-      })
 
 #########################################
 ## simple random sample (SRS) bootstrap
