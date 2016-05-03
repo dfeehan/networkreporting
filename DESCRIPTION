@@ -21,8 +21,7 @@ Imports:
     reshape2,
     stringr,
     dplyr,
-    RcppArmadillo
-LinkingTo: Rcpp, RcppArmadillo
+    surveybootstrap
 SystemRequirements: GNU make
 Suggests:
     knitr,

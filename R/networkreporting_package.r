@@ -8,11 +8,7 @@
 ##' @docType package
 ##' @name networkreporting
 ##' @aliases networkreporting package-networkreporting
-##' @import reshape2 functional ggplot2 dplyr lazyeval RcppArmadillo
-NULL
-
-##' @useDynLib networkreporting
-##' @importFrom Rcpp sourceCpp
+##' @import reshape2 functional ggplot2 dplyr lazyeval surveybootstrap
 NULL
 
 ##' @importFrom plyr aaply
