@@ -1,3 +1,10 @@
+networkreporting 0.1.0
+======================
+* moved C++ code and other bootstrap code into a separate package,
+  called surveybootstrap
+
+* some new unit tests and vignette
+
 networkreporting 0.0.2
 ======================
 * rescaled bootstrap code now written in C++ for increased speed
