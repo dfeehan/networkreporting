@@ -5,7 +5,7 @@ Description: Functions useful
     reporting techniques like network scale-up, indirect sampling,
     network reporting, and sibling history.
 Version: 0.1.0
-Maintainer: Dennis Feehan <feehan@berkeley.edu>
+Maintainer: Dennis M. Feehan <feehan@berkeley.edu>
 Authors@R: c(person(given=c("Dennis", "M."), 
                     family="Feehan", 
                     email="feehan@berkeley.edu", 
