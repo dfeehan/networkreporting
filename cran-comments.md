@@ -3,6 +3,7 @@
 
 * local OS X install, R 3.3.0 RC (2016-04-28 r70564)
 * ubuntu 12.04 (on travis-ci), R 3.2.5
+* win-builder x86_64-w64-mingw32 (64-bit), R 3.3.0 (2016-05-03)
 
 ## R CMD CHECK results
 
@@ -12,13 +13,18 @@ There were 2 NOTEs:
 
     1)
     * checking CRAN incoming feasibility ... NOTE
-    Maintainer: ‘Dennis Feehan <feehan@berkeley.edu>’
+
+    New maintainer:
+      Dennis M. Feehan <feehan@berkeley.edu>
+    Old maintainer(s):
+      Dennis Feehan <dfeehan@princeton.edu>
 
     License components with restrictions and base license permitting such:
       MIT + file LICENSE
     File 'LICENSE':
       YEAR: 2016
       COPYRIGHT HOLDER: Dennis M. Feehan
+
 
     2)
     checking dependencies in R code ... NOTE
