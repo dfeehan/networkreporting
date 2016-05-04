@@ -6,7 +6,14 @@ Description: Functions useful
     network reporting, and sibling history.
 Version: 0.1.0
 Maintainer: Dennis Feehan <feehan@berkeley.edu>
-Author: Dennis Feehan, Matthew Salganik
+Authors@R: c(person(given=c("Dennis", "M."), 
+                    family="Feehan", 
+                    email="feehan@berkeley.edu", 
+                    role=c("aut", "cre")),
+             person(given=c("Matthew", "J."), 
+                    family="Salganik", 
+                    email="mjs3@princeton.edu",
+                    role="ths"))
 Depends:
     R (>= 2.11.0)
 License: MIT + file LICENSE
