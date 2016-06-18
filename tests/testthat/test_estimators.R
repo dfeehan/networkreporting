@@ -156,7 +156,6 @@ tocheck <- plyr::llply(c(1),
                 ## no weights in toy network data, so give everyone a weight
                 ## of 1 for now
                 this.nrnet$weight <- 1
-                this.nrnet$nrid <- this.nrnet.idx
 
                 this.attrib <- toy.nr.long.networks[[this.nrnet.idx]]
                 this.attrib$ego.weight <- 1
@@ -174,6 +173,8 @@ tocheck <- plyr::llply(c(1),
 
                 netsurv.est <- dplyr::left_join(netsurv.est, truth,
                                                 by=c('age', 'sex'))
+
+                netsurv.est$nrid <- this.nrnet.idx
 
                 return(netsurv.est)
               })
