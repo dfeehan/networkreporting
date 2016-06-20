@@ -1,4 +1,4 @@
-networkreporting 0.1.0
+networkreporting 0.1.1
 ======================
 * very slight change to maintain compatability with upcoming
   version of dplyr
