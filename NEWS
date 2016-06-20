@@ -1,5 +1,11 @@
 networkreporting 0.1.0
 ======================
+* very slight change to maintain compatability with upcoming
+  version of dplyr
+
+
+networkreporting 0.1.0
+======================
 * moved C++ code and other bootstrap code into a separate package,
   called surveybootstrap
 
