@@ -107,8 +107,16 @@ network.survival.estimator_ <- function(resp.data,
     ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
     tog.df <- deg.by.att %>% full_join(deaths.by.att, by=attribute.names)
 
+    ## the full_join could produce missing values when there is no match;
+    ## this means that there is a cell that has a death and no respondents,
+    ## or vice versa
+    if (any(is.na(tog.df$wgt.total.y.kp))) {
+        surveybootstrap:::vcat(verbose,
+                               "Some deaths seem to come from a cell that has no survey respondents (or vice-versa).\n")
+    }
+
     ## NB: we're using the sum of the sampling weights as N.F
-    N.F <- sum(tog.df$wgt.total.y.kp)
+    N.F <- sum(tog.df$wgt.total.y.kp, na.rm=TRUE)
 
     surveybootstrap:::vcat(verbose,
          "Taking N.F value implied by weights: ", N.F, "\n")
