@@ -23,10 +23,6 @@
 ##'
 ##' @section TODO:
 ##' \itemize{
-##' \item{ handle case where attribute.names is NULL (should compute overall average)}
-##' \item{ handle missing values }
-##' \item{ integrate the individual-level estimator above, kp.degree.estimator}
-##' \item{ finish documentation for NSE version }
 ##' \item{ make unit tests }
 ##' \item{ think about how to elegantly add options for dbar_(P,Q) vs dbar_(Q,P)}
 ##' }
@@ -43,7 +39,10 @@
 ##'        often the frame population, which is the default if nothing else is
 ##'        specified; the size of the frame population is taken to be the sum
 ##'        of the weights over all of resp.data
-##' @return the estimated average degree for respondents in each
+##' @param missing if "ignore", then proceed with the analysis without
+##'                doing anything about missing values.
+##'                future versions may have other options
+##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
 ##'         of the categories given by \code{attribute.names}
 ##'
 ##' @rdname kp.estimator
@@ -53,7 +52,8 @@ kp.estimator_ <- function(resp.data,
                           attribute.names,
                           weights,
                           total.kp.size=NULL,
-                          alter.popn.size=NULL) {
+                          alter.popn.size=NULL,
+                          missing="ignore") {
 
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
