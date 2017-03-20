@@ -164,7 +164,7 @@ topcode.data <- function(survey.data, vars, max, to.na=NULL, ignore=NA) {
 ##' handle the total.popn.size argument in a uniform way across
 ##' several functions, including
 ##' \code{\link{kp.degree.estimator}},
-##' \code{\link{nsum.internal.validation}}, and
+##' \code{\link{nsum.internal.consistency}}, and
 ##' \code{\link{nsum.estimator}}.
 ##'
 ##' The result depends upon the value that was passed in:
