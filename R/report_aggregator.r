@@ -46,12 +46,14 @@ report.aggregator_ <- function(resp.data,
   dots <- lapply(grouping.cols, as.symbol)
 
   df.summ <- df %>% group_by_(.dots=dots) %>%
-             dplyr::summarise_(mean.qoi = interp(~weighted.mean(a, w=b), a=qoi.col, b=wgt.col),
+             dplyr::summarise_(mean.qoi = interp(~weighted.mean(a, w=b), 
+                                                 a=qoi.col, 
+                                                 b=wgt.col),
                         sum.qoi = interp(~sum(a*b), a=qoi.col, b=wgt.col),
                         wgt.total = interp(~sum(b), b=wgt.col),
                         wgt.inv.total = interp(~sum(1/b), b=wgt.col),
                         ## this is a hack because n() generates errors due to
-                        ## plyr/dplyr import conflict ( and it is hard to regulate
+                        ## plyr/dplyr import conflict (and it is hard to regulate
                         ## import order with package infrastructure)
                         num.obs = interp(~length(a), a=qoi.col))
 
