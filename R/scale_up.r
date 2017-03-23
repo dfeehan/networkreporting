@@ -9,7 +9,7 @@
 ##         when passed in as args. (ie, use get.var; now some fns
 ##         still don't use get.var)
 ## TODO -- perhaps an easy to use interface for nsum estimates
-##         with bootstrap (and then use this in nsum.internal.validation)
+##         with bootstrap (and then use this in nsum.internal.consistency)
 ## TODO -- when using defaults (for example, taking
 ##         popn size info from dataframe attributes,
 ##         should we print out a message to the screen?
@@ -206,9 +206,9 @@ nsum.estimator <- function(survey.data,
 }
 
 #####################################################
-##' nsum.internal.validation
+##' nsum.internal.consistency
 ##'
-##' use a hold-one-out method to estimate the predictive
+##' use a leave-one-out method to estimate the predictive
 ##' accuracy of the network scale-up estimator on the
 ##' known populations
 ##'
@@ -254,27 +254,32 @@ nsum.estimator <- function(survey.data,
 ##'                the variable with the appropriate weights. these weights
 ##'                should be construted so that, eg, the mean of the degrees is
 ##'                estimated as (1/n) * \\sum_i {w_i * d_i}
+##' @param alter.popn.size the size of the population of alters; this is most
+##'        often the frame population, which is the default if nothing else is
+##'        specified; the size of the frame population is taken to be the sum
+##'        of the weights over all of survey.data
 ##' @param killworth.se if TRUE, return the Killworth et al estimate of the standard error
 ##' @param return.plot if TRUE, make and return a ggplot2 plot object
 ##' @param verbose if TRUE, report more detailed information about what's going on
-##' @param bootstrap if TRUE, use \code{bootstrap.estimates} to take bootstrap resamples
+##' @param bootstrap if TRUE, use \code{surveybootstrap::bootstrap.estimates} to take bootstrap resamples
 ##'                  in order to obtain intervals around each estimate. in this case,
 ##'                  you are expected to also pass in at least \code{bootstrap.fn},
 ##'                  \code{survey.design}, and \code{num.reps}
-##' @param ... additional arguments, which are passed on to \code{bootstrap.estimates}
+##' @param ... additional arguments, which are passed on to \code{surveybootstrap::bootstrap.estimates}
 ##'            if \code{bootstrap} is TRUE
 ##' @return a list with a dataset containing the subpopn-specific estimates, as well as
 ##'         several summaries of the accuracy of those estimates, including
 ##'         mae (mean absolute error), mse (mean squared error),
 ##'         rmse (root mean squared error), and are (average relative error)
 ##' @export
-nsum.internal.validation <- function(survey.data,
+nsum.internal.consistency <- function(survey.data,
                                      known.popns=NULL,
                                      total.popn.size=NULL,
                                      degrees=NULL,
                                      missing="ignore",
-                                     kp.method=FALSE,
+                                     kp.method=TRUE,
                                      weights=NULL,
+                                     alter.popn.size=NULL,
                                      killworth.se=FALSE,
                                      return.plot=FALSE,
                                      verbose=FALSE,
@@ -283,7 +288,7 @@ nsum.internal.validation <- function(survey.data,
 {
 
   if (! missing %in% c("ignore", "complete.obs")) {
-    stop("error in specifying procedure for handling missing values in nsum.internal.validation. invalid option.\n")
+    stop("error in specifying procedure for handling missing values in nsum.internal.consistency invalid option.\n")
   }
 
   if (is.null(known.popns)) {
@@ -311,12 +316,24 @@ nsum.internal.validation <- function(survey.data,
                                            survey.data,
                                            verbose=verbose)
 
+  if(is.null(weights)) {
+	survey.data$.weight_default <- 1
+        weights <- ".weight_default"
+  }
+  
+  wdat <- select_(survey.data, .dots=weights)
+
+  alter.popn.size <- ifelse(is.null(alter.popn.size) ||
+                            is.null(lazy_eval(alter.popn.size)),
+                            sum(wdat[,1]),
+                            lazy_eval(alter.popn.size))
+
   ## go through each known population...
   res.all <- plyr::llply(names(known.popns),
 
                function(this.kp) {
 
-                 surveybootstrap:::vcat(verbose, "staring known popn: ", this.kp)
+                 surveybootstrap:::vcat(verbose, "starting known popn: ", this.kp)
 
                  known.size <- known.popns[this.kp]
 
@@ -326,11 +343,10 @@ nsum.internal.validation <- function(survey.data,
                  if( kp.method ) {
 
                    kp.minus <- known.popns[-match(this.kp,names(known.popns))]
-                   deg.minus <- kp.degree.estimator(survey.data=survey.data,
-                                                    known.popns=kp.minus,
-                                                    total.popn.size=total.popn.size,
-                                                    missing=missing,
-                                                    verbose=verbose)
+                   deg.minus <- kp.individual.estimator_(resp.data=survey.data,
+                                                         known.populations=names(kp.minus),
+                                                         total.kp.size=sum(kp.minus),
+                                                         alter.popn.size=alter.popn.size)$dbar.Fcell.F
 
                    thisdat <- survey.data
                    thisdat$deg.minus <- deg.minus
@@ -344,8 +360,8 @@ nsum.internal.validation <- function(survey.data,
                  }
 
                  degsum <- total.degree.estimator(thisdat,
-                                                 d.hat.vals="deg.minus",
-                                                 missing=missing)
+                                                  d.hat.vals="deg.minus",
+                                                  missing=missing)
 
                  ## note that this attribute could be NULL and we're
                  ## still OK here...
