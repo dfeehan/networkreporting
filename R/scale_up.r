@@ -321,8 +321,11 @@ nsum.internal.consistency <- function(survey.data,
         weights <- ".weight_default"
   }
   
+  ## grab the weights
   wdat <- select_(survey.data, .dots=weights)
 
+  ## grab the total size of the alter population
+  ## (typically, this would be the frame population, N.F)
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
                             is.null(lazy_eval(alter.popn.size)),
                             sum(wdat[,1]),
@@ -359,6 +362,7 @@ nsum.internal.consistency <- function(survey.data,
 
                  }
 
+                 ## TODO - should call report.aggregator_, i think 
                  degsum <- total.degree.estimator(thisdat,
                                                   d.hat.vals="deg.minus",
                                                   missing=missing)
