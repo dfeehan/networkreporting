@@ -31,5 +31,6 @@ Imports:
 SystemRequirements: GNU make
 Suggests:
     knitr,
-    testthat
+    testthat,
+    rmarkdown
 RoxygenNote: 5.0.1

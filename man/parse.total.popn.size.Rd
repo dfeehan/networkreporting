@@ -22,7 +22,7 @@ the parsed total population size
 handle the total.popn.size argument in a uniform way across
 several functions, including
 \code{\link{kp.degree.estimator}},
-\code{\link{nsum.internal.validation}}, and
+\code{\link{nsum.internal.consistency}}, and
 \code{\link{nsum.estimator}}.
 }
 \details{

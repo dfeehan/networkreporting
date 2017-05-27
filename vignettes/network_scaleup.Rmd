@@ -1,9 +1,13 @@
-<!--
-%\VignetteEngine{knitr::docco_linear}
-%\VignetteIndexEntry{network scale-up}
--->
-Analyzing network scale-up data using the **networkreporting** package
-=====================================================================
+---
+title: "Analyzing network scale-up data using the networkreporting package"
+author: "Dennis M. Feehan"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 Introduction
 ------------
@@ -202,10 +206,10 @@ each respondent's personal network.  To do this using the known population
 estimator, we use the `kp.degree.estimator` function:
 
 ```{r, tidy=FALSE}
-d.hat <- kp.degree.estimator(survey.data=example.survey,
-                             known.popns=kp.vec,
-                             total.popn.size=tot.pop.size,
-                             missing="complete.obs")
+d.hat <- kp.individual.estimator_(resp.data=example.survey,
+                                  known.populations=known.popn.vars,
+                                  total.kp.size=sum(kp.vec),
+                                  alter.popn.size=tot.pop.size)$dbar.Fcell.F
 
 summary(d.hat)
 ```
@@ -227,23 +231,25 @@ Now let's append the degree estimates to the survey reports dataframe:
 example.survey$d.hat <- d.hat
 ```
 
+<!--
 ### Missing data in known population questions
 
-TODO
-
+For now, we do not explicitly address missing data in the reported connections to the known
+populations. Future versions of the package may include tools to help address this issue.
+-->
 
 Estimating hidden population size
 ---------------------------------
 
 Now that you have estimated degrees, you can use them to produce estimates of the
-size of the hidden population. Here, we'll take the example of injecting drug
-users, `idu`
+size of the hidden population. Here, we'll take the example of clients of female sex
+workers, `clients`
 
 ```{r, tidy=FALSE}
 idu.est <- nsum.estimator(survey.data=example.survey,
                           d.hat.vals=d.hat,
                           total.popn.size=tot.pop.size,
-                          y.vals="idu",
+                          y.vals="clients",
                           missing="complete.obs")
 ```
 
@@ -292,7 +298,7 @@ idu.est <- bootstrap.estimates(## this describes the sampling design of the
                                ## to the nsum.estimator function
                                d.hat.vals=d.hat,
                                total.popn.size=tot.pop.size,
-                               y.vals="idu",
+                               y.vals="clients",
                                missing="complete.obs")
 ```
 
@@ -315,7 +321,7 @@ We can examine the summarized results with a histogram or with `summarize`.
 
 ```{r}
 ## look at a histogram of the results
-qplot(all.idu.estimates$estimate, binwidth=50)
+qplot(all.idu.estimates$estimate, binwidth=500)
 
 ## summarize the results
 summary(all.idu.estimates$estimate)
@@ -327,16 +333,16 @@ To produce 95% intervals using the percentile method you can do something like t
 quantile(all.idu.estimates$estimate, probs=c(0.025, 0.975))
 ```
 
-Internal valididty checks
--------------------------
+Internal consistency checks
+---------------------------
 
-If you want to run internal validation checks (see e.g. [Salganik et al., 2011, Fig 3](http://aje.oxfordjournals.org/content/174/10/1190.full)), you can use the
-`nsum.internal.validation` function. We specify that we wish to use only
+If you want to run internal consistency checks (see e.g. [Feehan et al., 2016, Fig 3](https://doi.org/10.1093/aje/kwv287)), you can use the
+`nsum.internal.consistency` function. We specify that we wish to use only
 complete observations (ie, we will remove rows that have any missing values
 from our calculations).
 
 ```{r, tidy=FALSE}
-iv.result <- nsum.internal.validation(survey.data=example.survey,
+ic.result <- nsum.internal.consistency(survey.data=example.survey,
                                       known.popns=kp.vec,
                                       missing="complete.obs",
                                       killworth.se=TRUE,
@@ -345,26 +351,26 @@ iv.result <- nsum.internal.validation(survey.data=example.survey,
                                       return.plot=TRUE)
 ```
 
-Now `iv.result` is a list that has a summary of the results in the entry `results`
+Now `ic.result` is a list that has a summary of the results in the entry `results`
 
 ```{r}
-iv.result$results
+ic.result$results
 ```
 Since we passed the argument `return.plot=TRUE` to the function, we also get a plot:
 ```{r}
-print(iv.result$plot)
+print(ic.result$plot)
 ```
 
 This plot is a `ggplot2` object, so we can customize it if we want. As a very simple 
 example, we can change the title:
 
 ```{r}
-print(iv.result$plot + ggtitle("internal validation checks"))
+print(ic.result$plot + ggtitle("internal consistency checks"))
 ```
 
 The [ggplot2 website](http://ggplot2.org/) has more information on modifying ggplot2 objects.
 
-
+<!--
 Attaching known population totals to the dataframe
 --------------------------------------------------
 
@@ -387,4 +393,4 @@ summary(d.hat.new)
 ```
 
 This is exactly the same result we obtained before.
-
+-->
