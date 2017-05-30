@@ -32,3 +32,6 @@
 # not positive about this one...
 # inst/doc
 inst/doc
+.Rproj.user
+
+*.swo
