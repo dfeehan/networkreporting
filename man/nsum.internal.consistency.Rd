@@ -6,8 +6,9 @@
 \usage{
 nsum.internal.consistency(survey.data, known.popns = NULL,
   total.popn.size = NULL, degrees = NULL, missing = "ignore",
-  kp.method = FALSE, weights = NULL, killworth.se = FALSE,
-  return.plot = FALSE, verbose = FALSE, bootstrap = FALSE, ...)
+  kp.method = TRUE, weights = NULL, alter.popn.size = NULL,
+  killworth.se = FALSE, return.plot = FALSE, verbose = FALSE,
+  bootstrap = FALSE, ...)
 }
 \arguments{
 \item{survey.data}{the dataframe with the survey results}
@@ -46,18 +47,23 @@ the variable with the appropriate weights. these weights
 should be construted so that, eg, the mean of the degrees is
 estimated as (1/n) * \\sum_i {w_i * d_i}}
 
+\item{alter.popn.size}{the size of the population of alters; this is most
+often the frame population, which is the default if nothing else is
+specified; the size of the frame population is taken to be the sum
+of the weights over all of survey.data}
+
 \item{killworth.se}{if TRUE, return the Killworth et al estimate of the standard error}
 
 \item{return.plot}{if TRUE, make and return a ggplot2 plot object}
 
 \item{verbose}{if TRUE, report more detailed information about what's going on}
 
-\item{bootstrap}{if TRUE, use \code{bootstrap.estimates} to take bootstrap resamples
+\item{bootstrap}{if TRUE, use \code{surveybootstrap::bootstrap.estimates} to take bootstrap resamples
 in order to obtain intervals around each estimate. in this case,
 you are expected to also pass in at least \code{bootstrap.fn},
 \code{survey.design}, and \code{num.reps}}
 
-\item{...}{additional arguments, which are passed on to \code{bootstrap.estimates}
+\item{...}{additional arguments, which are passed on to \code{surveybootstrap::bootstrap.estimates}
 if \code{bootstrap} is TRUE}
 }
 \value{
@@ -67,7 +73,7 @@ a list with a dataset containing the subpopn-specific estimates, as well as
         rmse (root mean squared error), and are (average relative error)
 }
 \description{
-use a hold-one-out method to estimate the predictive
+use a leave-one-out method to estimate the predictive
 accuracy of the network scale-up estimator on the
 known populations
 }

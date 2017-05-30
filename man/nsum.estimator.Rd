@@ -4,15 +4,17 @@
 \alias{nsum.estimator}
 \title{nsum.estimator}
 \usage{
-nsum.estimator(survey.data, d.hat.vals = "d", y.vals = "y",
-  total.popn.size = NULL, deg.ratio = 1, tx.rate = 1, weights = NULL,
-  killworth.se = FALSE, missing = "ignore", verbose = FALSE, ...)
+nsum.estimator(survey.data, d.hat.vals = "d", d.tot.hat = NULL,
+  y.vals = "y", total.popn.size = NULL, deg.ratio = 1, tx.rate = 1,
+  weights = NULL, killworth.se = FALSE, missing = "ignore",
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{survey.data}{the dataframe with survey results}
 
 \item{d.hat.vals}{the name or index of the column that contains
-each respondent's estimated degree}
+each respondent's estimated degree; note that if
+d.total.hat is specified, then this argument (d.hat.vals) is ignored}
 
 \item{y.vals}{the name or index of the column that contains
 the count of hidden popn members known}
@@ -40,6 +42,10 @@ must be taken in using this second option}
 \item{verbose}{if TRUE, print messages to the screen}
 
 \item{...}{extra parameters to pass on to the bootstrap fn, if applicable}
+
+\item{d.total.hat}{if not NULL, then the estimated total degree of the population
+(i.e., the average degree times the number of people);
+if NULL, then use d.hat.vals (see above)}
 }
 \value{
 the nsum estimate of the hidden population's size (as a prevalence or
