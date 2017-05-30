@@ -207,7 +207,7 @@ nsum.estimator <- function(survey.data,
   ## the killworth estimate for the standard error
   if (killworth.se) {
       if (! is.null(d.tot.hat)) {
-        error("Killworth SE not available when passing in estimated total network size.\n")
+        stop("Killworth SE not available when passing in estimated total network size.\n")
       }
     
       ## NOTE: this is not really defined for the case of
