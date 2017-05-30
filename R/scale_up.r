@@ -84,7 +84,11 @@ total.degree.estimator <- function(survey.data,
 ##'
 ##' @param survey.data the dataframe with survey results
 ##' @param d.hat.vals the name or index of the column that contains
-##'                  each respondent's estimated degree
+##'                  each respondent's estimated degree; note that if
+##'                  d.total.hat is specified, then this argument (d.hat.vals) is ignored
+##' @param d.total.hat if not NULL, then the estimated total degree of the population
+##'                    (i.e., the average degree times the number of people);
+##'                    if NULL, then use d.hat.vals (see above)
 ##' @param y.vals the name or index of the column that contains
 ##'              the count of hidden popn members known
 ##' @param total.popn.size NULL, NA, or a size
@@ -109,6 +113,7 @@ total.degree.estimator <- function(survey.data,
 ##' @export
 nsum.estimator <- function(survey.data,
                            d.hat.vals="d",
+                           d.tot.hat=NULL,
                            y.vals="y",
                            total.popn.size=NULL,
                            deg.ratio=1,
@@ -132,32 +137,53 @@ nsum.estimator <- function(survey.data,
   ## weights will default to 1 for everyone, unless the user specified
   ## a weights variable
   weights <- surveybootstrap:::get.weights(survey.data, weights)
-
-  raw.d.hat.vals <- surveybootstrap:::get.var(survey.data, d.hat.vals)
-
+  
+  ## get reported connections to the hidden population
   raw.y.vals <- surveybootstrap:::get.var(survey.data, y.vals)
-
-  #### compute the actual estimates
   y.vals <- raw.y.vals * weights
-  d.hat.vals <- raw.d.hat.vals * weights
-
-  ## figure out if we have to only use non-missing entries
+  
+  ## by default, use all the rows; we'll take out missing entries below, if appropriate
   touse.idx <- 1:length(y.vals)
-  if (missing == "complete.obs") {
-    touse.idx <- which( (! is.na(y.vals) & ! is.na(d.hat.vals)))
+    
+  ## if d.tot.hat is NULL, then we're using individual degree estimates
+  ## described by the d.hat.vals argument
+  if(is.null(d.tot.hat)) {
 
-    notused <- length(y.vals) - length(touse.idx)
-
-    if (verbose & notused > 0) {
-      cat(str_c("missing=='complete.obs', so dropping ",
-                notused, " rows with missing data\n"))
+    raw.d.hat.vals <- surveybootstrap:::get.var(survey.data, d.hat.vals)
+  
+    #### compute the actual estimates
+    d.hat.vals <- raw.d.hat.vals * weights
+  
+    if (missing == "complete.obs") {
+      ## figure out if we have to only use non-missing entries
+      touse.idx <- which( (! is.na(y.vals) & ! is.na(d.hat.vals)))
     }
-
+    
+    denom <- sum(d.hat.vals[touse.idx])
+    
+  ## if d.tot.hat is not NULL, then it is assumed to have an estimated average
+  ## personal network size, which we'll use as the denominator
+  } else {
+    if (missing == "complete.obs") {
+      ## figure out if we have to only use non-missing entries
+      touse.idx <- which( (! is.na(y.vals)))
+    }
+    
+    denom <- d.tot.hat
+  
+  }
+  
+  ## count the number of rows we aren't using because of missingness
+  notused <- length(y.vals) - length(touse.idx)
+  
+  if (missing == 'complete.obs' & verbose & notused > 0) {
+    cat(str_c("missing=='complete.obs', so dropping ",
+              notused, " rows with missing data\n"))
   }
 
   ## NB: for now, this will return NA if either the degrees or
   ##     the y_i's has any NAs
-  res <- sum(y.vals[touse.idx])/sum(d.hat.vals[touse.idx])
+  res <- sum(y.vals[touse.idx])/denom
 
   if (deg.ratio != 1) {
     res <- res * (1/deg.ratio)
@@ -175,12 +201,15 @@ nsum.estimator <- function(survey.data,
                 tot.connections=sum(y.vals[touse.idx]) *
                 (1/deg.ratio) *
                 (1/tx.rate),
-                sum.d.hat=sum(d.hat.vals[touse.idx]))
+                sum.d.hat=denom)
 
   ## not recommended, but interesting in some cases:
   ## the killworth estimate for the standard error
   if (killworth.se) {
-
+      if (! is.null(d.tot.hat)) {
+        error("Killworth SE not available when passing in estimated total network size.\n")
+      }
+    
       ## NOTE: this is not really defined for the case of
       ## non-trivial degree ratio or transmission rate
       ## we'll use unadjusted proportion in all cases

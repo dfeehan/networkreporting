@@ -1,3 +1,10 @@
+networkreporting 0.2
+====================
+* updated `nsum.estimator` function so that it can use an estimated
+  total degree that has come from some source other than the dataset being
+  used for scale-up estimates
+
+
 networkreporting 0.1.1
 ======================
 * very slight change to maintain compatability with upcoming
