@@ -16,3 +16,5 @@ var-prof-dev.r
 
 cran-comments.md
 
+^.*\.Rproj$
+^\.Rproj\.user$
