@@ -36,4 +36,3 @@ The result depends upon the value that was passed in:
 }
 }
 \keyword{internal}
-

@@ -22,4 +22,3 @@ the multiplicity estimate of the hidden
 compute gwsm estimate of the population
 size
 }
-

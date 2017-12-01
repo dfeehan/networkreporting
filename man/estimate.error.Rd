@@ -24,4 +24,3 @@ produce some measurements of how close the esimate is
    ## TODO add example
 }
 }
-

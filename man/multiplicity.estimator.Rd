@@ -21,4 +21,3 @@ the multiplicity estimate of the hidden
 compute multiplicity estimate of the population
 size
 }
-

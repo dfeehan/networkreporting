@@ -39,4 +39,3 @@ estimated degrees.\cr
 TODO -- for now, it doesn't worry about missing values
 OR about differences between the frame and the universe
 }
-

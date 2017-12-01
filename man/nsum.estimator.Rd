@@ -61,4 +61,3 @@ and information transmission rate are both 1
 TODO -- cite Killworth estimator, our methods paper
 TODO -- add refs to deg ratio and tx rate stuff...
 }
-

@@ -37,4 +37,3 @@ in TODO [Volz + Heckathorn '08]
 NOTE: we have no weights for now, right? RDS doesn't
 get used with weights?
 }
-

@@ -37,4 +37,3 @@ case where there is missing data is not yet implemented.
 (In fact, I don't think that there is a known
 estimator for this case.)
 }
-

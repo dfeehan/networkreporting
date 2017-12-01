@@ -31,4 +31,3 @@ that we do not generally recommend using this
 strategy for estimating variance
 }
 \keyword{internal}
-

@@ -27,4 +27,3 @@ function to topcode a set of columns in a data frame
    ## TODO write example
 }
 }
-

@@ -44,4 +44,3 @@ note that this function does not take survey weights, since
 these estimates are not for total degree, but just for the
 individual degree of each respondent
 }
-

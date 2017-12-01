@@ -91,4 +91,19 @@ TODO -- document bootstrap ci option better
 TODO -- add example of usage to the comments...\cr
 TODO -- make amenable to parallelization
 }
-
+\examples{
+\dontrun{
+ic.result <- 
+  nsum.internal.consistency(survey.data=recoded.dat,
+                            known.popns=kp.totals,
+                            missing="complete.obs",
+                            killworth.se=TRUE,
+                            kp.method=TRUE,
+                            alter.popn.size=total.popn.size,
+                            return.plot=TRUE,
+                            bootstrap=TRUE,
+                            bootstrap.fn="rescaled.bootstrap.sample",
+                            survey.design=~ cluster,
+                            num.reps=100)
+}
+}

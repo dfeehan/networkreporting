@@ -34,4 +34,3 @@ it's useful for topcoding a whole set of aggregated relational data
                                   max=30)
 }
 }
-
