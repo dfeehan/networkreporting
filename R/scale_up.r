@@ -301,6 +301,21 @@ nsum.estimator <- function(survey.data,
 ##'         mae (mean absolute error), mse (mean squared error),
 ##'         rmse (root mean squared error), and are (average relative error)
 ##' @export
+##' @examples 
+##' \dontrun{
+##' ic.result <- 
+##'   nsum.internal.consistency(survey.data=recoded.dat,
+##'                             known.popns=kp.totals,
+##'                             missing="complete.obs",
+##'                             killworth.se=TRUE,
+##'                             kp.method=TRUE,
+##'                             alter.popn.size=total.popn.size,
+##'                             return.plot=TRUE,
+##'                             bootstrap=TRUE,
+##'                             bootstrap.fn="rescaled.bootstrap.sample",
+##'                             survey.design=~ cluster,
+##'                             num.reps=100)
+##' }
 nsum.internal.consistency <- function(survey.data,
                                      known.popns=NULL,
                                      total.popn.size=NULL,
