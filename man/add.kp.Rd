@@ -4,14 +4,14 @@
 \alias{add.kp}
 \title{attach known populations to a dataframe}
 \usage{
-add.kp(survey.data, kp.vec, total.pop.size = NULL)
+add.kp(survey.data, kp.vec, total.popn.size = NULL)
 }
 \arguments{
 \item{survey.data}{the survey dataframe}
 
 \item{kp.vec}{the known population vector}
 
-\item{total.pop.size}{(optional) the total population size to use (see below)}
+\item{total.popn.size}{(optional) the total population size to use (see below)}
 }
 \value{
 the survey dataframe with the known population vector

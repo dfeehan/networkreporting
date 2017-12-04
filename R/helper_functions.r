@@ -65,7 +65,7 @@ df.to.kpvec <- function(kp.data,
 ##' @param kp.vec the known population vector
 ##' @return the survey dataframe with the known population vector
 ##' attached as an attribute
-##' @param total.pop.size (optional) the total population size to use (see below)
+##' @param total.popn.size (optional) the total population size to use (see below)
 ##' @export
 ##' @seealso \link{df.to.kpvec}
 ##' @examples \dontrun{
@@ -81,11 +81,11 @@ df.to.kpvec <- function(kp.data,
 ##'   # kp.degree.estimator without having to specify known
 ##'   # populations each time
 ##' }
-add.kp <- function(survey.data, kp.vec, total.pop.size=NULL) {
+add.kp <- function(survey.data, kp.vec, total.popn.size=NULL) {
   attr(survey.data, "known.popns") <- kp.vec
 
-  if (! is.null(total.pop.size)) {
-      attr(survey.data, "total.popn.size") <- total.pop.size
+  if (! is.null(total.popn.size)) {
+      attr(survey.data, "total.popn.size") <- total.popn.size
   }
     
   return(survey.data)
