@@ -31,7 +31,8 @@
 ##' @param known.populations  the names of the columns in \code{resp.data}
 ##'          that have respondents' reports about connections to known populations
 ##' @param attribute.names the names of the columns in \code{resp.data} that
-##'                        determine the subgroups for which average degree is estimated
+##'                        determine the subgroups for which average degree is estimated;
+##'                        if NULL, then the average over all respondents is estimated
 ##' @param weights weights to use in computing the estimate
 ##' @param total.kp.size the size of the probe alters; i.e., the sum of the known population
 ##'                      sizes. if NULL, then this is set to 1
@@ -49,15 +50,22 @@
 ##' @export
 kp.estimator_ <- function(resp.data, 
                           known.populations,
-                          attribute.names,
                           weights,
+                          attribute.names=NULL,
                           total.kp.size=NULL,
                           alter.popn.size=NULL,
                           missing="ignore") {
 
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
-  adat <- select_(resp.data, .dots=attribute.names)
+  
+  if(! is.null(attribute.names)) {
+    adat <- select_(resp.data, .dots=attribute.names)
+    atnames <- paste(colnames(adat))
+  } else {
+    adat <- NULL
+    atnames <- NULL
+  }
 
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
                             is.null(lazy_eval(alter.popn.size)),
@@ -75,7 +83,6 @@ kp.estimator_ <- function(resp.data,
 
   df <- bind_cols(kptot, wdat, adat)
 
-  atnames <- paste(colnames(adat))
 
   # now aggregate by attributes
   agg <- report.aggregator_(resp.data=df,
@@ -108,16 +115,23 @@ kp.estimator_ <- function(resp.data,
 
 #####################################################
 ##' @rdname kp.estimator
+##' @export
 kp.estimator <- function(resp.data, 
                          known.populations,
-                         attribute.names,
                          weights,
+                         attribute.names=NULL,
                          total.kp.size=1,
                          alter.popn.size=NULL) {
+  
+    if(is.null(attribute.names)) {
+      anames <- NULL
+    } else {
+      anames <- lazy(attribute.names, resp.data)
+    }
 
     kp.estimator_(resp.data,
                   known.populations=lazy(known.populations),
-                  attribute.names=lazy(attribute.names, resp.data),
+                  attribute.names=anames,
                   weights=lazy(weights, resp.data),
                   total.kp.size=lazy(total.kp.size),
                   alter.popn.size=lazy(alter.popn.size))
