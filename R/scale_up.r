@@ -542,7 +542,7 @@ nsum.internal.consistency <- function(survey.data,
                          range(known.size,nsum.holdout.est,na.rm=TRUE))) +
                ylim(with(res,
                          range(known.size,nsum.holdout.est,na.rm=TRUE))) +
-               geom_abline(intercept=0, slope=1) +
+               geom_abline(intercept=0, slope=1, color='grey') +
                ggtitle(paste("Hold-out estimate versus known popn size")) +
                xlab("known population size") +
                ylab("hold-out NSUM estimate\nof popn size")
