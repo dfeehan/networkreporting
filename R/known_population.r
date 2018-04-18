@@ -66,6 +66,10 @@ kp.estimator_ <- function(resp.data,
     adat <- NULL
     atnames <- NULL
   }
+  
+  if(missing == "ignore") {
+    cat("NOTE: Ignoring any rows with missingness on any of the report variables.\n")
+  }
 
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
                             is.null(lazy_eval(alter.popn.size)),
@@ -79,7 +83,11 @@ kp.estimator_ <- function(resp.data,
   # get individual-level sums for known population connections
   # (NB: might want to eventually allow for this to be adjusted by
   #      some kind of response / reporting model?)
-  kptot <- data_frame(kptot=rowSums(kpdat))
+  if(missing == 'ignore') {
+    kptot <- data_frame(kptot=rowSums(kpdat, na.rm=TRUE))
+  } else {
+    kptot <- data_frame(kptot=rowSums(kpdat))
+  }
 
   df <- bind_cols(kptot, wdat, adat)
 
