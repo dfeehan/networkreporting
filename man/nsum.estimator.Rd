@@ -16,6 +16,10 @@ nsum.estimator(survey.data, d.hat.vals = "d", d.tot.hat = NULL,
 each respondent's estimated degree; note that if
 d.total.hat is specified, then this argument (d.hat.vals) is ignored}
 
+\item{d.tot.hat}{if not NULL, then the estimated total degree of the population
+(i.e., the average degree times the number of people);
+if NULL, then use d.hat.vals (see above)}
+
 \item{y.vals}{the name or index of the column that contains
 the count of hidden popn members known}
 
@@ -42,10 +46,6 @@ must be taken in using this second option}
 \item{verbose}{if TRUE, print messages to the screen}
 
 \item{...}{extra parameters to pass on to the bootstrap fn, if applicable}
-
-\item{d.total.hat}{if not NULL, then the estimated total degree of the population
-(i.e., the average degree times the number of people);
-if NULL, then use d.hat.vals (see above)}
 }
 \value{
 the nsum estimate of the hidden population's size (as a prevalence or

@@ -86,7 +86,7 @@ total.degree.estimator <- function(survey.data,
 ##' @param d.hat.vals the name or index of the column that contains
 ##'                  each respondent's estimated degree; note that if
 ##'                  d.total.hat is specified, then this argument (d.hat.vals) is ignored
-##' @param d.total.hat if not NULL, then the estimated total degree of the population
+##' @param d.tot.hat if not NULL, then the estimated total degree of the population
 ##'                    (i.e., the average degree times the number of people);
 ##'                    if NULL, then use d.hat.vals (see above)
 ##' @param y.vals the name or index of the column that contains
