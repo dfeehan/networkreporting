@@ -86,6 +86,25 @@ typically have relative weights, which must be converted into standard sampling 
 before using this function.
 }
 
+\section{Returned dataframe}{
+
+Currently, the dataframe that is returned has columns for the attributes that death rates
+were calculated for, along with:
+\itemize{
+\item{ \code{sum.y.kp} - from \code{kp.estimator}}
+\item{ \code{wgt.total.y.kp} - from \code{kp.estimator}}
+\item{ \code{num.obs.y.kp} - from \code{kp.estimator}}
+\item{ \code{sum.y.kp.over.kptot} - from \code{kp.estimator}}
+\item{ \code{dbar.Fcell.F} - estimated avg. number connections from F.alpha to F}
+\item{ \code{mean.deaths} - weighted avg number of reported deaths}
+\item{ \code{sum.deaths} - weighted total number of reported deaths}
+\item{ \code{wgt.total.deaths} - total of weights (estimate for N.F)}
+\item{ \code{wgt.inv.total.deaths} - (not used)}
+\item{ \code{num.obs.deaths} - number of observations}
+\item{ \code{asdr.hat} - the estimated death rate}
+}
+}
+
 \section{TODO}{
 
 \itemize{
