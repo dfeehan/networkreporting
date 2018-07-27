@@ -47,23 +47,19 @@
 ##' Currently, the dataframe that is returned has columns for the attributes that death rates
 ##' were calculated for, along with:
 ##' \itemize{
-##' \item{ \code{sum.y.kp} - from \code{kp.estimator}}
-##' \item{ \code{wgt.total.y.kp} - from \code{kp.estimator}}
-##' \item{ \code{num.obs.y.kp} - from \code{kp.estimator}}
-##' \item{ \code{sum.y.kp.over.kptot} - from \code{kp.estimator}}
-##' \item{ \code{dbar.Fcell.F} - estimated avg. number connections from F.alpha to F}
-##' \item{ \code{mean.deaths} - weighted avg number of reported deaths}
-##' \item{ \code{sum.deaths} - weighted total number of reported deaths}
-##' \item{ \code{wgt.total.deaths} - total of weights (estimate for N.F)}
-##' \item{ \code{wgt.inv.total.deaths} - (not used)}
-##' \item{ \code{num.obs.deaths} - number of observations}
+##' \item{ \code{num.obs.deaths} - number of deaths reported}
+##' \item{ \code{num.obs.degree} - number of respondents in cell used for estimating degree}
+##' \item{ \code{y.F.Dcell.hat} - estimated total number connections from the frame to deaths}
+##' \item{ \code{y.Fcell.kp.hat} - estimated total number of connections from (frame intersect cell) to the groups of known size}
+##' \item{ \code{total.kp.size} - the total size of the groups of known size}
+##' \item{ \code{N.F.hat} - estimated size of frame population (based on survey weights)}
 ##' \item{ \code{asdr.hat} - the estimated death rate}
 ##' }
 ##'
 ##' @section TODO:
 ##' \itemize{
 ##' \item{ handle missing values}
-##' \item{ think about whether or not this is the best way to handle N.F}
+##' \item{ allow passing in N.F (currently, we always estimate from weights)}
 ##' \item{ write more general agg mult est fn and call that }
 ##' \item{ make unit tests }
 ##' }
@@ -150,7 +146,19 @@ network.survival.estimator_ <- function(resp.data,
     ## (these are done implicitly here because some of the factors cancel --
     ##  see TODO vignette)
     tog.df <- tog.df %>%
-              dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
+              dplyr::mutate(total.kp.size = total.kp.size,
+                            N.F.hat = N.F,
+                            y.F.Dcell.hat = sum.deaths,
+                            y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
+              dplyr::select(attribute.names,
+                            n.obs.deaths = num.obs.deaths,
+                            n.obs.degree = num.obs.y.kp,
+                            y.F.Dcell.hat,
+                            y.Fcell.kp.hat,
+                            total.kp.size,
+                            N.F.hat) %>%
+              dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
+              #dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
 
     return(tog.df)
 
