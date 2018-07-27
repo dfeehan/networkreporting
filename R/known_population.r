@@ -43,6 +43,7 @@
 ##' @param missing if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values.
 ##'                future versions may have other options
+##' @param verbose if TRUE, print information to screen
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
 ##'         of the categories given by \code{attribute.names}
 ##'
@@ -54,7 +55,8 @@ kp.estimator_ <- function(resp.data,
                           attribute.names=NULL,
                           total.kp.size=NULL,
                           alter.popn.size=NULL,
-                          missing="ignore") {
+                          missing="ignore",
+                          verbose=TRUE) {
 
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
@@ -68,7 +70,8 @@ kp.estimator_ <- function(resp.data,
   }
   
   if(missing == "ignore") {
-    cat("NOTE: Ignoring any rows with missingness on any of the report variables.\n")
+    surveybootstrap:::vcat(verbose,
+                           "NOTE: Ignoring any rows with missingness on any of the report variables.\n")
   }
 
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||

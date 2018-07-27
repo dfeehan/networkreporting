@@ -6,7 +6,8 @@
 \title{Average personal network size estimates using known population method}
 \usage{
 kp.estimator_(resp.data, known.populations, weights, attribute.names = NULL,
-  total.kp.size = NULL, alter.popn.size = NULL, missing = "ignore")
+  total.kp.size = NULL, alter.popn.size = NULL, missing = "ignore",
+  verbose = TRUE)
 
 kp.estimator(resp.data, known.populations, weights, attribute.names = NULL,
   total.kp.size = 1, alter.popn.size = NULL)
@@ -34,6 +35,8 @@ of the weights over all of resp.data}
 \item{missing}{if "ignore", then proceed with the analysis without
 doing anything about missing values.
 future versions may have other options}
+
+\item{verbose}{if TRUE, print information to screen}
 }
 \value{
 the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
