@@ -1,3 +1,7 @@
+networkreporting 0.2.99
+=======================
+* updated `network.survival` function so that it returns cell-specific degree estimates
+
 networkreporting 0.2
 ====================
 * updated `nsum.estimator` function so that it can use an estimated
