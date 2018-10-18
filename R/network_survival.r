@@ -52,6 +52,7 @@
 ##' \item{ \code{y.F.Dcell.hat} - estimated total number connections from the frame to deaths}
 ##' \item{ \code{y.Fcell.kp.hat} - estimated total number of connections from (frame intersect cell) to the groups of known size}
 ##' \item{ \code{total.kp.size} - the total size of the groups of known size}
+##' \item{ \code{N.Fcell.hat} - estimated size of (frame intersect cell) population (based on survey weights)}
 ##' \item{ \code{N.F.hat} - estimated size of frame population (based on survey weights)}
 ##' \item{ \code{asdr.hat} - the estimated death rate}
 ##' }
@@ -148,6 +149,7 @@ network.survival.estimator_ <- function(resp.data,
     tog.df <- tog.df %>%
               dplyr::mutate(total.kp.size = total.kp.size,
                             N.F.hat = N.F,
+                            N.Fcell.hat = wgt.total.y.kp,
                             y.F.Dcell.hat = sum.deaths,
                             y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
               dplyr::select(attribute.names,
@@ -156,6 +158,7 @@ network.survival.estimator_ <- function(resp.data,
                             y.F.Dcell.hat,
                             y.Fcell.kp.hat,
                             total.kp.size,
+                            N.Fcell.hat,
                             N.F.hat) %>%
               dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
               #dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
