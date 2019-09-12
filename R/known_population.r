@@ -177,7 +177,8 @@ kp.estimator_ <- function(resp.data,
                     dbar.Fcell.F = sum.y.kp.over.kptot * 
                       (alter.popn.size / wgt.total.y.kp))
       
-    ## TODO - CHECK FOR MISSINGNESS AND WARN
+    ## if there is any missingness in the dbar.Fcell.F estimates,
+    ## warn the user (and ignore it)
     if (any(is.na(res.boot$dbar.Fcell.F))) {
       n.na <- sum(is.na(res.boot$dbar.Fcell.F))
       n.all <- length(res.boot$dbar.Fcell.F)

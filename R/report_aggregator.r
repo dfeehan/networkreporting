@@ -44,7 +44,16 @@ report.aggregator_ <- function(resp.data,
   qoi.col <- as.symbol(names(df)[2])
 
   weighted_sum <- function(x, w) { return(sum(x*w)) }
-  weighted_mean <- surveybootstrap::weighted.mean
+  weighted_mean <- function (x, w, na.rm = FALSE) 
+  {
+    if (na.rm) {
+      idx <- (1:length(x))[!is.na(x)]
+    }
+    else {
+      idx <- 1:length(x)
+    }
+    return(sum(x[idx] * w[idx])/sum(w[idx]))
+  }
 
   ## NB: this design is based on siblingsurvival::get_ind_est_from_ec
   df.summ <- df %>% 
