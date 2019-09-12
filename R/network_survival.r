@@ -65,7 +65,7 @@
 ##' \item{ make unit tests }
 ##' }
 ##' 
-##' @param resp.data the dataframe that has a row for each respondent, with reported
+##' @param resp.data The dataframe that has a row for each respondent, with reported
 ##'                  connections to the groups of known size, as well as the attributes.
 ##'                  Note that the column names of the attributes should match
 ##'                  their names in \code{attribute.data}
@@ -74,19 +74,32 @@
 ##'                       row for each time a respondent reports a hidden population member.
 ##'                       For example, to estimate death rates, there should be one row for
 ##'                       each report of a death.
-##' @param attribute.names the names of the columns of attribute.data
+##' @param attribute.names The names of the columns of attribute.data
 ##'                        and resp.data that contain the attribute information.
-##' @param known.populations the names of the columns in \code{resp.data} that
+##' @param known.populations The names of the columns in \code{resp.data} that
 ##'          have responses to the known population questions
-##' @param total.kp.size the size of the probe alters, i.e., the sum of the known
+##' @param total.kp.size The size of the probe alters, i.e., the sum of the known
 ##'         population sizes
-##' @param weights the weights or weights column for the respondent data
-##' @param attribute.weights the weights or weights column for the alter data
-##' @param dropmiss see \code{\link{report.aggregator}}
-##' @param verbose if TRUE, print information to screen
+##' @param weights The weights or weights column for the respondent data
+##' @param attribute.weights The weights or weights column for the alter data
+##' @param boot.weights Optional dataframe with bootstrap resampled weights. See Details for more info.
+##' @param ego.id If boot.weights are included, then this is the name of the
+##'   column(s) we need to join the bootstrap weights onto the dataset. This is
+##'   most often the id of the ego making the reports.
+##' @param return.boot If TRUE, and if \code{boot.weights} is specified, then return each bootstrap estimate 
+##' @param dropmiss See \code{\link{report.aggregator}}
+##' @param verbose If TRUE, print information to screen
 ##' @return the network reporting estimate of the hidden population's size
 ##'         (as a prevalence) broken down by the categories defined by all combinations
 ##'         of \code{attribute.names}.
+##' @section Details:
+##' If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
+##' \code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
+##' and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
+##' 
+##' \code{ego.id} can either be a string or vector of strings, or it can be a named vector
+##' like \code{c('a'='b')}. In the second case, \code{'a'} should be the name of the id column
+##' in \code{resp.data}, while \code{'b'} should be the name of the id column in \code{'attribute.data'}.
 ##'
 ##' @rdname network.survival.estimator
 ##' @export
@@ -97,6 +110,9 @@ network.survival.estimator_ <- function(resp.data,
                                         total.kp.size=1,
                                         weights,
                                         attribute.weights,
+                                        boot.weights=NULL,
+                                        ego.id=NULL,
+                                        return.boot=FALSE,
                                         dropmiss=NULL,
                                         verbose=TRUE) {
 
@@ -146,7 +162,7 @@ network.survival.estimator_ <- function(resp.data,
     ## group size to obtain a rate.
     ## (these are done implicitly here because some of the factors cancel --
     ##  see TODO vignette)
-    tog.df <- tog.df %>%
+    res <- tog.df %>%
               dplyr::mutate(total.kp.size = total.kp.size,
                             N.F.hat = N.F,
                             N.Fcell.hat = wgt.total.y.kp,
@@ -163,7 +179,107 @@ network.survival.estimator_ <- function(resp.data,
               dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
               #dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
 
-    return(tog.df)
+    ## if we've been passed bootstrap weights, use them
+    if (! is.null(boot.weights)) {
+        if (is.null(ego.id)) {
+            stop("No ego.id specified. When using boot.weights, you must also pass ego.id in too.")
+        }
+        
+        ## ego.id is either (1) a string or unnamed vector, in case we are good
+        ##               or (2) a named vector like c('id'='ego.id'); in this case,
+        ##                      the ego id has the name 'id' in the respondent data
+        ##                      and 'ego.id' in the attribute.data. 
+        ##                      In this situation, we'll want a character
+        
+        # ego.id.forjoin has the full expression for joining ego and attribute data together
+        ego.id.forjoin <- ego.id  
+        if (! is.null(names(ego.id))) {
+            # ego.id has just the name of the variable(s) that are the ego id in the ego data
+            ego.id.forjoin <- setNames(names(ego.id), ego.id)
+            ego.id <- names(ego.id)
+        }
+        
+        ## estimate the average personal network size of the respondents
+        ## for each combination of attributes
+        deg.by.att.boot <- kp.estimator_(resp.data=resp.data,
+                                         known.populations=known.populations,
+                                         attribute.names=attribute.names,
+                                         weights=weights,
+                                         boot.weights=boot.weights,
+                                         ego.id=ego.id,
+                                         ## we want all of the bootstrap resamples
+                                         return.boot=TRUE,
+                                         total.kp.size=total.kp.size,
+                                         verbose=verbose)$boot.estimates
+        
+        # join bootstrap weights onto data, which is what report.aggregator_ requires
+        ad.withboot <- attribute.data %>%
+            left_join(boot.weights, by=ego.id.forjoin)
+        
+        # get the names of the columns that have bootstrap weights
+        boot.cols <- stringr::str_subset(colnames(boot.weights), ego.id, negate=TRUE)
+        
+        ## count the number of connections from respondents to members
+        ## of the hidden population with each combination of attributes
+        attribute.data$death <- 1 # done above, but repeat to avoid fragility if code is changed later
+        deaths.by.att.boot <- report.aggregator_(ad.withboot,
+                                                 attribute.names,
+                                                 qoi="death",
+                                                 #attribute.weights,
+                                                 weights=boot.cols,
+                                                 qoi.name="deaths",
+                                                 dropmiss)
+        
+        ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
+        tog.df.boot <- deg.by.att.boot %>% full_join(deaths.by.att.boot, 
+                                                     by=c(attribute.names, 'boot_idx'))        
+        
+        tog.df.boot <- tog.df.boot %>%
+            dplyr::mutate(total.kp.size = total.kp.size,
+                          N.F.hat = N.F,
+                          N.Fcell.hat = wgt.total.y.kp,
+                          y.F.Dcell.hat = sum.deaths,
+                          y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
+            dplyr::select(attribute.names,
+                          n.obs.deaths = num.obs.deaths,
+                          n.obs.degree = num.obs.y.kp,
+                          y.F.Dcell.hat,
+                          y.Fcell.kp.hat,
+                          total.kp.size,
+                          N.Fcell.hat,
+                          N.F.hat,
+                          boot_idx) %>%
+            dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
+        
+        ## check for missingness and warn
+        if (any(is.na(tog.df.boot$asdr.hat))) {
+            n.na <- sum(is.na(tog.df.boot$asdr.hat))
+            n.all <- length(tog.df.boot$asdr.hat)
+            warning(glue::glue("Aggregate estimates have {n.na} out of {n.all} values missing. These have been removed in the summary statistics. Beware!\n"))
+        } 
+        
+        ## calculate summaries
+        boot.varest <- tog.df.boot %>%
+            ungroup() %>%
+            group_by_at(attribute.names) %>%
+            summarise(asdr.hat.ci.low = quantile(asdr.hat, .025, na.rm=TRUE),
+                      asdr.hat.ci.high = quantile(asdr.hat, 0.975, na.rm=TRUE),
+                      asdr.hat.median = quantile(asdr.hat, 0.5, na.rm=TRUE),
+                      asdr.hat.se = sd(asdr.hat, na.rm=TRUE))
+        
+        # and join the estimated sampling uncertainty onto the returned asdrs
+        res <- res %>%
+            left_join(boot.varest, by=attribute.names) %>%
+            mutate(boot_reps = length(boot.cols))
+        
+        ## optionally return full bootstrap estimates
+        if (return.boot) {
+            res <- list(estimates=res,
+                        boot.estimates=tog.df.boot)
+        }
+    }
+    
+    return(res)
 
 }
 
@@ -176,6 +292,10 @@ network.survival.estimator <- function(resp.data,
                                        total.kp.size=1,
                                        weights,
                                        attribute.weights,
+                                       boot.weights=NULL,
+                                       ego.id=NULL,
+                                       return.boot=FALSE,                                       
+                                       dropmiss=NULL,
                                        verbose=TRUE) {
 
     network.survival.estimator_(resp.data,
@@ -185,6 +305,10 @@ network.survival.estimator <- function(resp.data,
                                 lazy(total.kp.size),
                                 lazy(weights),
                                 lazy(attribute.weights),
+                                lazy(boot.weights),
+                                lazy(ego.id),
+                                lazy(return.boot),
+                                lazy(dropmiss),
                                 lazy(verbose))
 
 }
