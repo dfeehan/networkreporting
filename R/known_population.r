@@ -132,7 +132,8 @@ kp.estimator <- function(resp.data,
                          weights,
                          attribute.names=NULL,
                          total.kp.size=1,
-                         alter.popn.size=NULL) {
+                         alter.popn.size=NULL,
+                         missing='ignore') {
   
     if(is.null(attribute.names)) {
       anames <- NULL
@@ -145,7 +146,8 @@ kp.estimator <- function(resp.data,
                   attribute.names=anames,
                   weights=lazy(weights, resp.data),
                   total.kp.size=lazy(total.kp.size),
-                  alter.popn.size=lazy(alter.popn.size))
+                  alter.popn.size=lazy(alter.popn.size),
+                  missing=lazy(missing))
 
 }
 
@@ -166,7 +168,6 @@ kp.estimator <- function(resp.data,
 ##'
 ##' @section TODO:
 ##' \itemize{
-##' \item{ handle missing values! }
 ##' \item{ make unit tests }
 ##' }
 ##'
@@ -177,6 +178,7 @@ kp.estimator <- function(resp.data,
 ##'        are reporting about connections to; typically this will
 ##'        be the frame population, so \code{alter.popn.size} should
 ##'        be the size of the frame population, N.F
+##' @param missing see the missing argument of \code{\link{kp.estimator_}}
 ##' @return a data frame with an estimate of each individual respondent's personal
 ##'         network size
 ##' @rdname kp.individual.estimator
@@ -184,7 +186,8 @@ kp.estimator <- function(resp.data,
 kp.individual.estimator <- function(resp.data, 
                                     known.populations,
                                     total.kp.size=1,
-                                    alter.popn.size) {
+                                    alter.popn.size,
+                                    missing='ignore') {
 
     resp.data$.rowid <- 1:nrow(resp.data)
     resp.data$.noweight <- 1
@@ -194,7 +197,8 @@ kp.individual.estimator <- function(resp.data,
                          attribute.names=".rowid",
                          weights=".noweight",
                          total.kp.size=lazy(total.kp.size),
-                         alter.popn.size=lazy(alter.popn.size))
+                         alter.popn.size=lazy(alter.popn.size),
+                         missing=lazy(missing))
 
 }
 
@@ -204,7 +208,8 @@ kp.individual.estimator <- function(resp.data,
 kp.individual.estimator_ <- function(resp.data, 
                                      known.populations,
                                      total.kp.size=1,
-                                     alter.popn.size) {
+                                     alter.popn.size,
+                                     missing='ignore') {
 
     resp.data$.rowid <- 1:nrow(resp.data)
     resp.data$.noweight <- 1
@@ -214,7 +219,8 @@ kp.individual.estimator_ <- function(resp.data,
                          attribute.names=".rowid",
                          weights=".noweight",
                          total.kp.size=total.kp.size,
-                         alter.popn.size=alter.popn.size)
+                         alter.popn.size=alter.popn.size,
+                         missing=missing)
 
 }
 
