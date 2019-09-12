@@ -72,7 +72,7 @@ report.aggregator_ <- function(resp.data,
       select(-rawqty) %>%
       tidyr::spread(qty, value)
     
-  } else {
+  } #else {
   
       toren <- list(~mean.qoi, ~sum.qoi, ~wgt.total, ~wgt.inv.total, ~num.obs)
       newnames <- paste0(c("mean.", "sum.", "wgt.total.", 
@@ -80,7 +80,7 @@ report.aggregator_ <- function(resp.data,
     
       df.summ <- dplyr::rename_(df.summ,
                          .dots=setNames(toren, newnames))
-  }
+  #}
 
   return(df.summ)
 

@@ -30,7 +30,13 @@
 ##' @param resp.data the dataframe that has the survey responses
 ##' @param known.populations  the names of the columns in \code{resp.data}
 ##'          that have respondents' reports about connections to known populations
-##' @param weights weights to use in computing the estimate
+##' @param weights the name of a column that has sampling weights
+##' @param boot.weights Optional dataframe with bootstrap resampled weights. See Details for more info.
+##' @param ego.id If boot.weights are included, then this is the name of the
+##'   column(s) we need to join the bootstrap weights onto the dataset. This is
+##'   most often the id of the ego making the reports.
+##' @param return.boot if TRUE and boot.weights are included, then return the full bootstrapped estiamates and not just the summaries;
+##' this option causes this function to return a list instead of a tibble
 ##' @param attribute.names the names of the columns in \code{resp.data} that
 ##'                        determine the subgroups for which average degree is estimated;
 ##'                        if NULL, then the average over all respondents is estimated
@@ -50,11 +56,19 @@
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
 ##'         of the categories given by \code{attribute.names}
 ##'
+##' @section Details:
+##' If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
+##' \code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
+##' and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
+##'
 ##' @rdname kp.estimator
 ##' @export
 kp.estimator_ <- function(resp.data, 
                           known.populations,
                           weights,
+                          boot.weights=NULL,
+                          ego.id=NULL,
+                          return.boot=FALSE,
                           attribute.names=NULL,
                           total.kp.size=NULL,
                           alter.popn.size=NULL,
@@ -63,6 +77,10 @@ kp.estimator_ <- function(resp.data,
 
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
+  
+  if(! is.null(ego.id)) {
+    iddat <- select_(resp.data, .dots=ego.id)
+  }
   
   if(! is.null(attribute.names)) {
     adat <- select_(resp.data, .dots=attribute.names)
@@ -100,6 +118,10 @@ kp.estimator_ <- function(resp.data,
   }
 
   df <- bind_cols(kptot, wdat, adat)
+  
+  if (! is.null(ego.id)) {
+    df <- bind_cols(df, iddat)
+  }
 
 
   # now aggregate by attributes
@@ -112,12 +134,12 @@ kp.estimator_ <- function(resp.data,
   tograb <- lapply(c(colnames(adat),
                      'sum.y.kp', 'wgt.total.y.kp', 'num.obs.y.kp'),
                    as.symbol)
-
+  
   ## to placate R CMD CHECK
   sum.y.kp <- NULL
   sum.y.kp.over.kptot <- NULL
   wgt.total.y.kp <- NULL
-
+  
   res <- select_(agg, .dots=tograb) %>%
          dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
                 ## here, we estimate N_F / N_{F_\alpha} by dividing the
@@ -126,6 +148,67 @@ kp.estimator_ <- function(resp.data,
                 ## (see technical note in documentation)
                 dbar.Fcell.F = sum.y.kp.over.kptot * 
                                (alter.popn.size / wgt.total.y.kp))
+    
+  if (! is.null(boot.weights)) {
+    
+    if (is.null(ego.id)) {
+      stop("In order to use bootstrap weights, you must also pass ego.id; this is needed to link the weights to the reports.")
+    }
+    
+    df <- df %>% left_join(boot.weights,
+                           by=ego.id) 
+    
+    
+    boot.cols <- stringr::str_subset(colnames(boot.weights), ego.id, negate=TRUE)
+    
+    # now aggregate by attributes
+    agg.boot <- report.aggregator_(resp.data=df,
+                                   attribute.names=atnames,
+                                   qoi='kptot',
+                                   weights=boot.cols,
+                                   qoi.name='y.kp')    
+    
+    res.boot <- select_(agg.boot, .dots=c(tograb, 'boot_idx')) %>%
+      dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
+                    ## here, we estimate N_F / N_{F_\alpha} by dividing the
+                    ## total of all respondents' weights by the sum of
+                    ## the weights for respondents in each cell \alpha
+                    ## (see technical note in documentation)
+                    dbar.Fcell.F = sum.y.kp.over.kptot * 
+                      (alter.popn.size / wgt.total.y.kp))
+      
+    ## TODO - CHECK FOR MISSINGNESS AND WARN
+    if (any(is.na(res.boot$dbar.Fcell.F))) {
+      n.na <- sum(is.na(res.boot$dbar.Fcell.F))
+      n.all <- length(res.boot$dbar.Fcell.F)
+      warning(glue::glue("Bootstrapped degree estimates have {n.na} out of {n.all} values missing. These have been removed in the summary statistics. Beware!\n"))
+    } 
+    
+    # get estimated sampling uncertainty for the
+    # aggregated reports
+    agg.varest <- res.boot %>%
+      ungroup() %>%
+      group_by_at(atnames) %>%
+      summarise(dbar.Fcell.F.ci.low  = quantile(dbar.Fcell.F, .025, na.rm=TRUE),
+                dbar.Fcell.F.ci.high = quantile(dbar.Fcell.F, 0.975, na.rm=TRUE),
+                dbar.Fcell.F.median  = quantile(dbar.Fcell.F, 0.5, na.rm=TRUE),
+                dbar.Fcell.F.se      = sd(dbar.Fcell.F, na.rm=TRUE))
+    
+    if (! is.null(atnames)) {
+      # and join the estimated sampling uncertainty onto the returned asdrs
+      res <- res %>%
+        left_join(agg.varest, by=atnames)
+    } else {
+      res <- bind_cols(res, agg.varest)
+    }
+  }
+  
+  if (! is.null(boot.weights)) {
+    if(return.boot) {
+      res <- list(estimates = res,
+                  boot.estimates = res.boot)
+    }
+  }
 
   return(res)
 
