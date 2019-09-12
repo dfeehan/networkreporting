@@ -15,11 +15,12 @@
 ##' @param attribute.names the names of the variables that define
 ##'          the groups for which the qoi should be aggregated
 ##' @param qoi the variable with quantity to aggregate
-##' @param weights analysis weights
+##' @param weights analysis weights; either the name of a column that has sampling weights
+##' or a vector with the names of columns of the dataset that have bootstrap weights. Currently,
+##' these weights must be named "boot_weight_1", "boot_weight_2", ...
 ##' @param qoi.name the name of the qoi
 ##' @param dropmiss NOT YET IMPLEMENTED
-##' @return the estimated average degree for respondents in each
-##'         of the categories given by \code{attribute.names}
+##' @return the aggregated reported quantities
 ##' @rdname report.aggregator
 report.aggregator_ <- function(resp.data,
                                attribute.names,
@@ -42,27 +43,44 @@ report.aggregator_ <- function(resp.data,
   wgt.col <- as.symbol(names(df)[1])
   qoi.col <- as.symbol(names(df)[2])
 
-  grouping.cols <- names(df)[-1:-2]
-  dots <- lapply(grouping.cols, as.symbol)
+  weighted_sum <- function(x, w) { return(sum(x*w)) }
+  weighted_mean <- surveybootstrap::weighted.mean
 
-  df.summ <- df %>% group_by_(.dots=dots) %>%
-             dplyr::summarise_(mean.qoi = interp(~weighted.mean(a, w=b), 
-                                                 a=qoi.col, 
-                                                 b=wgt.col),
-                        sum.qoi = interp(~sum(a*b), a=qoi.col, b=wgt.col),
-                        wgt.total = interp(~sum(b), b=wgt.col),
-                        wgt.inv.total = interp(~sum(1/b), b=wgt.col),
-                        ## this is a hack because n() generates errors due to
-                        ## plyr/dplyr import conflict (and it is hard to regulate
-                        ## import order with package infrastructure)
-                        num.obs = interp(~length(a), a=qoi.col))
-
-  toren <- list(~mean.qoi, ~sum.qoi, ~wgt.total, ~wgt.inv.total, ~num.obs)
-  newnames <- paste0(c("mean.", "sum.", "wgt.total.", 
-                       "wgt.inv.total.", "num.obs."), qoi.name)
-
-  df.summ <- dplyr::rename_(df.summ,
-                     .dots=setNames(toren, newnames))
+  ## NB: this design is based on siblingsurvival::get_ind_est_from_ec
+  df.summ <- df %>% 
+             group_by_at(attribute.names) %>%
+             dplyr::summarise_at(.vars=weights,
+                                 .funs=list(mean.qoi = ~weighted_mean(.data[[qoi]], w=.),
+                                            sum.qoi = ~weighted_sum(x=.data[[qoi]], w=.),
+                                            wgt.total = ~sum(.),
+                                            wgt.inv.total = ~sum(1/.),
+                                            ## this is a hack because n() generates errors due to
+                                            ## plyr/dplyr import conflict (and it is hard to regulate
+                                            ## import order with package infrastructure)
+                                            num.obs = ~length(.)))
+  
+  ## if we have bootstrap weights, reshape and clean things up
+  if(length(weights) > 1) {
+    
+    ## NB: assuming weight names are boot_weight_1, boot_weight_2, ...
+    df.summ <- df.summ %>%
+      tidyr::gather(starts_with('boot_weight'),
+             key='rawqty',
+             value='value')  %>%
+      mutate(qty = stringr::str_remove(rawqty, 'boot_weight_\\d+_'),
+             boot_idx = as.integer(stringr::str_remove_all(rawqty, '[^\\d]'))) %>%
+      select(-rawqty) %>%
+      tidyr::spread(qty, value)
+    
+  } else {
+  
+      toren <- list(~mean.qoi, ~sum.qoi, ~wgt.total, ~wgt.inv.total, ~num.obs)
+      newnames <- paste0(c("mean.", "sum.", "wgt.total.", 
+                           "wgt.inv.total.", "num.obs."), qoi.name)
+    
+      df.summ <- dplyr::rename_(df.summ,
+                         .dots=setNames(toren, newnames))
+  }
 
   return(df.summ)
 

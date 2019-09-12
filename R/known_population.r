@@ -42,6 +42,9 @@
 ##'        of the weights over all of resp.data
 ##' @param missing if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values.
+##'                if "complete.obs", then, for each row, use only the known populations
+##'                that have no missingness for the
+##'                computations. care must be taken in using this second option.
 ##'                future versions may have other options
 ##' @param verbose if TRUE, print information to screen
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
@@ -74,11 +77,15 @@ kp.estimator_ <- function(resp.data,
                            "NOTE: Ignoring any rows with missingness on any of the report variables.\n")
   }
 
+  ## if missing == 'complete.obs'
+  ##    then disregard rows that don't have no missingness on kp questions
+  
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
                             is.null(lazy_eval(alter.popn.size)),
                             sum(wdat[,1]),
                             lazy_eval(alter.popn.size))
 
+  # NB: this will change to handle complete.obs
   total.kp.size <- ifelse(is.null(total.kp.size),
                           1,
                           lazy_eval(total.kp.size))

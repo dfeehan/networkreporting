@@ -5,12 +5,13 @@
 \alias{kp.estimator}
 \title{Average personal network size estimates using known population method}
 \usage{
-kp.estimator_(resp.data, known.populations, weights, attribute.names = NULL,
-  total.kp.size = NULL, alter.popn.size = NULL, missing = "ignore",
-  verbose = TRUE)
+kp.estimator_(resp.data, known.populations, weights,
+  attribute.names = NULL, total.kp.size = NULL,
+  alter.popn.size = NULL, missing = "ignore", verbose = TRUE)
 
-kp.estimator(resp.data, known.populations, weights, attribute.names = NULL,
-  total.kp.size = 1, alter.popn.size = NULL)
+kp.estimator(resp.data, known.populations, weights,
+  attribute.names = NULL, total.kp.size = 1, alter.popn.size = NULL,
+  missing = "ignore")
 }
 \arguments{
 \item{resp.data}{the dataframe that has the survey responses}

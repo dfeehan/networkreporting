@@ -6,10 +6,10 @@
 \title{Individual personal network size estimates using the known population method}
 \usage{
 kp.individual.estimator(resp.data, known.populations, total.kp.size = 1,
-  alter.popn.size)
+  alter.popn.size, missing = "ignore")
 
 kp.individual.estimator_(resp.data, known.populations, total.kp.size = 1,
-  alter.popn.size)
+  alter.popn.size, missing = "ignore")
 }
 \arguments{
 \item{resp.data}{the respondent (survey) data}
@@ -22,6 +22,8 @@ kp.individual.estimator_(resp.data, known.populations, total.kp.size = 1,
 are reporting about connections to; typically this will
 be the frame population, so \code{alter.popn.size} should
 be the size of the frame population, N.F}
+
+\item{missing}{see the missing argument of \code{\link{kp.estimator_}}}
 }
 \value{
 a data frame with an estimate of each individual respondent's personal
@@ -42,7 +44,6 @@ sampling weights are not used here.
 \section{TODO}{
 
 \itemize{
-\item{ handle missing values! }
 \item{ make unit tests }
 }
 }
