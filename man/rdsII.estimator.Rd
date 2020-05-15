@@ -4,8 +4,13 @@
 \alias{rdsII.estimator}
 \title{rdsII.estimator}
 \usage{
-rdsII.estimator(survey.data, d.hat.vals, y.vals, missing = "ignore",
-  verbose = FALSE)
+rdsII.estimator(
+  survey.data,
+  d.hat.vals,
+  y.vals,
+  missing = "ignore",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{survey.data}{the dataframe with RDS survey results}

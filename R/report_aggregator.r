@@ -18,6 +18,7 @@
 ##' @param weights analysis weights; either the name of a column that has sampling weights
 ##' or a vector with the names of columns of the dataset that have bootstrap weights. Currently,
 ##' these weights must be named "boot_weight_1", "boot_weight_2", ...
+##' @param scaling.factor a factor by which weights should be multiplied before applying them. Defaults to NULL (no scaling)
 ##' @param qoi.name the name of the qoi
 ##' @param dropmiss NOT YET IMPLEMENTED
 ##' @return the aggregated reported quantities
@@ -27,6 +28,7 @@ report.aggregator_ <- function(resp.data,
                                qoi,
                                weights,
                                qoi.name,
+                               scaling.factor=NULL,
                                dropmiss=FALSE) {
   
   resp.data <- resp.data
@@ -34,6 +36,23 @@ report.aggregator_ <- function(resp.data,
   wdat <- select_(resp.data, .dots=weights)
   qdat <- select_(resp.data, .dots=qoi)
   adat <- select_(resp.data, .dots=attribute.names)
+  
+  ## multiply weights by scaling factor, if one was specified
+  if (! is.null(scaling.factor)) {
+    if (is.numeric(scaling.factor)) {
+      # scaling factor is a number or vector, which we'll multiply each weight by
+      wdat <- wdat %>%
+        dplyr::mutate_all(~ . * scaling.factor)
+    } else if (is.character(scaling.factor)) {
+      if(! scaling.factor %in% colnames(resp.data)) {
+        stop(glue::glue("report.aggregator_: Can't find column '{sf}', which is supposed to have a scaling factor.",
+                         sf = scaling.factor))
+      }
+      # scaling factor is a string, meaning it's a column name
+      wdat <- wdat %>%
+        dplyr::mutate_all(~ . * resp.data[[scaling.factor]])
+    }
+  }
 
   df <- bind_cols(wdat, qdat, adat)
 
@@ -102,6 +121,7 @@ report.aggregator <- function(resp.data,
                               qoi,
                               weights,
                               qoi.name=NULL,
+                              scaling.factor=NULL,
                               dropmiss=FALSE) {
 
     report.aggregator_(resp.data,
@@ -109,6 +129,7 @@ report.aggregator <- function(resp.data,
                        qoi=lazy(qoi, resp.data),
                        weights=lazy(weights, resp.data),
                        ifelse(is.null(qoi.name), "qoi", lazy(qoi.name)),
+                       scaling.factor=lazy(scaling.factor, resp.data),
                        dropmiss)
 
 }

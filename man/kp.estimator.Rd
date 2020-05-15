@@ -5,13 +5,29 @@
 \alias{kp.estimator}
 \title{Average personal network size estimates using known population method}
 \usage{
-kp.estimator_(resp.data, known.populations, weights,
-  attribute.names = NULL, total.kp.size = NULL,
-  alter.popn.size = NULL, missing = "ignore", verbose = TRUE)
+kp.estimator_(
+  resp.data,
+  known.populations,
+  weights,
+  boot.weights = NULL,
+  ego.id = NULL,
+  return.boot = FALSE,
+  attribute.names = NULL,
+  total.kp.size = NULL,
+  alter.popn.size = NULL,
+  missing = "ignore",
+  verbose = TRUE
+)
 
-kp.estimator(resp.data, known.populations, weights,
-  attribute.names = NULL, total.kp.size = 1, alter.popn.size = NULL,
-  missing = "ignore")
+kp.estimator(
+  resp.data,
+  known.populations,
+  weights,
+  attribute.names = NULL,
+  total.kp.size = 1,
+  alter.popn.size = NULL,
+  missing = "ignore"
+)
 }
 \arguments{
 \item{resp.data}{the dataframe that has the survey responses}
@@ -19,7 +35,16 @@ kp.estimator(resp.data, known.populations, weights,
 \item{known.populations}{the names of the columns in \code{resp.data}
 that have respondents' reports about connections to known populations}
 
-\item{weights}{weights to use in computing the estimate}
+\item{weights}{the name of a column that has sampling weights}
+
+\item{boot.weights}{Optional dataframe with bootstrap resampled weights. See Details for more info.}
+
+\item{ego.id}{If boot.weights are included, then this is the name of the
+column(s) we need to join the bootstrap weights onto the dataset. This is
+most often the id of the ego making the reports.}
+
+\item{return.boot}{if TRUE and boot.weights are included, then return the full bootstrapped estiamates and not just the summaries;
+this option causes this function to return a list instead of a tibble}
 
 \item{attribute.names}{the names of the columns in \code{resp.data} that
 determine the subgroups for which average degree is estimated;
@@ -35,6 +60,9 @@ of the weights over all of resp.data}
 
 \item{missing}{if "ignore", then proceed with the analysis without
 doing anything about missing values.
+if "complete.obs", then, for each row, use only the known populations
+that have no missingness for the
+computations. care must be taken in using this second option.
 future versions may have other options}
 
 \item{verbose}{if TRUE, print information to screen}
@@ -65,5 +93,12 @@ the weights for respondents in each cell \eqn{\alpha}.
 \item{ make unit tests }
 \item{ think about how to elegantly add options for dbar_(P,Q) vs dbar_(Q,P)}
 }
+}
+
+\section{Details}{
+
+If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
+\code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
+and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
 }
 

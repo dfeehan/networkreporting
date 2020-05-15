@@ -4,11 +4,13 @@
 \name{example.knownpop.dat}
 \alias{example.knownpop.dat}
 \title{Example known population data}
-\format{A data frame with 22 rows and 2 variables:
+\format{
+A data frame with 22 rows and 2 variables:
 \describe{
   \item{known.popn}{The name of the group}
   \item{size}{The number of people in the group}
-}}
+}
+}
 \usage{
 example.knownpop.dat
 }

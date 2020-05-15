@@ -4,8 +4,12 @@
 \alias{total.degree.estimator}
 \title{total.degree}
 \usage{
-total.degree.estimator(survey.data, d.hat.vals = "d", weights = NULL,
-  missing = "ignore")
+total.degree.estimator(
+  survey.data,
+  d.hat.vals = "d",
+  weights = NULL,
+  missing = "ignore"
+)
 }
 \arguments{
 \item{survey.data}{the dataframe with survey results}

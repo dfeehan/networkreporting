@@ -4,10 +4,20 @@
 \alias{nsum.estimator}
 \title{nsum.estimator}
 \usage{
-nsum.estimator(survey.data, d.hat.vals = "d", d.tot.hat = NULL,
-  y.vals = "y", total.popn.size = NULL, deg.ratio = 1, tx.rate = 1,
-  weights = NULL, killworth.se = FALSE, missing = "ignore",
-  verbose = FALSE, ...)
+nsum.estimator(
+  survey.data,
+  d.hat.vals = "d",
+  d.tot.hat = NULL,
+  y.vals = "y",
+  total.popn.size = NULL,
+  deg.ratio = 1,
+  tx.rate = 1,
+  weights = NULL,
+  killworth.se = FALSE,
+  missing = "ignore",
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{survey.data}{the dataframe with survey results}

@@ -5,11 +5,25 @@
 \alias{report.aggregator}
 \title{aggregate a reported quantity by groups}
 \usage{
-report.aggregator_(resp.data, attribute.names, qoi, weights, qoi.name,
-  dropmiss = FALSE)
+report.aggregator_(
+  resp.data,
+  attribute.names,
+  qoi,
+  weights,
+  qoi.name,
+  scaling.factor = NULL,
+  dropmiss = FALSE
+)
 
-report.aggregator(resp.data, attribute.names = NULL, qoi, weights,
-  qoi.name = NULL, dropmiss = FALSE)
+report.aggregator(
+  resp.data,
+  attribute.names = NULL,
+  qoi,
+  weights,
+  qoi.name = NULL,
+  scaling.factor = NULL,
+  dropmiss = FALSE
+)
 }
 \arguments{
 \item{resp.data}{the data}
@@ -19,15 +33,18 @@ the groups for which the qoi should be aggregated}
 
 \item{qoi}{the variable with quantity to aggregate}
 
-\item{weights}{analysis weights}
+\item{weights}{analysis weights; either the name of a column that has sampling weights
+or a vector with the names of columns of the dataset that have bootstrap weights. Currently,
+these weights must be named "boot_weight_1", "boot_weight_2", ...}
 
 \item{qoi.name}{the name of the qoi}
+
+\item{scaling.factor}{a factor by which weights should be multiplied before applying them. Defaults to NULL (no scaling)}
 
 \item{dropmiss}{NOT YET IMPLEMENTED}
 }
 \value{
-the estimated average degree for respondents in each
-        of the categories given by \code{attribute.names}
+the aggregated reported quantities
 }
 \description{
 This function takes a quantity and aggregates it by groups,

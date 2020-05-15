@@ -5,16 +5,40 @@
 \alias{network.survival.estimator}
 \title{network survival estimator}
 \usage{
-network.survival.estimator_(resp.data, attribute.data, attribute.names,
-  known.populations, total.kp.size = 1, weights, attribute.weights,
-  dropmiss = NULL, verbose = TRUE)
+network.survival.estimator_(
+  resp.data,
+  attribute.data,
+  attribute.names,
+  known.populations,
+  total.kp.size = 1,
+  weights,
+  attribute.weights,
+  within.alter.weights = NULL,
+  boot.weights = NULL,
+  ego.id = NULL,
+  return.boot = FALSE,
+  dropmiss = NULL,
+  verbose = TRUE
+)
 
-network.survival.estimator(resp.data, attribute.data, attribute.names,
-  known.populations, total.kp.size = 1, weights, attribute.weights,
-  verbose = TRUE)
+network.survival.estimator(
+  resp.data,
+  attribute.data,
+  attribute.names,
+  known.populations,
+  total.kp.size = 1,
+  weights,
+  attribute.weights,
+  within.alter.weights = NULL,
+  boot.weights = NULL,
+  ego.id = NULL,
+  return.boot = FALSE,
+  dropmiss = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{resp.data}{the dataframe that has a row for each respondent, with reported
+\item{resp.data}{The dataframe that has a row for each respondent, with reported
 connections to the groups of known size, as well as the attributes.
 Note that the column names of the attributes should match
 their names in \code{attribute.data}}
@@ -25,22 +49,34 @@ row for each time a respondent reports a hidden population member.
 For example, to estimate death rates, there should be one row for
 each report of a death.}
 
-\item{attribute.names}{the names of the columns of attribute.data
+\item{attribute.names}{The names of the columns of attribute.data
 and resp.data that contain the attribute information.}
 
-\item{known.populations}{the names of the columns in \code{resp.data} that
+\item{known.populations}{The names of the columns in \code{resp.data} that
 have responses to the known population questions}
 
-\item{total.kp.size}{the size of the probe alters, i.e., the sum of the known
+\item{total.kp.size}{The size of the probe alters, i.e., the sum of the known
 population sizes}
 
-\item{weights}{the weights or weights column for the respondent data}
+\item{weights}{The weights or weights column for the respondent data}
 
-\item{attribute.weights}{the weights or weights column for the alter data}
+\item{attribute.weights}{The weights or weights column for the alter data (this should typically 
+be the weight of the respondent who reported the alter)}
 
-\item{dropmiss}{see \code{\link{report.aggregator}}}
+\item{within.alter.weights}{The weight or weights column for within-alter weights. This could be useful if,
+for example, respondents only report about a subset of all of their alters. See Details.}
 
-\item{verbose}{if TRUE, print information to screen}
+\item{boot.weights}{Optional dataframe with bootstrap resampled weights. See Details for more info.}
+
+\item{ego.id}{If boot.weights are included, then this is the name of the
+column(s) we need to join the bootstrap weights onto the dataset. This is
+most often the id of the ego making the reports.}
+
+\item{return.boot}{If TRUE, and if \code{boot.weights} is specified, then return each bootstrap estimate}
+
+\item{dropmiss}{See \code{\link{report.aggregator}}}
+
+\item{verbose}{If TRUE, print information to screen}
 }
 \value{
 the network reporting estimate of the hidden population's size
@@ -110,5 +146,26 @@ were calculated for, along with:
 \item{ write more general agg mult est fn and call that }
 \item{ make unit tests }
 }
+}
+
+\section{Details}{
+
+If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
+\code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
+and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
+
+\code{ego.id} can either be a string or vector of strings, or it can be a named vector
+like \code{c('a'='b')}. In the second case, \code{'a'} should be the name of the id column
+in \code{resp.data}, while \code{'b'} should be the name of the id column in \code{'attribute.data'}.
+
+\code{within.alter.weight} is a weight for alters within a respondent. This is set to NULL by default, and
+many applications will not need it. However, it can be helpful if respondents
+are only asked to report about a subset of their alters. For example, suppose that respondents can report
+about 10 alters in detail. Respondent A reports connections to 3 deaths, and respondent B reports connections to
+12 deaths. When aggregating Respondent A's detailed reports, we would only need to use the sampling weight.
+However, if we only used the sampling weight when aggregating Respondent B's reports, that would imply that
+Respondent B only reported connections to 10 deaths. In this case, setting within.alter.weight to (12/10) for
+Respondent B will make B's reports imply that she reported 12 deaths. Note that this makes the assumption that
+the 10 deaths Respondent B did report are a uniformly random subsample of the 12 deaths she reports being connected to.
 }
 

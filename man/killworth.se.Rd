@@ -4,8 +4,13 @@
 \alias{killworth.se}
 \title{killworth.se}
 \usage{
-killworth.se(estimates, d.hat, total.popn.size = NULL, total = TRUE,
-  missing = "ignore")
+killworth.se(
+  estimates,
+  d.hat,
+  total.popn.size = NULL,
+  total = TRUE,
+  missing = "ignore"
+)
 }
 \arguments{
 \item{estimates}{TODO}

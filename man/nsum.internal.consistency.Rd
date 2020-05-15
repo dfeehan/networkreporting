@@ -4,11 +4,21 @@
 \alias{nsum.internal.consistency}
 \title{nsum.internal.consistency}
 \usage{
-nsum.internal.consistency(survey.data, known.popns = NULL,
-  total.popn.size = NULL, degrees = NULL, missing = "ignore",
-  kp.method = TRUE, weights = NULL, alter.popn.size = NULL,
-  killworth.se = FALSE, return.plot = FALSE, verbose = FALSE,
-  bootstrap = FALSE, ...)
+nsum.internal.consistency(
+  survey.data,
+  known.popns = NULL,
+  total.popn.size = NULL,
+  degrees = NULL,
+  missing = "ignore",
+  kp.method = TRUE,
+  weights = NULL,
+  alter.popn.size = NULL,
+  killworth.se = FALSE,
+  return.plot = FALSE,
+  verbose = FALSE,
+  bootstrap = FALSE,
+  ...
+)
 }
 \arguments{
 \item{survey.data}{the dataframe with the survey results}

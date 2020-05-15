@@ -4,7 +4,8 @@
 \name{example.survey}
 \alias{example.survey}
 \title{Example household survey data}
-\format{A data frame with 2,406 rows and 36 variables:
+\format{
+A data frame with 2,406 rows and 36 variables:
 \describe{
   \item{id}{a unique identifier}
   \item{cluster}{the cluster (part of the complex survey design)}
@@ -42,7 +43,8 @@
   \item{msm}{reported connections to msm}
   \item{idu}{reported connections to injecting drug users}
   \item{clients}{reported connections to people who are clients of sex workers}
-}}
+}
+}
 \usage{
 example.survey
 }

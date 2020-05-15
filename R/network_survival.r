@@ -81,7 +81,10 @@
 ##' @param total.kp.size The size of the probe alters, i.e., the sum of the known
 ##'         population sizes
 ##' @param weights The weights or weights column for the respondent data
-##' @param attribute.weights The weights or weights column for the alter data
+##' @param attribute.weights The weights or weights column for the alter data (this should typically 
+##'                          be the weight of the respondent who reported the alter)
+##' @param within.alter.weights The weight or weights column for within-alter weights. This could be useful if,
+##'                            for example, respondents only report about a subset of all of their alters. See Details.
 ##' @param boot.weights Optional dataframe with bootstrap resampled weights. See Details for more info.
 ##' @param ego.id If boot.weights are included, then this is the name of the
 ##'   column(s) we need to join the bootstrap weights onto the dataset. This is
@@ -100,6 +103,16 @@
 ##' \code{ego.id} can either be a string or vector of strings, or it can be a named vector
 ##' like \code{c('a'='b')}. In the second case, \code{'a'} should be the name of the id column
 ##' in \code{resp.data}, while \code{'b'} should be the name of the id column in \code{'attribute.data'}.
+##' 
+##' \code{within.alter.weight} is a weight for alters within a respondent. This is set to NULL by default, and
+##' many applications will not need it. However, it can be helpful if respondents
+##' are only asked to report about a subset of their alters. For example, suppose that respondents can report
+##' about 10 alters in detail. Respondent A reports connections to 3 deaths, and respondent B reports connections to
+##' 12 deaths. When aggregating Respondent A's detailed reports, we would only need to use the sampling weight.
+##' However, if we only used the sampling weight when aggregating Respondent B's reports, that would imply that
+##' Respondent B only reported connections to 10 deaths. In this case, setting within.alter.weight to (12/10) for
+##' Respondent B will make B's reports imply that she reported 12 deaths. Note that this makes the assumption that
+##' the 10 deaths Respondent B did report are a uniformly random subsample of the 12 deaths she reports being connected to.
 ##'
 ##' @rdname network.survival.estimator
 ##' @export
@@ -110,6 +123,7 @@ network.survival.estimator_ <- function(resp.data,
                                         total.kp.size=1,
                                         weights,
                                         attribute.weights,
+                                        within.alter.weights=NULL,
                                         boot.weights=NULL,
                                         ego.id=NULL,
                                         return.boot=FALSE,
@@ -124,6 +138,14 @@ network.survival.estimator_ <- function(resp.data,
                                 weights=weights,
                                 total.kp.size=total.kp.size,
                                 verbose=verbose)
+    
+    ## if within.alter.weight was specified, we use it as the scaling.factor
+    ## in report.aggregator_ (see the helpfile for that function)
+    if (! is.null(within.alter.weights)) {
+        scaling.factor <- within.alter.weights 
+    } else {
+        scaling.factor <- 1
+    }
 
     ## count the number of connections from respondents to members
     ## of the hidden population with each combination of attributes
@@ -133,6 +155,7 @@ network.survival.estimator_ <- function(resp.data,
                                         "death",
                                         attribute.weights,
                                         qoi.name="deaths",
+                                        scaling.factor = scaling.factor,
                                         dropmiss)
 
     ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
@@ -228,6 +251,7 @@ network.survival.estimator_ <- function(resp.data,
                                                  #attribute.weights,
                                                  weights=boot.cols,
                                                  qoi.name="deaths",
+                                                 scaling.factor = scaling.factor,
                                                  dropmiss)
         
         ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
@@ -292,6 +316,7 @@ network.survival.estimator <- function(resp.data,
                                        total.kp.size=1,
                                        weights,
                                        attribute.weights,
+                                       within.alter.weights=NULL,
                                        boot.weights=NULL,
                                        ego.id=NULL,
                                        return.boot=FALSE,                                       
@@ -305,6 +330,7 @@ network.survival.estimator <- function(resp.data,
                                 lazy(total.kp.size),
                                 lazy(weights),
                                 lazy(attribute.weights),
+                                lazy(within.alter.weights),
                                 lazy(boot.weights),
                                 lazy(ego.id),
                                 lazy(return.boot),

@@ -4,7 +4,6 @@
 \name{networkreporting}
 \alias{networkreporting}
 \alias{package-networkreporting}
-\alias{networkreporting-package}
 \title{Network reporting estimators}
 \description{
 \code{networkreporting} has methods for analyzing data that were collected

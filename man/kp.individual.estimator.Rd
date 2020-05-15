@@ -5,11 +5,21 @@
 \alias{kp.individual.estimator_}
 \title{Individual personal network size estimates using the known population method}
 \usage{
-kp.individual.estimator(resp.data, known.populations, total.kp.size = 1,
-  alter.popn.size, missing = "ignore")
+kp.individual.estimator(
+  resp.data,
+  known.populations,
+  total.kp.size = 1,
+  alter.popn.size,
+  missing = "ignore"
+)
 
-kp.individual.estimator_(resp.data, known.populations, total.kp.size = 1,
-  alter.popn.size, missing = "ignore")
+kp.individual.estimator_(
+  resp.data,
+  known.populations,
+  total.kp.size = 1,
+  alter.popn.size,
+  missing = "ignore"
+)
 }
 \arguments{
 \item{resp.data}{the respondent (survey) data}
