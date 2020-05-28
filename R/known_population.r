@@ -280,7 +280,7 @@ kp.estimator <- function(resp.data,
 ##'        are reporting about connections to; typically this will
 ##'        be the frame population, so \code{alter.popn.size} should
 ##'        be the size of the frame population, N.F
-##' @param missing see the missing argument of \code{\link{kp.estimator_}}
+##' @param dropmiss see the dropmiss argument of \code{\link{kp.estimator_}}
 ##' @return a data frame with an estimate of each individual respondent's personal
 ##'         network size
 ##' @rdname kp.individual.estimator
@@ -289,7 +289,7 @@ kp.individual.estimator <- function(resp.data,
                                     known.populations,
                                     total.kp.size=1,
                                     alter.popn.size,
-                                    missing='ignore') {
+                                    dropmiss=FALSE) {
 
     resp.data$.rowid <- 1:nrow(resp.data)
     resp.data$.noweight <- 1
@@ -300,7 +300,7 @@ kp.individual.estimator <- function(resp.data,
                          weights=".noweight",
                          total.kp.size=lazy(total.kp.size),
                          alter.popn.size=lazy(alter.popn.size),
-                         missing=lazy(missing))
+                         dropmiss=lazy(dropmiss))
 
 }
 
@@ -311,7 +311,7 @@ kp.individual.estimator_ <- function(resp.data,
                                      known.populations,
                                      total.kp.size=1,
                                      alter.popn.size,
-                                     missing='ignore') {
+                                     dropmiss=FALSE) {
 
     resp.data$.rowid <- 1:nrow(resp.data)
     resp.data$.noweight <- 1
@@ -322,7 +322,7 @@ kp.individual.estimator_ <- function(resp.data,
                          weights=".noweight",
                          total.kp.size=total.kp.size,
                          alter.popn.size=alter.popn.size,
-                         missing=missing)
+                         dropmiss=dropmiss)
 
 }
 
@@ -361,7 +361,7 @@ kp.individual.estimator_ <- function(resp.data,
 kp.degree.estimator <- function(survey.data,
                                 known.popns=NULL,
                                 total.popn.size=NULL,
-                                missing="ignore",
+                                dropmiss=FALSE,
                                 verbose=FALSE)
 {
 
