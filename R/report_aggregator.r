@@ -20,7 +20,10 @@
 ##' these weights must be named "boot_weight_1", "boot_weight_2", ...
 ##' @param scaling.factor a factor by which weights should be multiplied before applying them. Defaults to NULL (no scaling)
 ##' @param qoi.name the name of the qoi
-##' @param dropmiss NOT YET IMPLEMENTED
+##' @param dropmiss if TRUE, then drop missing values and rescale the weights to preserve their total. So, if weights
+##' sum to 100, and dropping rows with missing values leads to weights that sum to 80, then the remaining rows will have
+##' their weights multiplied by (100/80) to ensure the weights still add up to 100 after dropping the rows with missing values.
+##' Defaults to FALSE
 ##' @return the aggregated reported quantities
 ##' @rdname report.aggregator
 report.aggregator_ <- function(resp.data,
@@ -62,7 +65,18 @@ report.aggregator_ <- function(resp.data,
   wgt.col <- as.symbol(names(df)[1])
   qoi.col <- as.symbol(names(df)[2])
 
-  weighted_sum <- function(x, w) { return(sum(x*w)) }
+  weighted_sum <- function(x, w, na.rm = FALSE) 
+  { 
+    if(na.rm) {
+      idx <- (1:length(x))[!is.na(x)]
+      wfac <- sum(w) / sum(w[idx])
+    } else {
+      idx <- 1:length(x)
+      wfac <- 1
+    }
+    return(sum(x[idx]*w[idx]*wfac)) 
+  }
+  
   weighted_mean <- function (x, w, na.rm = FALSE) 
   {
     if (na.rm) {
@@ -78,14 +92,18 @@ report.aggregator_ <- function(resp.data,
   df.summ <- df %>% 
              group_by_at(attribute.names) %>%
              dplyr::summarise_at(.vars=weights,
-                                 .funs=list(mean.qoi = ~weighted_mean(.data[[qoi]], w=.),
-                                            sum.qoi = ~weighted_sum(x=.data[[qoi]], w=.),
+                                 .funs=list(mean.qoi = ~weighted_mean(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                            sum.qoi  = ~weighted_sum(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                            # get the sum of the weights
+                                            # NB: this includes rows w/ missingness, even if
+                                            #     dropmiss=TRUE
                                             wgt.total = ~sum(.),
                                             wgt.inv.total = ~sum(1/.),
                                             ## this is a hack because n() generates errors due to
                                             ## plyr/dplyr import conflict (and it is hard to regulate
                                             ## import order with package infrastructure)
-                                            num.obs = ~length(.)))
+                                            num.obs = ~length(.),
+                                            dropmiss = ~dropmiss))
   
   ## if we have bootstrap weights, reshape and clean things up
   if(length(weights) > 1) {
