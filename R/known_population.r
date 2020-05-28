@@ -46,15 +46,14 @@
 ##'        often the frame population, which is the default if nothing else is
 ##'        specified; the size of the frame population is taken to be the sum
 ##'        of the weights over all of resp.data
-##' @param missing if "ignore", then proceed with the analysis without
-##'                doing anything about missing values.
-##'                if "complete.obs", then, for each row, use only the known populations
-##'                that have no missingness for the
-##'                computations. in this case, the sampling weights are rescaled so that the implied total
-##'                size of the frame population is not changed.
-##'                (see the 'dropmiss' argument to the function report.aggregator_)
-##'                care must be taken in using this second option.
-##'                future versions may have other options
+##' @param dropmiss if FALSE, then, for each row, use only the reports about connections to known populations
+##'                 that have no missingness. This effectively assumes that missing reports are 0.
+##'                 if TRUE, then only use rows that have no missingness in reported connections to known
+##'                 populations in estimating degree.
+##'                 in this case, the sampling weights are rescaled so that the implied total
+##'                 size of the frame population is not changed.
+##'                 (see the 'dropmiss' argument to the function report.aggregator_)
+##'                 future versions may have other options
 ##' @param verbose if TRUE, print information to screen
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
 ##'         of the categories given by \code{attribute.names}
@@ -81,7 +80,7 @@ kp.estimator_ <- function(resp.data,
                           attribute.names=NULL,
                           total.kp.size=NULL,
                           alter.popn.size=NULL,
-                          missing="ignore",
+                          dropmiss=FALSE,
                           verbose=TRUE) {
 
   wdat <- select_(resp.data, .dots=weights)
@@ -99,15 +98,12 @@ kp.estimator_ <- function(resp.data,
     atnames <- NULL
   }
   
-  dropmiss <- FALSE
- 
-  if(missing == "ignore") {
+  if(! dropmiss) {
     surveybootstrap:::vcat(verbose,
                            "NOTE: Ignoring any rows with missingness on any of the report variables.\n")
-  } else if (missing == "complete.obs") {
+  } else {
     surveybootstrap:::vcat(verbose,
                            "NOTE: Any rows with missingness on any of the report variables will be dropped. The weights will be rescaled to keep the implied size of the frame population the same.\n")
-    dropmiss <- TRUE
   }
 
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
@@ -120,7 +116,7 @@ kp.estimator_ <- function(resp.data,
                           lazy_eval(total.kp.size))
 
   # get individual-level sums for known population connections
-  if(missing == 'ignore') {
+  if(! dropmiss) {
     kptot <- tibble(kptot=rowSums(kpdat, na.rm=TRUE))
   } 
   ## if missing == 'complete.obs'
@@ -138,7 +134,6 @@ kp.estimator_ <- function(resp.data,
 
 
   # now aggregate by attributes
-  ## TODO - if complete.obs, rescale weights to account for missingness
   agg <- report.aggregator_(resp.data=df,
                             attribute.names=atnames,
                             qoi='kptot',
@@ -177,7 +172,6 @@ kp.estimator_ <- function(resp.data,
     boot.cols <- stringr::str_subset(colnames(boot.weights), ego.id, negate=TRUE)
     
     # now aggregate by attributes
-    ## TODO - if complete.obs, rescale weights to account for missingness
     agg.boot <- report.aggregator_(resp.data=df,
                                    attribute.names=atnames,
                                    qoi='kptot',
@@ -241,7 +235,7 @@ kp.estimator <- function(resp.data,
                          attribute.names=NULL,
                          total.kp.size=1,
                          alter.popn.size=NULL,
-                         missing='ignore') {
+                         dropmiss=FALSE) {
   
     if(is.null(attribute.names)) {
       anames <- NULL
@@ -255,7 +249,7 @@ kp.estimator <- function(resp.data,
                   weights=lazy(weights, resp.data),
                   total.kp.size=lazy(total.kp.size),
                   alter.popn.size=lazy(alter.popn.size),
-                  missing=lazy(missing))
+                  dropmiss=lazy(dropmiss))
 
 }
 
