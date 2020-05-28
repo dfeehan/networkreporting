@@ -90,7 +90,7 @@
 ##'   column(s) we need to join the bootstrap weights onto the dataset. This is
 ##'   most often the id of the ego making the reports.
 ##' @param return.boot If TRUE, and if \code{boot.weights} is specified, then return each bootstrap estimate 
-##' @param dropmiss See \code{\link{report.aggregator}}
+##' @param dropmiss How to handle missingness in reported connections to known populations and number of deaths. See \code{\link{report.aggregator}}
 ##' @param verbose If TRUE, print information to screen
 ##' @return the network reporting estimate of the hidden population's size
 ##'         (as a prevalence) broken down by the categories defined by all combinations
@@ -127,7 +127,7 @@ network.survival.estimator_ <- function(resp.data,
                                         boot.weights=NULL,
                                         ego.id=NULL,
                                         return.boot=FALSE,
-                                        dropmiss=NULL,
+                                        dropmiss=FALSE,
                                         verbose=TRUE) {
 
     ## estimate the average personal network size of the respondents
@@ -137,7 +137,8 @@ network.survival.estimator_ <- function(resp.data,
                                 attribute.names=attribute.names,
                                 weights=weights,
                                 total.kp.size=total.kp.size,
-                                verbose=verbose)
+                                verbose=verbose,
+                                dropmiss=dropmiss)
     
     ## if within.alter.weight was specified, we use it as the scaling.factor
     ## in report.aggregator_ (see the helpfile for that function)
@@ -156,9 +157,8 @@ network.survival.estimator_ <- function(resp.data,
                                         attribute.weights,
                                         qoi.name="deaths",
                                         scaling.factor = scaling.factor,
-                                        dropmiss)
+                                        dropmiss=dropmiss)
 
-    ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
     tog.df <- deg.by.att %>% full_join(deaths.by.att, by=attribute.names)
 
     ## the full_join could produce missing values when there is no match;
@@ -233,7 +233,8 @@ network.survival.estimator_ <- function(resp.data,
                                          ## we want all of the bootstrap resamples
                                          return.boot=TRUE,
                                          total.kp.size=total.kp.size,
-                                         verbose=verbose)$boot.estimates
+                                         verbose=verbose,
+                                         dropmiss=dropmiss)$boot.estimates
         
         # join bootstrap weights onto data, which is what report.aggregator_ requires
         ad.withboot <- attribute.data %>%
@@ -252,9 +253,8 @@ network.survival.estimator_ <- function(resp.data,
                                                  weights=boot.cols,
                                                  qoi.name="deaths",
                                                  scaling.factor = scaling.factor,
-                                                 dropmiss)
+                                                 dropmiss=dropmiss)
         
-        ##tog.df <- plyr::join(deg.by.att, deaths.by.att, by=attribute.names)
         tog.df.boot <- deg.by.att.boot %>% full_join(deaths.by.att.boot, 
                                                      by=c(attribute.names, 'boot_idx'))        
         
