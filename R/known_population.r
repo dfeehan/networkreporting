@@ -50,7 +50,10 @@
 ##'                doing anything about missing values.
 ##'                if "complete.obs", then, for each row, use only the known populations
 ##'                that have no missingness for the
-##'                computations. care must be taken in using this second option.
+##'                computations. in this case, the sampling weights are rescaled so that the implied total
+##'                size of the frame population is not changed.
+##'                (see the 'dropmiss' argument to the function report.aggregator_)
+##'                care must be taken in using this second option.
 ##'                future versions may have other options
 ##' @param verbose if TRUE, print information to screen
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
@@ -59,7 +62,13 @@
 ##' @section Details:
 ##' If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
 ##' \code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
-##' and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
+##' and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.  
+##' 
+##' The two options for missing values are 'ignore' or 'complete.obs'.
+##' 'ignore' adds up each respondent's nonmissing reported connections to the known populations,
+##' effectively treating missing reports as 0s.
+##' 'complete.obs' only uses responses from respondents who have non-missing values for all of
+##' the known population reports.
 ##'
 ##' @rdname kp.estimator
 ##' @export
@@ -90,31 +99,35 @@ kp.estimator_ <- function(resp.data,
     atnames <- NULL
   }
   
+  dropmiss <- FALSE
+ 
   if(missing == "ignore") {
     surveybootstrap:::vcat(verbose,
                            "NOTE: Ignoring any rows with missingness on any of the report variables.\n")
+  } else if (missing == "complete.obs") {
+    surveybootstrap:::vcat(verbose,
+                           "NOTE: Any rows with missingness on any of the report variables will be dropped. The weights will be rescaled to keep the implied size of the frame population the same.\n")
+    dropmiss <- TRUE
   }
 
-  ## if missing == 'complete.obs'
-  ##    then disregard rows that don't have no missingness on kp questions
-  
   alter.popn.size <- ifelse(is.null(alter.popn.size) ||
                             is.null(lazy_eval(alter.popn.size)),
                             sum(wdat[,1]),
                             lazy_eval(alter.popn.size))
 
-  # NB: this will change to handle complete.obs
   total.kp.size <- ifelse(is.null(total.kp.size),
                           1,
                           lazy_eval(total.kp.size))
 
   # get individual-level sums for known population connections
-  # (NB: might want to eventually allow for this to be adjusted by
-  #      some kind of response / reporting model?)
   if(missing == 'ignore') {
-    kptot <- data_frame(kptot=rowSums(kpdat, na.rm=TRUE))
-  } else {
-    kptot <- data_frame(kptot=rowSums(kpdat))
+    kptot <- tibble(kptot=rowSums(kpdat, na.rm=TRUE))
+  } 
+  ## if missing == 'complete.obs'
+  ##    then we will want to disregard rows that have any missingness on kp questions
+  ##    so, for complete.obs, we want to end up with NAs in kptot
+  else {
+    kptot <- tibble(kptot=rowSums(kpdat))
   }
 
   df <- bind_cols(kptot, wdat, adat)
@@ -125,11 +138,13 @@ kp.estimator_ <- function(resp.data,
 
 
   # now aggregate by attributes
+  ## TODO - if complete.obs, rescale weights to account for missingness
   agg <- report.aggregator_(resp.data=df,
                             attribute.names=atnames,
                             qoi='kptot',
                             weights=weights,
-                            qoi.name='y.kp')
+                            qoi.name='y.kp',
+                            dropmiss=dropmiss)
 
   tograb <- lapply(c(colnames(adat),
                      'sum.y.kp', 'wgt.total.y.kp', 'num.obs.y.kp'),
@@ -162,11 +177,13 @@ kp.estimator_ <- function(resp.data,
     boot.cols <- stringr::str_subset(colnames(boot.weights), ego.id, negate=TRUE)
     
     # now aggregate by attributes
+    ## TODO - if complete.obs, rescale weights to account for missingness
     agg.boot <- report.aggregator_(resp.data=df,
                                    attribute.names=atnames,
                                    qoi='kptot',
                                    weights=boot.cols,
-                                   qoi.name='y.kp')    
+                                   qoi.name='y.kp',
+                                   dropmiss=dropmiss)    
     
     res.boot <- select_(agg.boot, .dots=c(tograb, 'boot_idx')) %>%
       dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
