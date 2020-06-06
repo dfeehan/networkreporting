@@ -15,7 +15,7 @@ kp.estimator_(
   attribute.names = NULL,
   total.kp.size = NULL,
   alter.popn.size = NULL,
-  missing = "ignore",
+  dropmiss = FALSE,
   verbose = TRUE
 )
 
@@ -26,7 +26,7 @@ kp.estimator(
   attribute.names = NULL,
   total.kp.size = 1,
   alter.popn.size = NULL,
-  missing = "ignore"
+  dropmiss = FALSE
 )
 }
 \arguments{
@@ -58,11 +58,13 @@ often the frame population, which is the default if nothing else is
 specified; the size of the frame population is taken to be the sum
 of the weights over all of resp.data}
 
-\item{missing}{if "ignore", then proceed with the analysis without
-doing anything about missing values.
-if "complete.obs", then, for each row, use only the known populations
-that have no missingness for the
-computations. care must be taken in using this second option.
+\item{dropmiss}{if FALSE, then, for each row, use only the reports about connections to known populations
+that have no missingness. This effectively assumes that missing reports are 0.
+if TRUE, then only use rows that have no missingness in reported connections to known
+populations in estimating degree.
+in this case, the sampling weights are rescaled so that the implied total
+size of the frame population is not changed.
+(see the 'dropmiss' argument to the function report.aggregator_)
 future versions may have other options}
 
 \item{verbose}{if TRUE, print information to screen}
@@ -99,6 +101,12 @@ the weights for respondents in each cell \eqn{\alpha}.
 
 If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
 \code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
-and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
+and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.  
+
+The two options for missing values are 'ignore' or 'complete.obs'.
+'ignore' adds up each respondent's nonmissing reported connections to the known populations,
+effectively treating missing reports as 0s.
+'complete.obs' only uses responses from respondents who have non-missing values for all of
+the known population reports.
 }
 

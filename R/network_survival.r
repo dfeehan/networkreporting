@@ -192,15 +192,26 @@ network.survival.estimator_ <- function(resp.data,
                             y.F.Dcell.hat = sum.deaths,
                             y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
               dplyr::select(attribute.names,
+                            # number of rows used in death reports
                             n.obs.deaths = num.obs.deaths,
+                            # number of rows used in kp reports
                             n.obs.degree = num.obs.y.kp,
+                            # sum of weights of rows used in death repots
+                            wgt.total.deaths,
+                            # sum of weights of rows used in kp reports
+                            wgt.total.degree = wgt.total.y.kp,
                             y.F.Dcell.hat,
                             y.Fcell.kp.hat,
                             total.kp.size,
                             N.Fcell.hat,
                             N.F.hat) %>%
+              # it may be that there are no reported connections to deaths in a given cell; the
+              # estimated number of connections to deaths should then be 0
+              dplyr::mutate(y.F.Dcell.hat = ifelse(wgt.total.deaths == 0, 0, y.F.Dcell.hat)) %>%
+              # similarly, it may be that there are no reported connections to kp in a given cell; the
+              # estimated degree should then be 0
+              dplyr::mutate(y.Fcell.kp.hat = ifelse(wgt.total.degree == 0, 0, y.Fcell.kp.hat)) %>%
               dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
-              #dplyr::mutate(asdr.hat = sum.deaths / (sum.y.kp.over.kptot * N.F))
 
     ## if we've been passed bootstrap weights, use them
     if (! is.null(boot.weights)) {
@@ -265,14 +276,26 @@ network.survival.estimator_ <- function(resp.data,
                           y.F.Dcell.hat = sum.deaths,
                           y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
             dplyr::select(attribute.names,
+                          # number of rows used in death reports
                           n.obs.deaths = num.obs.deaths,
+                          # number of rows used in kp reports
                           n.obs.degree = num.obs.y.kp,
+                          # sum of weights of rows used in death repots
+                          wgt.total.deaths,
+                          # sum of weights of rows used in kp reports
+                          wgt.total.degree = wgt.total.y.kp,
                           y.F.Dcell.hat,
                           y.Fcell.kp.hat,
                           total.kp.size,
                           N.Fcell.hat,
                           N.F.hat,
                           boot_idx) %>%
+            # it may be that there are no reported connections to deaths in a given cell; the
+            # estimated number of connections to deaths should then be 0
+            dplyr::mutate(y.F.Dcell.hat = ifelse(wgt.total.deaths == 0, 0, y.F.Dcell.hat)) %>%
+            # similarly, it may be that there are no reported connections to kp in a given cell; the
+            # estimated degree should then be 0
+            dplyr::mutate(y.Fcell.kp.hat = ifelse(wgt.total.degree == 0, 0, y.Fcell.kp.hat)) %>%
             dplyr::mutate(asdr.hat = (y.F.Dcell.hat / y.Fcell.kp.hat) * (total.kp.size / N.F.hat))
         
         ## check for missingness and warn

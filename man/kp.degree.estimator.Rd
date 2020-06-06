@@ -8,7 +8,7 @@ kp.degree.estimator(
   survey.data,
   known.popns = NULL,
   total.popn.size = NULL,
-  missing = "ignore",
+  dropmiss = FALSE,
   verbose = FALSE
 )
 }
@@ -24,13 +24,13 @@ dataframe has an attribute called 'known.popns' containing this vector.}
 this function returns proportions; if not NULL, it
 returns absolute numbers (ie, the proportions * total popn size)}
 
+\item{verbose}{if TRUE, print messages to the screen}
+
 \item{missing}{if "ignore", then proceed with the analysis without
 doing anything about missing values. if "complete.obs"
 then, for each row, use only the known populations
 that have no missingness for the
 computations. care must be taken in using this second option}
-
-\item{verbose}{if TRUE, print messages to the screen}
 }
 \value{
 a vector with an estimate of the degree for each row

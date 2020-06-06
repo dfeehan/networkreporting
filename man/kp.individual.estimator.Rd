@@ -10,7 +10,7 @@ kp.individual.estimator(
   known.populations,
   total.kp.size = 1,
   alter.popn.size,
-  missing = "ignore"
+  dropmiss = FALSE
 )
 
 kp.individual.estimator_(
@@ -18,7 +18,7 @@ kp.individual.estimator_(
   known.populations,
   total.kp.size = 1,
   alter.popn.size,
-  missing = "ignore"
+  dropmiss = FALSE
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ are reporting about connections to; typically this will
 be the frame population, so \code{alter.popn.size} should
 be the size of the frame population, N.F}
 
-\item{missing}{see the missing argument of \code{\link{kp.estimator_}}}
+\item{dropmiss}{see the dropmiss argument of \code{\link{kp.estimator_}}}
 }
 \value{
 a data frame with an estimate of each individual respondent's personal

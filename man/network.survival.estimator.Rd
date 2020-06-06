@@ -17,7 +17,7 @@ network.survival.estimator_(
   boot.weights = NULL,
   ego.id = NULL,
   return.boot = FALSE,
-  dropmiss = NULL,
+  dropmiss = FALSE,
   verbose = TRUE
 )
 
@@ -74,7 +74,7 @@ most often the id of the ego making the reports.}
 
 \item{return.boot}{If TRUE, and if \code{boot.weights} is specified, then return each bootstrap estimate}
 
-\item{dropmiss}{See \code{\link{report.aggregator}}}
+\item{dropmiss}{How to handle missingness in reported connections to known populations and number of deaths. See \code{\link{report.aggregator}}}
 
 \item{verbose}{If TRUE, print information to screen}
 }
