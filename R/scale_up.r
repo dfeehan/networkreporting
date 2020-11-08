@@ -404,7 +404,7 @@ nsum.internal.consistency <- function(survey.data,
                    thisdat$deg.minus <- thisdat[,degrees]
 
                  }
-
+                 
                  ## TODO - should call report.aggregator_, i think 
                  degsum <- total.degree.estimator(thisdat,
                                                   d.hat.vals="deg.minus",
@@ -435,7 +435,7 @@ nsum.internal.consistency <- function(survey.data,
                                   missing=missing,
                                   verbose=verbose,
                                   killworth.se=killworth.se)
-
+                 
                  nsum.holdout.res <- eval(est.call)
                  nsum.holdout.est <- nsum.holdout.res$estimate
                  nsum.holdout.sum.d.hat <- nsum.holdout.res$sum.d.hat
