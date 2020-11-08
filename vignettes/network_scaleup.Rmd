@@ -4,7 +4,7 @@ author: "Dennis M. Feehan"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Analyzing network scale-up data using the networkreporting package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -379,7 +379,7 @@ the vector containing the known population sizes and also the size of
 the total population.  We can avoid this step by attaching these two
 pieces of information to the survey dataframe using the `add.kp` function:
 
-```{r}
+```{r, eval=FALSE}
 example.survey <- add.kp(example.survey, kp.vec, tot.pop.size)
 
 d.hat.new <- kp.degree.estimator(survey.data=example.survey,

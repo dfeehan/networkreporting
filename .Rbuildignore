@@ -4,7 +4,7 @@
 
 data/scratch
 
-vignettes/draft
+^vignettes/draft/.*$
 
 ^.*-dev\\.R$
 ^.*-dev\\.r$
@@ -18,3 +18,6 @@ cran-comments.md
 
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

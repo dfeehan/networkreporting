@@ -1,0 +1,13 @@
+home:
+  title: "networkreporting: Analyzing network reporting data"
+  description: Analyze data collected by asking survey respondents to report about other people.
+template:
+  params:
+    bootswatch: flatly
+    ganalytics: G-5CY4HESMNP
+articles:
+# NB: ignore the other vignettes
+- title: All vignettes
+  desc: ~
+  contents:
+  - '`network_scaleup`'
