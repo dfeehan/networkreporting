@@ -501,12 +501,12 @@ populations. Future versions of the package may include tools to help address th
 <span class="co">## summarize the results</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">all.idu.estimates</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span></pre></div>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   26327   31563   35119   35002   38297   44420</code></pre>
+##   24204   32736   34985   34937   37205   45006</code></pre>
 <p>To produce 95% intervals using the percentile method you can do something like this</p>
 <div class="sourceCode" id="cb32"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">all.idu.estimates</span><span class="op">$</span><span class="va">estimate</span>, probs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span></pre></div>
 <pre><code>##     2.5%    97.5% 
-## 27001.95 43213.31</code></pre>
+## 27588.62 41182.12</code></pre>
 </div>
 <div id="internal-consistency-checks" class="section level2">
 <h2 class="hasAnchor">
