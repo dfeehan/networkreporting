@@ -347,6 +347,7 @@ ic.result <- nsum.internal.consistency(survey.data=example.survey,
                                       missing="complete.obs",
                                       killworth.se=TRUE,
                                       total.popn.size=tot.pop.size,
+                                      alter.popn.size=tot.pop.size,
                                       kp.method=TRUE,
                                       return.plot=TRUE)
 ```
