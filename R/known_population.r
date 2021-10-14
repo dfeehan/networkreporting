@@ -86,6 +86,9 @@ kp.estimator_ <- function(resp.data,
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
   
+  
+  dropmiss <- lazy_eval(dropmiss)
+  
   if(! is.null(ego.id)) {
     iddat <- select_(resp.data, .dots=ego.id)
   }

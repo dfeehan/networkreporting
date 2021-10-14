@@ -1,3 +1,8 @@
+networkreporting 0.3.1
+========================
+* fixed a bug that caused a lazy evaluation-related error for the `dropmiss` 
+  param when using `kp.estimator_` 
+
 networkreporting 0.2.99
 =======================
 * updated `network.survival` function so that it returns cell-specific degree estimates
