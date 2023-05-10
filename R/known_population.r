@@ -350,7 +350,7 @@ kp.individual.estimator_ <- function(resp.data,
 ##' @param total.popn.size the size of the entire population. if NULL,
 ##'                        this function returns proportions; if not NULL, it
 ##'                        returns absolute numbers (ie, the proportions * total popn size)
-##' @param missing if "ignore", then proceed with the analysis without
+##' @param dropmiss if "ignore", then proceed with the analysis without
 ##'                doing anything about missing values. if "complete.obs"
 ##'                then, for each row, use only the known populations
 ##'                that have no missingness for the

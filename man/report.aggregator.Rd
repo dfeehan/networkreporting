@@ -45,8 +45,6 @@ these weights must be named "boot_weight_1", "boot_weight_2", ...}
 sum to 100, and dropping rows with missing values leads to weights that sum to 80, then the remaining rows will have
 their weights multiplied by (100/80) to ensure the weights still add up to 100 after dropping the rows with missing values.
 Defaults to FALSE}
-
-\item{TODO}{TODO}
 }
 \value{
 the aggregated reported quantities

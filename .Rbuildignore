@@ -13,6 +13,7 @@ data-dev.r
 netsurv-dev.r
 var-dev.r
 var-prof-dev.r
+scaleup-dev.r
 
 cran-comments.md
 
