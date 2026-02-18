@@ -128,7 +128,8 @@ network.survival.estimator_ <- function(resp.data,
                                         ego.id=NULL,
                                         return.boot=FALSE,
                                         dropmiss=FALSE,
-                                        verbose=TRUE) {
+                                        verbose=TRUE,
+                                        boot.chunk.size=500) {
 
     ## estimate the average personal network size of the respondents
     ## for each combination of attributes
@@ -245,7 +246,8 @@ network.survival.estimator_ <- function(resp.data,
                                          return.boot=TRUE,
                                          total.kp.size=total.kp.size,
                                          verbose=verbose,
-                                         dropmiss=dropmiss)$boot.estimates
+                                         dropmiss=dropmiss,
+                                         boot.chunk.size=boot.chunk.size)$boot.estimates
         
         # join bootstrap weights onto data, which is what report.aggregator_ requires
         ad.withboot <- attribute.data %>%
@@ -264,7 +266,8 @@ network.survival.estimator_ <- function(resp.data,
                                                  weights=boot.cols,
                                                  qoi.name="deaths",
                                                  scaling.factor = scaling.factor,
-                                                 dropmiss=dropmiss)
+                                                 dropmiss=dropmiss,
+                                                 boot.chunk.size=boot.chunk.size)
         
         tog.df.boot <- deg.by.att.boot %>% full_join(deaths.by.att.boot, 
                                                      by=c(attribute.names, 'boot_idx'))        
