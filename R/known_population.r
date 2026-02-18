@@ -71,7 +71,7 @@
 ##'
 ##' @rdname kp.estimator
 ##' @export
-kp.estimator_ <- function(resp.data, 
+kp.estimator_ <- function(resp.data,
                           known.populations,
                           weights,
                           boot.weights=NULL,
@@ -81,7 +81,8 @@ kp.estimator_ <- function(resp.data,
                           total.kp.size=NULL,
                           alter.popn.size=NULL,
                           dropmiss=FALSE,
-                          verbose=TRUE) {
+                          verbose=TRUE,
+                          boot.chunk.size=500) {
 
   wdat <- select_(resp.data, .dots=weights)
   kpdat <- select_(resp.data, .dots=known.populations)
@@ -180,7 +181,8 @@ kp.estimator_ <- function(resp.data,
                                    qoi='kptot',
                                    weights=boot.cols,
                                    qoi.name='y.kp',
-                                   dropmiss=dropmiss)    
+                                   dropmiss=dropmiss,
+                                   boot.chunk.size=boot.chunk.size)
     
     res.boot <- select_(agg.boot, .dots=c(tograb, 'boot_idx')) %>%
       dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,

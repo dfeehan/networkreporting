@@ -32,7 +32,8 @@ report.aggregator_ <- function(resp.data,
                                weights,
                                qoi.name,
                                scaling.factor=NULL,
-                               dropmiss=FALSE) {
+                               dropmiss=FALSE,
+                               boot.chunk.size=500) {
   
   resp.data <- resp.data
 
@@ -89,27 +90,26 @@ report.aggregator_ <- function(resp.data,
   }
 
   ## NB: this design is based on siblingsurvival::get_ind_est_from_ec
-  df.summ <- df %>% 
-             group_by_at(attribute.names) %>%
-             dplyr::summarise_at(.vars=weights,
-                                 .funs=list(mean.qoi = ~weighted_mean(x=.data[[qoi]], w=., na.rm=dropmiss),
-                                            sum.qoi  = ~weighted_sum(x=.data[[qoi]], w=., na.rm=dropmiss),
-                                            # get the sum of the weights
-                                            # NB: this includes rows w/ missingness, even if
-                                            #     dropmiss=TRUE
-                                            wgt.total = ~sum(.),
-                                            wgt.inv.total = ~sum(1/.),
-                                            ## this is a hack because n() generates errors due to
-                                            ## plyr/dplyr import conflict (and it is hard to regulate
-                                            ## import order with package infrastructure)
-                                            num.obs = ~length(.),
-                                            dropmiss = ~dropmiss))
-  
-  ## if we have bootstrap weights, reshape and clean things up
-  if(length(weights) > 1) {
-    
+
+  ## helper: summarise one set of weight columns and reshape to long format
+  summarise_and_reshape <- function(weight_cols) {
+    chunk.summ <- df %>%
+      group_by_at(attribute.names) %>%
+      dplyr::summarise_at(.vars=weight_cols,
+                          .funs=list(mean.qoi = ~weighted_mean(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                     sum.qoi  = ~weighted_sum(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                     # get the sum of the weights
+                                     # NB: this includes rows w/ missingness, even if
+                                     #     dropmiss=TRUE
+                                     wgt.total = ~sum(.),
+                                     wgt.inv.total = ~sum(1/.),
+                                     ## this is a hack because n() generates errors due to
+                                     ## plyr/dplyr import conflict (and it is hard to regulate
+                                     ## import order with package infrastructure)
+                                     num.obs = ~length(.),
+                                     dropmiss = ~dropmiss))
     ## NB: assuming weight names are boot_weight_1, boot_weight_2, ...
-    df.summ <- df.summ %>%
+    chunk.summ %>%
       tidyr::gather(starts_with('boot_weight'),
              key='rawqty',
              value='value')  %>%
@@ -117,7 +117,26 @@ report.aggregator_ <- function(resp.data,
              boot_idx = as.integer(stringr::str_remove_all(rawqty, '[^\\d]'))) %>%
       select(-rawqty) %>%
       tidyr::spread(qty, value)
-    
+  }
+
+  ## if we have bootstrap weights, process in chunks to avoid huge wide intermediates
+  if(length(weights) > 1) {
+
+    chunks <- split(weights, ceiling(seq_along(weights) / boot.chunk.size))
+    df.summ <- dplyr::bind_rows(lapply(chunks, summarise_and_reshape))
+
+  } else {
+
+    df.summ <- df %>%
+      group_by_at(attribute.names) %>%
+      dplyr::summarise_at(.vars=weights,
+                          .funs=list(mean.qoi = ~weighted_mean(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                     sum.qoi  = ~weighted_sum(x=.data[[qoi]], w=., na.rm=dropmiss),
+                                     wgt.total = ~sum(.),
+                                     wgt.inv.total = ~sum(1/.),
+                                     num.obs = ~length(.),
+                                     dropmiss = ~dropmiss))
+
   } #else {
   
       toren <- list(~mean.qoi, ~sum.qoi, ~wgt.total, ~wgt.inv.total, ~num.obs)
