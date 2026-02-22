@@ -20,6 +20,27 @@
 
 set.seed(12345)
 
+## rescaled.bootstrap.sample was updated to return tibbles with a
+## 'weight_scale' column (underscore), but bootstrap.estimates still reads
+## 'weight.scale' (dot), causing numeric(0) weights and a crash.
+## This adapter renames the column to restore compatibility.
+## It must be assigned to the global environment because bootstrap.estimates
+## uses get.fn() to look up the bootstrap function by name in the package
+## namespace / global env (a local function in the test file is not visible).
+rescaled.bootstrap.compat <- function(survey.data, survey.design, num.reps,
+                                      parallel = FALSE, paropts = NULL) {
+  reps <- rescaled.bootstrap.sample(survey.data    = survey.data,
+                                    survey.design  = survey.design,
+                                    num.reps       = num.reps,
+                                    parallel       = parallel,
+                                    paropts        = paropts)
+  lapply(reps, function(r) {
+    names(r)[names(r) == "weight_scale"] <- "weight.scale"
+    r
+  })
+}
+assign("rescaled.bootstrap.compat", rescaled.bootstrap.compat, envir = .GlobalEnv)
+
 ## size of the entire population
 tot.pop.size <- 10718378
 
@@ -114,20 +135,56 @@ test.bootfn <- function(bfn) {
 ## simple random sample (SRS) bootstrap
 context("variance estimators - srs bootstrap - sanity checks")
 
-tmp <- test.bootfn("srs.bootstrap.sample")
+test_that("srs bootstrap produces variance and non-negative estimates", {
+  test.bootfn("srs.bootstrap.sample")
+})
 
 
 #########################################
 ## rescaled (Rao / Wu) bootstrap
 context("variance estimators - rescaled bootstrap - sanity checks")
 
-tmp <- test.bootfn("rescaled.bootstrap.sample")
+test_that("rescaled bootstrap produces variance and non-negative estimates", {
+  test.bootfn("rescaled.bootstrap.compat")
+})
 
 
 ## TODO -- LEFT OFF HERE...
 ##  * consider increasing M
-##  * test that mean is close to raw value
-##  * draft the rest of the tests...
+
+#########################################
+## bootstrap mean close to raw estimate
+context("variance estimators - bootstrap mean vs raw estimate")
+
+test_that("mean of bootstrap estimates is reasonably close to raw point estimate", {
+  raw <- nsum.estimator(boot.example,
+                        kp.method       = TRUE,
+                        weights         = "indweight",
+                        missing         = "complete.obs",
+                        y.vals          = "clients",
+                        verbose         = FALSE,
+                        d.hat.vals      = "d.hat")
+
+  boot.res <- bootstrap.estimates(
+    survey.data    = boot.example,
+    survey.design  = ~ cluster + strata(region),
+    num.reps       = M2,
+    estimator.fn   = "nsum.estimator",
+    kp.method      = TRUE,
+    return.plot    = FALSE,
+    weights        = "indweight",
+    missing        = "complete.obs",
+    y.vals         = "clients",
+    verbose        = FALSE,
+    bootstrap.fn   = "rescaled.bootstrap.compat",
+    d.hat.vals     = "d.hat"
+  )
+
+  boot.ests <- laply(boot.res, function(x) { x$estimate })
+
+  ## the mean of the bootstrap estimates should be within 50% of the raw estimate
+  expect_true(abs(mean(boot.ests) - raw$estimate) / raw$estimate < 0.5)
+})
 
 
 ## raw estimates
@@ -137,5 +194,5 @@ tmp <- test.bootfn("rescaled.bootstrap.sample")
 ##                                    weights="indweight")
 
 ## conduct the bootstrap resamples
-## rw.rbs <- rw.befn(bootstrap.fn="rescaled.bootstrap.sample")
+## rw.rbs <- rw.befn(bootstrap.fn="rescaled.bootstrap.compat")
 ## rw.srs <- rw.befn(bootstrap.fn="srs.bootstrap.sample")
