@@ -1,0 +1,113 @@
+# Summary
+
+The goal of the `networkreporting` package is to help people use network
+reporting methods.
+
+## Installing
+
+You can install:
+
+- the latest released version from CRAN with
+
+  ``` r
+  install.packages("networkreporting")
+  ```
+
+- the latest development version from github with
+
+  ``` r
+  install.packages("devtools")
+  devtools::install_github("dfeehan/networkreporting")
+  ```
+
+## Vignettes
+
+The `networkreporting` package enables you to use several methods that
+many people currently think of as distinct. Here are some vignettes for
+how to use the package:
+
+- [Analyzing network scale-up data using the networkreporting
+  package](https://cran.r-project.org/web/packages/networkreporting/vignettes/network_scaleup.html)
+- Analyzing sibling method data using the networkreporting package
+  (Coming soon)
+- Analyzing generalized network scale-up data using the networkreporting
+  package (Coming soon)
+
+## Issues
+
+If you would like to suggest a feature or report a bug, please create an
+[issue](https://github.com/dfeehan/networkreporting/issues)
+
+## Citation
+
+The development of this software was supported by a grant from the
+National Institutes of Health (R01-HD075666).
+
+If you use our package for your research, please cite it so that we can
+continue to develop it.
+
+- Feehan, Dennis M. and Salganik, Matthew J. (2014) “The
+  networkreporting package.”
+  <http://cran.r-project.org/package=networkreporting>
+
+# Package index
+
+## All functions
+
+- [`add.kp()`](http://dennisfeehan.org/networkreporting/reference/add.kp.md)
+  : attach known populations to a dataframe
+- [`df.to.kpvec()`](http://dennisfeehan.org/networkreporting/reference/df.to.kpvec.md)
+  : turn a dataframe into a known population vector
+- [`estimate.error()`](http://dennisfeehan.org/networkreporting/reference/estimate.error.md)
+  : given an estimated subpopn size or prevalence and the correct value,
+  produce some measurements of how close the esimate is
+- [`example.knownpop.dat`](http://dennisfeehan.org/networkreporting/reference/example.knownpop.dat.md)
+  : Example known population data
+- [`example.survey`](http://dennisfeehan.org/networkreporting/reference/example.survey.md)
+  : Example household survey data
+- [`gwsm.estimator()`](http://dennisfeehan.org/networkreporting/reference/gwsm.estimator.md)
+  : indirect estimator (generalized weight share method / gwsm)
+- [`kp.degree.estimator()`](http://dennisfeehan.org/networkreporting/reference/kp.degree.estimator.md)
+  : kp.degree.estimator (DEPRECATED)
+- [`kp.estimator_()`](http://dennisfeehan.org/networkreporting/reference/kp.estimator.md)
+  [`kp.estimator()`](http://dennisfeehan.org/networkreporting/reference/kp.estimator.md)
+  : Average personal network size estimates using known population
+  method
+- [`kp.individual.estimator()`](http://dennisfeehan.org/networkreporting/reference/kp.individual.estimator.md)
+  [`kp.individual.estimator_()`](http://dennisfeehan.org/networkreporting/reference/kp.individual.estimator.md)
+  : Individual personal network size estimates using the known
+  population method
+- [`multiplicity.estimator()`](http://dennisfeehan.org/networkreporting/reference/multiplicity.estimator.md)
+  : multiplicity.estimator
+- [`network.survival.estimator_()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
+  [`network.survival.estimator()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
+  : network survival estimator
+- [`networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting.md)
+  [`package-networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting.md)
+  : Network reporting estimators
+- [`nsum.estimator()`](http://dennisfeehan.org/networkreporting/reference/nsum.estimator.md)
+  : nsum.estimator
+- [`nsum.internal.consistency()`](http://dennisfeehan.org/networkreporting/reference/nsum.internal.consistency.md)
+  : nsum.internal.consistency
+- [`plot_meanties_truth()`](http://dennisfeehan.org/networkreporting/reference/plot_meanties_truth.md)
+  : plot_meanties_truth
+- [`rdsII.estimator()`](http://dennisfeehan.org/networkreporting/reference/rdsII.estimator.md)
+  : rdsII.estimator
+- [`report.aggregator_()`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md)
+  [`report.aggregator()`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md)
+  : aggregate a reported quantity by groups
+- [`summation.estimator()`](http://dennisfeehan.org/networkreporting/reference/summation.estimator.md)
+  : summation.estimator
+- [`topcode.data()`](http://dennisfeehan.org/networkreporting/reference/topcode.data.md)
+  : topcode a group of variables
+- [`topcode.var()`](http://dennisfeehan.org/networkreporting/reference/topcode.var.md)
+  : topcode a vector of numerical values
+- [`total.degree.estimator()`](http://dennisfeehan.org/networkreporting/reference/total.degree.estimator.md)
+  : total.degree
+
+# Articles
+
+### All vignettes
+
+- [Analyzing network scale-up data using the networkreporting
+  package](http://dennisfeehan.org/networkreporting/articles/network_scaleup.md):

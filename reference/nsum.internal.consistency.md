@@ -1,0 +1,146 @@
+# nsum.internal.consistency
+
+use a leave-one-out method to estimate the predictive accuracy of the
+network scale-up estimator on the known populations
+
+## Usage
+
+``` r
+nsum.internal.consistency(
+  survey.data,
+  known.popns = NULL,
+  total.popn.size = NULL,
+  degrees = NULL,
+  missing = "ignore",
+  kp.method = TRUE,
+  weights = NULL,
+  alter.popn.size = NULL,
+  killworth.se = FALSE,
+  return.plot = FALSE,
+  verbose = FALSE,
+  bootstrap = FALSE,
+  ...
+)
+```
+
+## Arguments
+
+- survey.data:
+
+  the dataframe with the survey results
+
+- known.popns:
+
+  if not NULL, a vector whose entries are the size of the known
+  populations, and whose names are the variable names in the dataset
+  corresponding to each one. if NULL, then assume that the survey.data
+  dataframe has an attribute called 'known.popns' containing this
+  vector.
+
+- total.popn.size:
+
+  the size of the entire population. if NA, this function works with
+  proportions; if NULL, it looks for the 'total.popn.size' attribute of
+  the dataset `survey.data`; if not NULL or NA, it works with absolute
+  numbers (ie, the proportions \* total popn size)
+
+- degrees:
+
+  if not NULL, then the name or index of the column in the datset
+  containing the degree estimates. if NULL, then use the known
+  population method to estimate the degrees (see
+  [`kp.degree.estimator`](http://dennisfeehan.org/networkreporting/reference/kp.degree.estimator.md))
+
+- missing:
+
+  if "ignore", then proceed with the analysis without doing anything
+  about missing values. if "complete.obs" then only use rows that have
+  no missingness for the computations (listwise deletion). care must be
+  taken in using this second option
+
+- kp.method:
+
+  if TRUE, then we're using known population method estimates of the
+  degrees. this means we have to recompute the degrees each time we hold
+  out a known subgroup. if the degrees come from another estimator, like
+  the summation method, then we don't need to do that since we don't use
+  the ARD questions in coming up with the degree estimate.
+
+- weights:
+
+  if not NULL, weights to use in computing the estimate. this should be
+  the name of the column in the survey.data which has the variable with
+  the appropriate weights. these weights should be construted so that,
+  eg, the mean of the degrees is estimated as (1/n) \* \sum_i w_i \* d_i
+
+- alter.popn.size:
+
+  the size of the population of alters; this is most often the frame
+  population, which is the default if nothing else is specified; the
+  size of the frame population is taken to be the sum of the weights
+  over all of survey.data
+
+- killworth.se:
+
+  if TRUE, return the Killworth et al estimate of the standard error
+
+- return.plot:
+
+  if TRUE, make and return a ggplot2 plot object
+
+- verbose:
+
+  if TRUE, report more detailed information about what's going on
+
+- bootstrap:
+
+  if TRUE, use
+  [`surveybootstrap::bootstrap.estimates`](https://rdrr.io/pkg/surveybootstrap/man/bootstrap.estimates.html)
+  to take bootstrap resamples in order to obtain intervals around each
+  estimate. in this case, you are expected to also pass in at least
+  `bootstrap.fn`, `survey.design`, and `num.reps`
+
+- ...:
+
+  additional arguments, which are passed on to
+  [`surveybootstrap::bootstrap.estimates`](https://rdrr.io/pkg/surveybootstrap/man/bootstrap.estimates.html)
+  if `bootstrap` is TRUE
+
+## Value
+
+a list with a dataset containing the subpopn-specific estimates, as well
+as several summaries of the accuracy of those estimates, including mae
+(mean absolute error), mse (mean squared error), rmse (root mean squared
+error), and are (average relative error)
+
+## Details
+
+given a set of estimated degrees, responses to a group of ARD questions,
+and the total size of the populations that the ARD questions ask about,
+this function estimates the accuracy of the network scale-up method by
+dropping each known population in turn, using the non-dropped
+populations to compute the degree and an estimate of the size of the
+known population, and comparing the result to the actual size of the
+known population
+
+\* TODO – document bootstrap ci option better  
+\* TODO – make amenable to parallelization  
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+ic.result <- 
+  nsum.internal.consistency(survey.data=recoded.dat,
+                            known.popns=kp.totals,
+                            missing="complete.obs",
+                            killworth.se=TRUE,
+                            kp.method=TRUE,
+                            alter.popn.size=total.popn.size,
+                            return.plot=TRUE,
+                            bootstrap=TRUE,
+                            bootstrap.fn="rescaled.bootstrap.sample",
+                            survey.design=~ cluster,
+                            num.reps=100)
+} # }
+```
