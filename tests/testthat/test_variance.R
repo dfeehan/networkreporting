@@ -108,23 +108,23 @@ test.bootfn <- function(bfn) {
 
   ## be sure that there is variation in the numerator
   ## the denominator and the estimates
-  expect_that(var(ests1) == 0, is_false())
-  expect_that(var(nums1) == 0, is_false())
-  expect_that(var(denoms1) == 0, is_false())
+  expect_false(var(ests1) == 0)
+  expect_false(var(nums1) == 0)
+  expect_false(var(denoms1) == 0)
 
-  expect_that(var(ests2) == 0, is_false())
-  expect_that(var(nums2) == 0, is_false())
-  expect_that(var(denoms2) == 0, is_false())
+  expect_false(var(ests2) == 0)
+  expect_false(var(nums2) == 0)
+  expect_false(var(denoms2) == 0)
 
   ## be sure that the estimates, the numerator,
   ## and the denominator are always nonnegative
-  expect_that(all(ests1 >= 0), is_true())
-  expect_that(all(nums1 >= 0), is_true())
-  expect_that(all(denoms1 >= 0), is_true())
+  expect_true(all(ests1 >= 0))
+  expect_true(all(nums1 >= 0))
+  expect_true(all(denoms1 >= 0))
 
-  expect_that(all(ests2 >= 0), is_true())
-  expect_that(all(nums2 >= 0), is_true())
-  expect_that(all(denoms2 >= 0), is_true())
+  expect_true(all(ests2 >= 0))
+  expect_true(all(nums2 >= 0))
+  expect_true(all(denoms2 >= 0))
 
   ## eventually, we might want to do more with the resamples,
   ## so return them

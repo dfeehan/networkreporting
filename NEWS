@@ -1,3 +1,9 @@
+networkreporting 0.3.2
+========================
+* replaced defunct dplyr `select_()` and `rename_()` calls (underscore SE
+  interface) with `select(all_of())` and `rename()` throughout
+  `report_aggregator.r`, `known_population.r`, and `scale_up.r`
+
 networkreporting 0.3.1
 ========================
 * fixed a bug that caused a lazy evaluation-related error for the `dropmiss` 

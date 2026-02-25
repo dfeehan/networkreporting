@@ -365,7 +365,7 @@ nsum.internal.consistency <- function(survey.data,
   }
   
   ## grab the weights
-  wdat <- select_(survey.data, .dots=weights)
+  wdat <- select(survey.data, all_of(weights))
 
   ## grab the total size of the alter population
   ## (typically, this would be the frame population, N.F)

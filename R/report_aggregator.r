@@ -37,9 +37,9 @@ report.aggregator_ <- function(resp.data,
   
   resp.data <- resp.data
 
-  wdat <- select_(resp.data, .dots=weights)
-  qdat <- select_(resp.data, .dots=qoi)
-  adat <- select_(resp.data, .dots=attribute.names)
+  wdat <- select(resp.data, all_of(weights))
+  qdat <- select(resp.data, all_of(qoi))
+  adat <- select(resp.data, all_of(attribute.names))
   
   ## multiply weights by scaling factor, if one was specified
   if (! is.null(scaling.factor)) {
@@ -139,12 +139,12 @@ report.aggregator_ <- function(resp.data,
 
   } #else {
   
-      toren <- list(~mean.qoi, ~sum.qoi, ~wgt.total, ~wgt.inv.total, ~num.obs)
-      newnames <- paste0(c("mean.", "sum.", "wgt.total.", 
+      old_names <- c("mean.qoi", "sum.qoi", "wgt.total", "wgt.inv.total", "num.obs")
+      newnames <- paste0(c("mean.", "sum.", "wgt.total.",
                            "wgt.inv.total.", "num.obs."), qoi.name)
-    
-      df.summ <- dplyr::rename_(df.summ,
-                         .dots=setNames(toren, newnames))
+
+      df.summ <- dplyr::rename(df.summ,
+                         !!!setNames(old_names, newnames))
   #}
 
   return(df.summ)

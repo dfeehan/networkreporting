@@ -84,18 +84,18 @@ kp.estimator_ <- function(resp.data,
                           verbose=TRUE,
                           boot.chunk.size=500) {
 
-  wdat <- select_(resp.data, .dots=weights)
-  kpdat <- select_(resp.data, .dots=known.populations)
+  wdat <- select(resp.data, all_of(weights))
+  kpdat <- select(resp.data, all_of(known.populations))
   
   
   dropmiss <- lazy_eval(dropmiss)
   
   if(! is.null(ego.id)) {
-    iddat <- select_(resp.data, .dots=ego.id)
+    iddat <- select(resp.data, all_of(ego.id))
   }
   
   if(! is.null(attribute.names)) {
-    adat <- select_(resp.data, .dots=attribute.names)
+    adat <- select(resp.data, all_of(attribute.names))
     atnames <- paste(colnames(adat))
   } else {
     adat <- NULL
@@ -145,16 +145,14 @@ kp.estimator_ <- function(resp.data,
                             qoi.name='y.kp',
                             dropmiss=dropmiss)
 
-  tograb <- lapply(c(colnames(adat),
-                     'sum.y.kp', 'wgt.total.y.kp', 'num.obs.y.kp'),
-                   as.symbol)
+  tograb <- c(colnames(adat), 'sum.y.kp', 'wgt.total.y.kp', 'num.obs.y.kp')
   
   ## to placate R CMD CHECK
   sum.y.kp <- NULL
   sum.y.kp.over.kptot <- NULL
   wgt.total.y.kp <- NULL
   
-  res <- select_(agg, .dots=tograb) %>%
+  res <- select(agg, all_of(tograb)) %>%
          dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
                 ## here, we estimate N_F / N_{F_\alpha} by dividing the
                 ## total of all respondents' weights by the sum of
@@ -184,7 +182,7 @@ kp.estimator_ <- function(resp.data,
                                    dropmiss=dropmiss,
                                    boot.chunk.size=boot.chunk.size)
     
-    res.boot <- select_(agg.boot, .dots=c(tograb, 'boot_idx')) %>%
+    res.boot <- select(agg.boot, all_of(c(tograb, 'boot_idx'))) %>%
       dplyr::mutate(sum.y.kp.over.kptot = sum.y.kp / total.kp.size,
                     ## here, we estimate N_F / N_{F_\alpha} by dividing the
                     ## total of all respondents' weights by the sum of

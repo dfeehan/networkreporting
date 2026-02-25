@@ -192,7 +192,7 @@ network.survival.estimator_ <- function(resp.data,
                             N.Fcell.hat = wgt.total.y.kp,
                             y.F.Dcell.hat = sum.deaths,
                             y.Fcell.kp.hat = sum.y.kp.over.kptot * total.kp.size) %>%
-              dplyr::select(attribute.names,
+              dplyr::select(all_of(attribute.names),
                             # number of rows used in death reports
                             n.obs.deaths = num.obs.deaths,
                             # number of rows used in kp reports
