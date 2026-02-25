@@ -1,5 +1,7 @@
-[![Travis-CI Build
-Status](https://travis-ci.org/dfeehan/networkreporting.svg?branch=master)](https://travis-ci.org/dfeehan/networkreporting)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/dfeehan/networkreporting/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dfeehan/networkreporting/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/dfeehan/networkreporting/graph/badge.svg)](https://app.codecov.io/gh/dfeehan/networkreporting)
+<!-- badges: end -->
 
 Summary
 ================
