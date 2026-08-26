@@ -1,4 +1,4 @@
 library(testthat)
-library(plyr)
+library(networkreporting)
 
 test_check("networkreporting")

@@ -37,7 +37,7 @@ be the size of the frame population, N.F}
 }
 \value{
 a data frame with an estimate of each individual respondent's personal
-        network size
+network size
 }
 \description{
 In most situations, the known population method will be

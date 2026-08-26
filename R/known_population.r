@@ -55,6 +55,9 @@
 ##'                 (see the 'dropmiss' argument to the function report.aggregator_)
 ##'                 future versions may have other options
 ##' @param verbose if TRUE, print information to screen
+##' @param boot.chunk.size number of bootstrap weight columns to process at a time;
+##' see the \code{boot.chunk.size} argument of \code{\link{report.aggregator_}}.
+##' Affects speed and peak memory only, not the results. Defaults to 500
 ##' @return the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
 ##'         of the categories given by \code{attribute.names}
 ##'

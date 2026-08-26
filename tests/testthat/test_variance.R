@@ -133,8 +133,7 @@ test.bootfn <- function(bfn) {
 
 #########################################
 ## simple random sample (SRS) bootstrap
-context("variance estimators - srs bootstrap - sanity checks")
-
+## --- variance estimators - srs bootstrap - sanity checks ---
 test_that("srs bootstrap produces variance and non-negative estimates", {
   test.bootfn("srs.bootstrap.sample")
 })
@@ -142,8 +141,7 @@ test_that("srs bootstrap produces variance and non-negative estimates", {
 
 #########################################
 ## rescaled (Rao / Wu) bootstrap
-context("variance estimators - rescaled bootstrap - sanity checks")
-
+## --- variance estimators - rescaled bootstrap - sanity checks ---
 test_that("rescaled bootstrap produces variance and non-negative estimates", {
   test.bootfn("rescaled.bootstrap.compat")
 })
@@ -154,8 +152,7 @@ test_that("rescaled bootstrap produces variance and non-negative estimates", {
 
 #########################################
 ## bootstrap mean close to raw estimate
-context("variance estimators - bootstrap mean vs raw estimate")
-
+## --- variance estimators - bootstrap mean vs raw estimate ---
 test_that("mean of bootstrap estimates is reasonably close to raw point estimate", {
   raw <- nsum.estimator(boot.example,
                         kp.method       = TRUE,

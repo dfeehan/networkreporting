@@ -59,7 +59,7 @@ must be taken in using this second option}
 }
 \value{
 the nsum estimate of the hidden population's size (as a prevalence or
-        an absolute number, depending on total.popn.size)
+an absolute number, depending on total.popn.size)
 }
 \description{
 compute network scale-up (nsum) estimate of the

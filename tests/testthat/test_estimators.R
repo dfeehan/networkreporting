@@ -42,8 +42,7 @@ load("toynrnetworks.RData")
 
 ####################################
 ## multiplicity estimator
-context("estimators - multiplicity")
-
+## --- estimators - multiplicity ---
 ests <- ldply(toy.networks,
               function(tn) {
                 return(c("est"=multiplicity.estimator(tn,
@@ -60,7 +59,7 @@ tocheck <- merge(ests,
 d_ply(tocheck,
       .(.id),
       function(x) {
-        expect_that(x$est, equals(x$truth),
+        expect_equal(x$est, x$truth,
                     info=paste("estimate is", x$est,
                                "but it should be", x$truth),
                     label=paste("multiplicity estimate on toy network ",
@@ -70,8 +69,7 @@ d_ply(tocheck,
 
 ####################################
 ## nsum estimator
-context("estimators - nsum")
-
+## --- estimators - nsum ---
 ## TODO - add test for Killworth estimate of the
 ##        standard error (both for proportions and for totals)
 
@@ -93,7 +91,7 @@ tocheck <- merge(ests,
 d_ply(tocheck,
       .(.id),
       function(x) {
-        expect_that(x$estimate, equals(x$truth),
+        expect_equal(x$estimate, x$truth,
                     info=paste("estimate is", x$est,
                                "but it should be", x$truth),
                     label=paste("nsum estimate on toy network ",
@@ -107,8 +105,7 @@ d_ply(tocheck,
 
 ####################################
 ## gnsum estimator
-context("estimators - gnsum")
-
+## --- estimators - gnsum ---
 ests <- ldply(toy.networks,
               function(tn) {
                 d.T.bar <- mean(subset(tn,hidden)$d)
@@ -132,7 +129,7 @@ tocheck <- merge(ests,
 d_ply(tocheck,
       .(.id),
       function(x) {
-        expect_that(x$est, equals(x$truth),
+        expect_equal(x$est, x$truth,
                     info=paste("estimate is", x$est,
                                "but it should be", x$truth),
                     label=paste("gnsum estimate on toy network ",
@@ -141,8 +138,7 @@ d_ply(tocheck,
 
 ####################################
 ## network reporting estimator
-context("estimators - network survival")
-
+## --- estimators - network survival ---
 ## TODO (NB: see README from non-versioned networksampling folder)
 
 ## NB: for now, we're just testing the first network, since
@@ -181,7 +177,7 @@ tocheck <- plyr::llply(c(1),
 
 l_ply(tocheck,
       function(x) {
-        expect_that(x$asdr.hat, equals(x$truth),
+        expect_equal(x$asdr.hat, x$truth,
                     info=paste("estimate is", paste(x$asdr.hat, collapse=""),
                                "but it should be", paste(x$truth, collapse="")),
                     label=paste("network survival estimate on toy network ",
@@ -191,8 +187,7 @@ l_ply(tocheck,
 
 ####################################
 ## nsum.estimator - numerators and denominators
-context("estimators - nsum numerators and denominators")
-
+## --- estimators - nsum numerators and denominators ---
 ## Use the first toy network and check that tot.connections and sum.d.hat
 ## match hand-computed values (estimate = tot.connections / sum.d.hat)
 
@@ -232,8 +227,7 @@ test_that("nsum.estimator uniform weights gives same result as unweighted", {
 
 ####################################
 ## nsum.estimator - d.tot.hat pre-computed
-context("estimators - nsum with pre-computed total degree")
-
+## --- estimators - nsum with pre-computed total degree ---
 test_that("nsum.estimator with d.tot.hat matches estimate from d.hat.vals", {
   tn1 <- toy.networks[[1]]
   ## compute total degree the normal way first
@@ -256,8 +250,7 @@ test_that("nsum.estimator with d.tot.hat matches estimate from d.hat.vals", {
 
 ####################################
 ## nsum.estimator - complete.obs with NAs
-context("estimators - nsum complete.obs NA handling")
-
+## --- estimators - nsum complete.obs NA handling ---
 test_that("nsum.estimator complete.obs excludes NA rows", {
   ## Create a small synthetic dataset where we can hand-compute the answer
   ## 4 respondents: degrees c(10, 20, 30, 40), y c(1, 2, NA, 4)
@@ -282,8 +275,7 @@ test_that("nsum.estimator complete.obs excludes NA rows", {
 
 ####################################
 ## nsum.internal.consistency
-context("estimators - nsum internal consistency")
-
+## --- estimators - nsum internal consistency ---
 test_that("nsum.internal.consistency returns expected structure and sane values", {
   ## Use the example survey data bundled with the package
   kp.q <- paste(example.knownpop.dat$known.popn)

@@ -15,7 +15,7 @@ by the sum of the multiplicities (TODO MORE DETAIL)}
 }
 \value{
 the multiplicity estimate of the hidden
-        population's size (as a prevalence)
+population's size (as a prevalence)
 }
 \description{
 compute multiplicity estimate of the population

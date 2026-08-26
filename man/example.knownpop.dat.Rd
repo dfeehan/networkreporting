@@ -7,8 +7,8 @@
 \format{
 A data frame with 22 rows and 2 variables:
 \describe{
-  \item{known.popn}{The name of the group}
-  \item{size}{The number of people in the group}
+\item{known.popn}{The name of the group}
+\item{size}{The number of people in the group}
 }
 }
 \usage{

@@ -36,7 +36,7 @@ the RDS-II estimate of the average of the quantity of interest
 \description{
 compute an estimate for the prevalence of a trait
 from an RDS sample, using the estimator described
-in TODO [Volz + Heckathorn '08]
+in TODO: Volz + Heckathorn '08
 }
 \details{
 NOTE: we have no weights for now, right? RDS doesn't

@@ -9,8 +9,7 @@
 
 ####################################
 ## kp.individual.estimator_
-context("estimators - known population individual")
-
+## --- estimators - known population individual ---
 test_that("kp.individual.estimator_ returns correct hand-computed values", {
   # 2 respondents, 2 known populations
   # nurses total = 50, teachers total = 50, so total.kp.size = 100
@@ -80,8 +79,7 @@ test_that("kp.individual.estimator_ with dropmiss=TRUE gives 0 for fully-missing
 
 ####################################
 ## total.degree.estimator
-context("estimators - known population total degree")
-
+## --- estimators - known population total degree ---
 test_that("total.degree.estimator returns unweighted sum of degrees", {
   df <- data.frame(d = c(10, 20, 30))
   result <- total.degree.estimator(df, d.hat.vals = "d")
