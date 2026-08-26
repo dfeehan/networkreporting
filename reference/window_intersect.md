@@ -1,0 +1,45 @@
+# window_intersect
+
+given two intervals, figure out the intersection between the first and
+the second
+
+NOTE that the intervals are treated as half-open, closed on the left and
+open on the right, so that an event happening exactly at time b is
+counted in the window starting at b and not in the one ending at b.
+
+The left-closed form matters at the edges of the observation period. An
+event in the very first month of a window contributes exposure to that
+window, so it must also be able to be counted there; closing on the
+right instead would take the exposure and drop the event, leaving the
+numerator and denominator disagreeing about whether that month is in the
+window. It also puts an event exactly on an age-group boundary into the
+later group, which is what floor((death - dob)/width) does and what The
+DHS Program's own tabulation code assumes.
+
+## Usage
+
+``` r
+window_intersect(a, b)
+```
+
+## Arguments
+
+- a:
+
+  the first window; here, we use all three components (start, finish,
+  event)
+
+- b:
+
+  the second window; here, we only use the start and finish time, and
+  ignore any events
+
+## Value
+
+a window containing the exposure and events from a that takes place
+during the time given by b; also, if a has an event and it takes place
+during b, it is included
+
+## Details
+
+TODO - should write a more detailed description

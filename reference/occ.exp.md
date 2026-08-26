@@ -1,0 +1,179 @@
+# tabulate occurrences and exposures
+
+Given a variable indicating when an event happened, a time window we are
+interested in, and possibly a set of covariates, tabulate counts of
+event occurences and exposures in the given time interval.  
+Note that you have to be careful about observations that don't
+experience an event, but still count for exposure; see the example
+below.
+
+## Usage
+
+``` r
+occ.exp(
+  data,
+  start.obs,
+  end.obs,
+  event,
+  age.groups,
+  time.periods,
+  id.var = NULL,
+  covars = NULL,
+  age.offsets = NULL,
+  time.offsets = NULL,
+  weights = NULL,
+  discretize = FALSE,
+  exp.scale = 1
+)
+```
+
+## Arguments
+
+- data:
+
+  the dataset containing events
+
+- start.obs:
+
+  vector of values (one per row of `data`) with the starting point of
+  the observation window for each row, in CMC format
+
+- end.obs:
+
+  vector of values (one per row of `data`) with the ending point of the
+  observation window for each row, in CMC format
+
+- event:
+
+  the column of the dataset that indicates the date of an event.
+  observations that contribute exposure but no events should have this
+  set to a value that will never occur in the time period; for example,
+  -1
+
+- age.groups:
+
+  an age.groups object
+
+- time.periods:
+
+  a time.periods object
+
+- id.var:
+
+  the variable giving the unique rows of the dataset for each individual
+  (UNDER DEVELOPMENT)
+
+- covars:
+
+  the name of covariates over which occurrences and exposures should be
+  aggregated; defaults to NULL, meaning totals are computed over the
+  entire dataset
+
+- age.offsets:
+
+  if not NULL, then the age.periods are to be interpreted relative to
+  these times (one for each row). this is usually a birth date
+
+- time.offsets:
+
+  if not NULL, then the time.periods are to be interpreted relative to
+  these times (one for each row). useful for computing quantities like
+  "X months before interview", where interview happened at different
+  times for different respondents
+
+- weights:
+
+  the weight to apply to occurrences and exposures; defaults to 1
+
+- discretize:
+
+  if TRUE, turn reported amounts of exposure into a 0/1 exposure or no
+  exposure; 0 exposure when \< half of the time interval was spent in
+  the cell and 1 exposure when \>= half of the time interval was spent
+  in the cell; thus, each sib can contribute to exposure in one and only
+  one cell
+
+- exp.scale:
+
+  amount by which to scale exposure; if, for example, dates are measured
+  in months, but you want to measure rates in years, then this should be
+  1/12. It defaults to 1
+
+## Value
+
+a data frame with the covariates, age groups, occurences and expsoures
+
+## Details
+
+TODO
+
+- write unit tests
+
+- fill an example in the documentation below
+
+- at start of code, handle defaults more elegantly
+
+- id.var is not implemented; might be better to directly handle multiple
+  events (see below)
+
+- handle multiple time periods
+
+- handle multiple events
+
+- handle GK weights (possibly not in this function)
+
+- possibly refactor in the future to pass in dataset of lifelines and
+  separate list of event dates
+
+- what if event date is missing?
+
+- what about things that vary with the event, eg mother's age when child
+  was born?
+
+- better description of dates; this was developed using CMC codes from
+  the DHS surveys, but it should work for any interval scale
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+  ## THESE EXAMPLES ARE NOT UPDATED!
+  ## Please disregard for the time being...
+
+  ## RECODE so that observations w/ no births show up
+  ## in the dataset at least once by giving them a first
+  ## birth at the (impossible) CMC code of -1. This ensures
+  ## that they never contribute a birth, but that they
+  ## still count for exposure.
+  ##
+  ## NB: this is a key step. if we don't do this,
+  ## women who haven't had any births are removed
+  ## from the dataset, biasing rates upward...
+
+  bdata.coded <- bdata
+  bdata.coded$bdate[ is.na(bdata.coded$bdate) &
+                    bdata.coded$bnum == "01" ] <- -1
+  bdata.coded <- subset(bdata.coded, ! is.na(bdate) )
+
+  ## NO COVARIATES:
+  ## now use compute.occ.exp to get counts of
+  ## births and exposure between 1980 and 1990
+  ## for ages 0 to 60
+
+  ## TODO -- need to write this example using new
+  ##         version
+
+  ## WITH COVARIATES:
+  ##  use compute.occ.exp to get counts of
+  ## births and exposure by 5-year period
+  ## between 1970 and 2005,
+  ## for 5-year age groups [0,5), ..., [60,65)
+  ## by the covariates
+  ## urban, highestedlevel, and religion
+  ## (NOTE: this is just illustrative. we wouldn't recommend
+  ##  substantively interpreting the results of this example.)
+
+  ## TODO -- need to write this example using new
+  ##         version
+} # }
+```

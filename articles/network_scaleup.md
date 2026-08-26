@@ -30,30 +30,37 @@ the package to carry the estimation out.
 
 Here, we will use the *known population* estimator for respondents’
 degrees (Killworth et al., 1998; Feehan and Salganik, 2016). In order to
-estimate the degree of the $i$ th survey respondent, we use
+estimate the degree of the $`i`$ th survey respondent, we use
 
-$$\begin{array}{r}
-{\widehat{d_{i}} = \sum\limits_{j = 1}^{K}y_{ij} \times \frac{N}{\sum\limits_{j = 1}^{K}N_{j}},}
-\end{array}$$
+``` math
+\begin{align}
+\label{eqn:kpdegree}
+\hat{d_i} = \sum_{j=1}^{K} y_{ij} \times 
+\frac{N}{\sum_{j=1}^{K} N_j},
+\end{align}
+```
 
-where $N$ is the total size of the population, $N_{j}$ is the size of
-the $j$ th population of known size, and $y_{ij}$ is the number of
-connections that survey respondent $i$ reports between herself and
-members of the $j$ th population of known size.
+where $`N`$ is the total size of the population, $`N_j`$ is the size of
+the $`j`$ th population of known size, and $`y_{ij}`$ is the number of
+connections that survey respondent $`i`$ reports between herself and
+members of the $`j`$ th population of known size.
 
 ### Step 2: estimating hidden population sizes
 
 Once we have the estimates of the respondents’ degrees, we use them to
 produce an estimate for the size of the hidden population:
 
-$$\begin{array}{r}
-{{\widehat{N}}_{h} = \frac{\sum\limits_{i \in s}y_{ih}}{\sum\limits_{i \in s}\widehat{d_{i}}},}
-\end{array}$$
+``` math
+\begin{align}
+\label{eqn:nsum}
+\hat{N}_h = \frac{ \sum_{i \in s} y_{ih} }{ \sum_{i \in s} \hat{d_i} },
+\end{align}
+```
 
-where $N_{h}$ is the size of the population of interest (which we want
-to estimate), $s$ is the set of respondents in our sample, and
-$\widehat{d_{i}}$ is the estimate of the size of respondent $i$’s
-degree, obtained using the known population method.
+where $`N_h`$ is the size of the population of interest (which we want
+to estimate), $`s`$ is the set of respondents in our sample, and
+$`\hat{d_i}`$ is the estimate of the size of respondent $`i`$’s degree,
+obtained using the known population method.
 
 ## Preparing data
 
@@ -66,6 +73,7 @@ The example data for this vignette are provided with the
 `networkreporting` package, and can be loaded by typing
 
 ``` r
+
 library(networkreporting)
 library(surveybootstrap)
 
@@ -93,6 +101,7 @@ for use with the known population estimator.
 The demo known population data are in `example.knownpop.dat`:
 
 ``` r
+
 example.knownpop.dat
 ```
 
@@ -129,6 +138,7 @@ population names. The `df.to.kpvec` function makes it easy for us to
 create it:
 
 ``` r
+
 kp.vec <- df.to.kpvec(example.knownpop.dat, kp.var="known.popn", kp.value="size")
 
 kp.vec
@@ -156,6 +166,7 @@ making estimates about. In this case, let’s assume that we’re working in
 a country of 10 million people:
 
 ``` r
+
 # total size of the population
 tot.pop.size <- 10e6
 ```
@@ -166,6 +177,7 @@ Now let’s take a look at the demo survey dataset, which is called
 `example.survey`:
 
 ``` r
+
 head(example.survey)
 ```
 
@@ -243,6 +255,7 @@ value 30. First, we’ll examine the distribution of the responses before
 topcoding:
 
 ``` r
+
 ## make a vector with the list of known population names from
 ## our dataset of known population totals
 known.popn.vars <- paste(example.knownpop.dat$known.popn)
@@ -266,7 +279,7 @@ summary(example.survey[,known.popn.vars])
     ##  Mean   : 1.022   Mean   : 0.1484   Mean   : 1.885   Mean   : 2.094  
     ##  3rd Qu.: 1.000   3rd Qu.: 0.0000   3rd Qu.: 3.000   3rd Qu.: 1.000  
     ##  Max.   :95.000   Max.   :25.0000   Max.   :30.000   Max.   :95.000  
-    ##                                                      NA's   :1       
+    ##                                                      NAs    :1       
     ##   incarcerated      man.divorced       nsengimana       murekatete     
     ##  Min.   : 0.0000   Min.   : 0.0000   Min.   :0.0000   Min.   : 0.0000  
     ##  1st Qu.: 0.0000   1st Qu.: 0.0000   1st Qu.:0.0000   1st Qu.: 0.0000  
@@ -311,6 +324,7 @@ Now we use the `topcode.data` function to topcode all of the responses
 at 30:
 
 ``` r
+
 example.survey <- topcode.data(example.survey,
                                vars=known.popn.vars,
                                max=30)
@@ -334,7 +348,7 @@ summary(example.survey[,known.popn.vars])
     ##  Mean   : 0.9638   Mean   : 0.1484   Mean   : 1.885   Mean   : 1.468  
     ##  3rd Qu.: 1.0000   3rd Qu.: 0.0000   3rd Qu.: 3.000   3rd Qu.: 1.000  
     ##  Max.   :30.0000   Max.   :25.0000   Max.   :30.000   Max.   :30.000  
-    ##                                                       NA's   :1       
+    ##                                                       NAs    :1       
     ##   incarcerated      man.divorced       nsengimana       murekatete     
     ##  Min.   : 0.0000   Min.   : 0.0000   Min.   :0.0000   Min.   : 0.0000  
     ##  1st Qu.: 0.0000   1st Qu.: 0.0000   1st Qu.:0.0000   1st Qu.: 0.0000  
@@ -379,6 +393,7 @@ sizes of each respondent’s personal network. To do this using the known
 population estimator, we use the `kp.degree.estimator` function:
 
 ``` r
+
 d.hat <- kp.individual.estimator_(resp.data=example.survey,
                                   known.populations=known.popn.vars,
                                   total.kp.size=sum(kp.vec),
@@ -388,6 +403,7 @@ d.hat <- kp.individual.estimator_(resp.data=example.survey,
     ## NOTE: Ignoring any rows with missingness on any of the report variables.
 
 ``` r
+
 summary(d.hat)
 ```
 
@@ -397,11 +413,13 @@ summary(d.hat)
 We can examine the results with a histogram
 
 ``` r
+
 library(ggplot2) # we'll use qplot from ggplot2 for plots
 theme_set(theme_minimal())
 ```
 
 ``` r
+
 qplot(d.hat, binwidth=25)
 ```
 
@@ -415,6 +433,7 @@ qplot(d.hat, binwidth=25)
 Now let’s append the degree estimates to the survey reports dataframe:
 
 ``` r
+
 example.survey$d.hat <- d.hat
 ```
 
@@ -425,6 +444,7 @@ estimates of the size of the hidden population. Here, we’ll take the
 example of clients of female sex workers, `clients`
 
 ``` r
+
 idu.est <- nsum.estimator(survey.data=example.survey,
                           d.hat.vals=d.hat,
                           total.popn.size=tot.pop.size,
@@ -438,6 +458,7 @@ and also that we had to pass in the total population size using the
 `total.popn.size` option. The resulting estimate is
 
 ``` r
+
 idu.est
 ```
 
@@ -464,6 +485,7 @@ particular, you need to be able to describe the stratifcation (if any)
 and the primary sampling units used in the study.
 
 ``` r
+
 idu.est <- bootstrap.estimates(## this describes the sampling design of the
                                ## survey; here, the PSUs are given by the
                                ## variable cluster, and the strata are given
@@ -509,6 +531,7 @@ Next, you can write a bit of code that will help us put all of these
 results together, for plotting and summarizing
 
 ``` r
+
 library(plyr)
 ## combine the estimates together in one data frame
 ## (bootstrap.estimates gives us a list)
@@ -520,6 +543,7 @@ We can examine the summarized results with a histogram or with
 `summarize`.
 
 ``` r
+
 ## look at a histogram of the results
 qplot(all.idu.estimates$estimate, binwidth=500)
 ```
@@ -527,6 +551,7 @@ qplot(all.idu.estimates$estimate, binwidth=500)
 ![](network_scaleup_files/figure-html/unnamed-chunk-16-1.png)
 
 ``` r
+
 ## summarize the results
 summary(all.idu.estimates$estimate)
 ```
@@ -538,6 +563,7 @@ To produce 95% intervals using the percentile method you can do
 something like this
 
 ``` r
+
 quantile(all.idu.estimates$estimate, probs=c(0.025, 0.975))
 ```
 
@@ -553,6 +579,7 @@ only complete observations (ie, we will remove rows that have any
 missing values from our calculations).
 
 ``` r
+
 ic.result <- nsum.internal.consistency(survey.data=example.survey,
                                       known.popns=kp.vec,
                                       missing="complete.obs",
@@ -611,6 +638,7 @@ Now `ic.result` is a list that has a summary of the results in the entry
 `results`
 
 ``` r
+
 ic.result$results
 ```
 
@@ -665,6 +693,7 @@ Since we passed the argument `return.plot=TRUE` to the function, we also
 get a plot:
 
 ``` r
+
 print(ic.result$plot)
 ```
 
@@ -674,6 +703,7 @@ This plot is a `ggplot2` object, so we can customize it if we want. As a
 very simple example, we can change the title:
 
 ``` r
+
 print(ic.result$plot + ggtitle("internal consistency checks"))
 ```
 

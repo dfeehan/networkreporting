@@ -1,7 +1,7 @@
 # rdsII.estimator
 
 compute an estimate for the prevalence of a trait from an RDS sample,
-using the estimator described in TODO \[Volz + Heckathorn '08\]
+using the estimator described in TODO: Volz + Heckathorn '08
 
 ## Usage
 

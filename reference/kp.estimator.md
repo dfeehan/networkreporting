@@ -19,7 +19,8 @@ kp.estimator_(
   total.kp.size = NULL,
   alter.popn.size = NULL,
   dropmiss = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  boot.chunk.size = 500
 )
 
 kp.estimator(
@@ -97,6 +98,13 @@ kp.estimator(
 - verbose:
 
   if TRUE, print information to screen
+
+- boot.chunk.size:
+
+  number of bootstrap weight columns to process at a time; see the
+  `boot.chunk.size` argument of
+  [`report.aggregator_`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md).
+  Affects speed and peak memory only, not the results. Defaults to 500
 
 ## Value
 

@@ -19,7 +19,8 @@ network.survival.estimator_(
   ego.id = NULL,
   return.boot = FALSE,
   dropmiss = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  boot.chunk.size = 500
 )
 
 network.survival.estimator(
@@ -112,6 +113,13 @@ network.survival.estimator(
 
   If TRUE, print information to screen
 
+- boot.chunk.size:
+
+  number of bootstrap weight columns to process at a time; see the
+  `boot.chunk.size` argument of
+  [`report.aggregator_`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md).
+  Affects speed and peak memory only, not the results. Defaults to 500
+
 ## Value
 
 the network reporting estimate of the hidden population's size (as a
@@ -134,7 +142,7 @@ dataset might look like:
 | 33  | m   | 3.67   |
 
 The second source of data we need is the known population responses for
-the respondents, along with the \*same\* attributes for each respondent.
+the respondents, along with the *same* attributes for each respondent.
 For example, in the situation above, we would also require a dataset
 like this to be passed in
 
@@ -148,7 +156,7 @@ like this to be passed in
 ## Technical note
 
 This function assumes that the sampling weights are standard analysis
-weights and \*not\* relative weights. Standard analysis weights should
+weights and *not* relative weights. Standard analysis weights should
 provide an estimate for the size of the frame population when added up;
 relative weights, on the other hand, will sum to the number of
 respondents in the sample. Demographic and Health surveys typically have

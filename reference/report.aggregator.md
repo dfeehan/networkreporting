@@ -13,7 +13,8 @@ report.aggregator_(
   weights,
   qoi.name,
   scaling.factor = NULL,
-  dropmiss = FALSE
+  dropmiss = FALSE,
+  boot.chunk.size = 500
 )
 
 report.aggregator(
@@ -66,6 +67,15 @@ report.aggregator(
   have their weights multiplied by (100/80) to ensure the weights still
   add up to 100 after dropping the rows with missing values. Defaults to
   FALSE
+
+- boot.chunk.size:
+
+  number of bootstrap weight columns to process at a time. The bootstrap
+  path reshapes an intermediate frame whose width grows with the number
+  of weight columns, and whose cost grows super-linearly in that width,
+  so the columns are processed in chunks and the results combined.
+  Affects speed and peak memory only, never the returned values.
+  Defaults to 500
 
 ## Value
 

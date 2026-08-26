@@ -4,6 +4,22 @@
 
 - [`add.kp()`](http://dennisfeehan.org/networkreporting/reference/add.kp.md)
   : attach known populations to a dataframe
+- [`add_esc_ind_vis()`](http://dennisfeehan.org/networkreporting/reference/add_esc_ind_vis.md)
+  : add individual visibility based on sib reports to ego X sib X cell
+  reports
+- [`agenames()`](http://dennisfeehan.org/networkreporting/reference/agenames.md)
+  : make labels for age groups
+- [`apply_visibility_rule()`](http://dennisfeehan.org/networkreporting/reference/apply_visibility_rule.md)
+  : Apply a visibility rule to ego X alter X cell reports
+- [`calculate_sib_ind_visibility()`](http://dennisfeehan.org/networkreporting/reference/calculate_sib_ind_visibility.md)
+  : given a sib dataset, calculate individual visibility weight for each
+  sib
+- [`cell_config()`](http://dennisfeehan.org/networkreporting/reference/cell_config.md)
+  : Specify the cells (age groups, time period) to produce estimates for
+- [`cpp_compute_occ_exp()`](http://dennisfeehan.org/networkreporting/reference/cpp_compute_occ_exp.md)
+  : cpp_compute_occ_exp
+- [`cpp_compute_occ_exp2()`](http://dennisfeehan.org/networkreporting/reference/cpp_compute_occ_exp2.md)
+  : cpp_compute_occ_exp
 - [`df.to.kpvec()`](http://dennisfeehan.org/networkreporting/reference/df.to.kpvec.md)
   : turn a dataframe into a known population vector
 - [`estimate.error()`](http://dennisfeehan.org/networkreporting/reference/estimate.error.md)
@@ -13,8 +29,30 @@
   : Example known population data
 - [`example.survey`](http://dennisfeehan.org/networkreporting/reference/example.survey.md)
   : Example household survey data
+- [`get_agg_est_from_ec()`](http://dennisfeehan.org/networkreporting/reference/get_agg_est_from_ec.md)
+  : helper function for calculating aggregate visibility estimate from
+  ego X cell data
+- [`get_boot_ests_matrix()`](http://dennisfeehan.org/networkreporting/reference/get_boot_ests_matrix.md)
+  : Fast bootstrap estimation using matrix multiplication
+- [`get_ec_reports()`](http://dennisfeehan.org/networkreporting/reference/get_ec_reports.md)
+  : get ego X cell reports
+- [`get_esc_reports()`](http://dennisfeehan.org/networkreporting/reference/get_esc_reports.md)
+  : Get ego X sibling X cell reports
+- [`get_ic_reports()`](http://dennisfeehan.org/networkreporting/reference/get_ic_reports.md)
+  : get a dataset with reports used for internal-consistency checks
+- [`get_ind_est_from_ec()`](http://dennisfeehan.org/networkreporting/reference/get_ind_est_from_ec.md)
+  : helper function for calculating individual visibility estimate from
+  ego X cell data
+- [`get_sibship_info()`](http://dennisfeehan.org/networkreporting/reference/get_sibship_info.md)
+  : calculate number of sibs on frame for each respondent
+- [`get_visibility()`](http://dennisfeehan.org/networkreporting/reference/get_visibility.md)
+  : calculate visibility for each sibship and ego
 - [`gwsm.estimator()`](http://dennisfeehan.org/networkreporting/reference/gwsm.estimator.md)
   : indirect estimator (generalized weight share method / gwsm)
+- [`is_tie_config()`](http://dennisfeehan.org/networkreporting/reference/is_tie_config.md)
+  : Is this a tie_config?
+- [`is_visibility_rule()`](http://dennisfeehan.org/networkreporting/reference/is_visibility_rule.md)
+  : Is this object a visibility rule?
 - [`kp.degree.estimator()`](http://dennisfeehan.org/networkreporting/reference/kp.degree.estimator.md)
   : kp.degree.estimator (DEPRECATED)
 - [`kp.estimator_()`](http://dennisfeehan.org/networkreporting/reference/kp.estimator.md)
@@ -25,30 +63,59 @@
   [`kp.individual.estimator_()`](http://dennisfeehan.org/networkreporting/reference/kp.individual.estimator.md)
   : Individual personal network size estimates using the known
   population method
+- [`make.age.groups()`](http://dennisfeehan.org/networkreporting/reference/make.age.groups.md)
+  : make an age.groups object
+- [`make.even.age.groups()`](http://dennisfeehan.org/networkreporting/reference/make.even.age.groups.md)
+  : make an age.groups object with evenly-sized intervals
+- [`make.time.periods()`](http://dennisfeehan.org/networkreporting/reference/make.time.periods.md)
+  : make a time.periods object
+- [`make_vis_refit()`](http://dennisfeehan.org/networkreporting/reference/make_vis_refit.md)
+  : Build a per-replicate refit function for an estimated visibility
+  rule
 - [`multiplicity.estimator()`](http://dennisfeehan.org/networkreporting/reference/multiplicity.estimator.md)
   : multiplicity.estimator
 - [`network.survival.estimator_()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
   [`network.survival.estimator()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
   : network survival estimator
-- [`networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting.md)
-  [`package-networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting.md)
+- [`networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
+  [`networkreporting-package`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
+  [`package-networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
   : Network reporting estimators
+- [`nmx_to_nqx()`](http://dennisfeehan.org/networkreporting/reference/nmx_to_nqx.md)
+  : convert age-specific mortality rates to probabilities of dying
 - [`nsum.estimator()`](http://dennisfeehan.org/networkreporting/reference/nsum.estimator.md)
   : nsum.estimator
 - [`nsum.internal.consistency()`](http://dennisfeehan.org/networkreporting/reference/nsum.internal.consistency.md)
   : nsum.internal.consistency
+- [`occ.exp()`](http://dennisfeehan.org/networkreporting/reference/occ.exp.md)
+  : tabulate occurrences and exposures
 - [`plot_meanties_truth()`](http://dennisfeehan.org/networkreporting/reference/plot_meanties_truth.md)
   : plot_meanties_truth
+- [`q15_to_50()`](http://dennisfeehan.org/networkreporting/reference/q15_to_50.md)
+  : probability of dying between exact ages 15 and 50
 - [`rdsII.estimator()`](http://dennisfeehan.org/networkreporting/reference/rdsII.estimator.md)
   : rdsII.estimator
 - [`report.aggregator_()`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md)
   [`report.aggregator()`](http://dennisfeehan.org/networkreporting/reference/report.aggregator.md)
   : aggregate a reported quantity by groups
+- [`sib_ic_checks()`](http://dennisfeehan.org/networkreporting/reference/sib_ic_checks.md)
+  : get calculate internal consistency checks for sibling reports
 - [`summation.estimator()`](http://dennisfeehan.org/networkreporting/reference/summation.estimator.md)
   : summation.estimator
+- [`tie_config()`](http://dennisfeehan.org/networkreporting/reference/tie_config.md)
+  [`print(`*`<tie_config>`*`)`](http://dennisfeehan.org/networkreporting/reference/tie_config.md)
+  : Declare what kind of tie a set of reports is about
 - [`topcode.data()`](http://dennisfeehan.org/networkreporting/reference/topcode.data.md)
   : topcode a group of variables
 - [`topcode.var()`](http://dennisfeehan.org/networkreporting/reference/topcode.var.md)
   : topcode a vector of numerical values
 - [`total.degree.estimator()`](http://dennisfeehan.org/networkreporting/reference/total.degree.estimator.md)
   : total.degree
+- [`vis_coalesce()`](http://dennisfeehan.org/networkreporting/reference/vis_coalesce.md)
+  : Try visibility rules in priority order
+- [`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md)
+  : Visibility from a clique tie
+- [`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md)
+  : Visibility borrowed from a donor population
+- [`window_intersect()`](http://dennisfeehan.org/networkreporting/reference/window_intersect.md)
+  : window_intersect

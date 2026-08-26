@@ -10,12 +10,14 @@ You can install:
 - the latest released version from CRAN with
 
   ``` r
+
   install.packages("networkreporting")
   ```
 
 - the latest development version from github with
 
   ``` r
+
   install.packages("devtools")
   devtools::install_github("dfeehan/networkreporting")
   ```

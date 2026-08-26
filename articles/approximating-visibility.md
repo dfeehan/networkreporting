@@ -1,0 +1,394 @@
+# Approximating visibility
+
+``` r
+
+library(networkreporting)
+library(dplyr)
+library(tibble)
+```
+
+## What visibility is, and why it usually cannot be calculated
+
+A network reporting estimator divides each report by the number of
+frame-population members who could have made it. That number is the
+alter’s **visibility**, and it is what converts “how many reports did we
+see” into “how big is the population”.
+
+For siblings, visibility is not a modelling choice. It can be read
+straight off ego’s own roster:
+
+- an alter who is **on the frame** has visibility `y.F`
+- an alter who is **not** has visibility `y.F + 1`
+
+where `y.F` is the number of ego’s siblings who are in the frame
+population. That is
+[`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md),
+and it is the default everywhere.
+
+``` r
+
+vis_from_clique()
+#> <visibility_rule: clique>
+#>   requires:     y.F, .sib.in.F
+#>   is_estimated: FALSE  (fit once; frozen across bootstrap replicates)
+#>   parameters:
+#>     ego.in.group = TRUE
+#>   assumptions:
+#>     - the tie partitions the population into disjoint groups
+#>     - ego is a member of the group ego reports about
+#>     - reporting within the group is complete
+```
+
+The three assumptions it prints are the whole reason it works.
+Siblingship is an equivalence relation, so it cuts the population into
+disjoint groups; ego belongs to the group ego reports about; and
+reporting within the group is complete. Given those three, ego’s roster
+is enough to recover the visibility of *every* alter, including alters
+whose own neighbourhoods ego cannot see.
+
+Households satisfy all three. Most other ties do not:
+
+| Tie        | Partitions?             | Ego in group? | Verdict              |
+|------------|-------------------------|---------------|----------------------|
+| siblings   | yes                     | yes           | exact                |
+| household  | yes                     | yes           | exact                |
+| cousins    | **no** (not transitive) | yes           | not identified       |
+| parents    | yes                     | **no**        | needs another roster |
+| neighbours | **no**                  | yes           | not identified       |
+
+For those, visibility generally is not identified from one-sided reports
+at all. The standard move is to substitute a summary of the
+*respondents’* visibility. That is a real assumption with a knowable
+bias, and the point of this machinery is to give it somewhere to live
+other than an undocumented `case_when` in analysis code.
+
+## The subtlety that determines the whole design
+
+It is tempting to think that a visibility which is constant within an
+estimation cell cancels out of a rate — the rate is a ratio, and both
+numerator and denominator get divided by the same number.
+
+**It does not**, and seeing why is what makes the rest of this make
+sense.
+
+Deaths and exposure do not receive the same visibility:
+
+- a dead alter is never on the frame, so **every death** gets
+  `1/(y.F + 1)`
+- exposure is a **mixture**: living on-frame alters get `1/y.F`, living
+  off-frame alters get `1/(y.F + 1)`
+
+So visibility survives into the rate purely through that asymmetry. Here
+is the consequence, made explicit:
+
+``` r
+
+alters <- tibble(
+  .ego.id   = c(1, 1, 1, 2, 2),
+  .sib.in.F = c(1,  1,  0,  1,  0),
+  y.F       = c(2,  2,  2,  1,  1),
+  sib.occ   = c(0,  0,  1,  0,  1),   # deaths, only ever off-frame
+  sib.exp   = c(10, 10, 4,  10, 6)    # exposure, a mixture
+)
+
+rate <- function(w) sum(alters$sib.occ * w) / sum(alters$sib.exp * w)
+
+# a rule that ignores frame status: one number for every alter
+flat <- rep(1/4, nrow(alters))
+
+# the clique rule, which preserves the split
+clique <- vis_from_clique()
+split  <- clique$predict(alters, clique$fit(NULL, NULL))$vis_weight
+
+c(flat      = rate(flat),
+  aggregate = sum(alters$sib.occ) / sum(alters$sib.exp),
+  split     = rate(split))
+#>       flat  aggregate      split 
+#> 0.05000000 0.05000000 0.03424658
+```
+
+The flat rule reproduces the **aggregate** estimator exactly, because a
+constant divides out of a ratio. An approximation that assigns one
+number per cell without keeping the on-frame/off-frame split therefore
+does nothing at all.
+
+This is why
+[`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md)
+estimates a *group size* and then reconstructs the split from it, rather
+than estimating a visibility directly.
+
+## Borrowing visibility from donors
+
+[`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md)
+takes a donor population — normally the survey respondents, whose own
+visibility *is* derivable — summarises it, and applies the result to
+alters that cannot be resolved exactly.
+
+``` r
+
+rule <- vis_from_donor(match_on = c(.sib.sex = "sex"), min_donors = 10)
+rule
+#> <visibility_rule: donor(.sib.sex)>
+#>   requires:     .sib.in.F
+#>   is_estimated: TRUE  (refit within each bootstrap replicate)
+#>   parameters:
+#>     donor = egos
+#>     match_on = .sib.sex
+#>     statistic = harmonic
+#>     donor_vis = <clique>
+#>     min_donors = 10
+#>     on_missing = error
+#>   assumptions:
+#>     - visibility is borrowed from the survey respondents, matched on .sib.sex
+#>     - donor visibilities are summarised by their weighted harmonic mean
+#>     - donors are alive and on the frame, but many alters needing an imputed visibility are dead; where visibility correlates with mortality the donor is systematically wrong, not merely noisy
+```
+
+Two things to notice in that printout.
+
+`is_estimated` is `TRUE`. The estimated group size is a **sample**
+quantity, so holding it fixed across bootstrap replicates would
+understate the variance. `is_estimated` is what drives the replicate
+loop to refit rather than freeze; for
+[`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md)
+it is `FALSE`, and freezing is then correct, because visibility is a
+function of ego’s own reports rather than of who was sampled.
+
+And the assumptions include the direction of the bias, not just its
+existence. Donors are alive and on the frame. Many of the alters needing
+an imputed visibility are dead. Wherever visibility correlates with
+mortality — through family size for kin ties, living arrangements for
+household ties — the donor is systematically wrong, not merely noisy.
+
+### Harmonic, not arithmetic
+
+The default summary is the weighted **harmonic** mean, and that is not a
+detail. The individual estimator averages `1/v`, so the functional that
+makes the plug-in unbiased is `(E[1/v])^-1`, not `E[v]`.
+
+``` r
+
+# four donors with very different sibship sizes
+spread <- tibble(.ego.id = 1:4, y.F = c(1, 2, 3, 11), w = 1)
+one    <- tibble(.ego.id = 1, .sib.in.F = 0)
+
+S_under <- function(stat) {
+  r <- vis_from_donor(match_on = NULL, statistic = stat, min_donors = 1)
+  r$predict(one, r$fit(spread, "w"))$vis
+}
+
+c(harmonic   = S_under("harmonic"),
+  arithmetic = S_under("arithmetic"))
+#>   harmonic arithmetic 
+#>   3.428571   5.250000
+```
+
+By Jensen’s inequality harmonic `<=` arithmetic always, so the two
+disagree in a *known direction*, by an amount that grows with the
+variance of visibility. They coincide exactly when there is no variance
+at all.
+
+`"arithmetic"` remains available, because it is what the historical
+`y.F.bar / (y.F.bar + 1)` adjustment factor used. If you are reproducing
+an older analysis, that is the setting that will match it.
+
+## Donor coverage fails, routinely
+
+`match_on` describes the **alter**. Donors are **respondents**. DHS and
+MICS interview women aged 15–49, so an alter aged 60, or any male alter,
+has no donor cell at all.
+
+Left alone, that produces `NA` and the `NA` propagates silently into
+rates. `min_donors` together with `on_missing` makes it loud instead:
+
+``` r
+
+donors <- tibble(.ego.id = 1:40, y.F = 3, sex = "f", w = 1)
+alters <- tibble(.ego.id = c(1, 2), .sib.in.F = c(0, 0), .sib.sex = c("f", "m"))
+
+strict <- vis_from_donor(match_on = c(.sib.sex = "sex"), min_donors = 10)
+strict$predict(alters, strict$fit(donors, "w"))
+#> Error in `strict$predict()`:
+#> ! 1 of 2 alter row(s) have no usable donor cell (missing, or fewer than 10 donors).
+#> This is routine rather than exceptional: match_on describes the alter, but donors are respondents, and a survey of women aged 15-49 has no donor for an alter aged 60.
+#> Use on_missing = 'fallback' to take the global value instead, or wrap this rule in vis_coalesce() to fall through to a coarser one. Unresolved cells:
+#> # A tibble: 1 × 1
+#>   .sib.sex
+#>   <chr>   
+#> 1 m
+```
+
+The three options are `"error"` (the default, above), `"fallback"` (use
+the global value and say so), and `"na"` (leave it unresolved, so that a
+coalesced rule can try the next tier).
+
+## You must say what the tie is
+
+[`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md)
+will not run until you declare what kind of tie the reports are about:
+
+``` r
+
+apply_visibility_rule(vis_from_clique(), esc.dat = tibble(
+  .ego.id = 1, .sib.in.F = 0, y.F = 2))
+#> Error in `apply_visibility_rule()`:
+#> ! visibility rule 'clique' is only valid for tie structure(s): clique,
+#> and no tie was declared. Pass tie = tie_config("...").
+#> 
+#> This is deliberate. Applicability cannot be read off the data: on a tie that is not a clique, vis_from_clique() still returns a finite, plausible number, and it is wrong. Siblings and household members are 'clique'; cousins are 'group'; parents are 'star'; neighbours and acquaintances are 'unbounded'.
+```
+
+This is deliberate, and it is the most important safety property in this
+vignette. The clique rule returns a finite, plausible number for *any*
+roster. Nothing in the data distinguishes a tie that satisfies its
+assumptions from one that does not, so applied in the wrong place it is
+wrong with no outward sign – and the provenance table then reports
+`clique: 100%`, which reads as “the exact rule was used”.
+
+How wrong? Socsim gives the true reporting network, and therefore each
+alter’s true visibility, so this is measurable rather than a matter of
+opinion:
+
+| tie | off-frame (carries the deaths) | on-frame (exposure only) | differential |
+|----|----|----|----|
+| siblings (a clique) | exact | exact | 1.00 |
+| maternal cousins | 1.55x too high | 1.29x too high | **1.20** |
+| paternal cousins | 1.56x too high | 1.28x too high | **1.22** |
+
+Siblings are a clique and the rule is exact for 100% of alters.
+Cousinship is not transitive – your cousins need not be each other’s
+cousins – and there the rule overstates visibility. Note *where* it
+overstates: more on the off-frame side, which carries every death, than
+on the on-frame side. By the argument above, a uniform error would
+cancel; this differential one does not.
+
+So declare the tie:
+
+``` r
+
+tie_config("clique", name = "siblings")
+#> <tie_config>
+#>   structure: clique
+#>   name:      siblings
+tie_config("group",  name = "maternal cousins")
+#> <tie_config>
+#>   structure: group
+#>   name:      maternal cousins
+```
+
+`"clique"` is siblings and household members; `"group"` is cousins;
+`"star"` is parents, whose visibility is a fact about the *sibship*
+rather than the parent roster; `"unbounded"` is neighbours and
+acquaintances. A rule that makes no structural assumption, such as
+[`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md),
+needs no declaration and accepts any.
+
+## Coalescing: exact where possible, approximate where not
+
+[`vis_coalesce()`](http://dennisfeehan.org/networkreporting/reference/vis_coalesce.md)
+takes rules in priority order. For each row the first rule returning a
+non-`NA` visibility wins, and the row records which tier resolved it.
+
+``` r
+
+mixed <- tibble(
+  .ego.id   = c(1, 2, 3),
+  .sib.in.F = c(0, 0, 0),
+  .sib.sex  = c("f", "f", "f"),
+  y.F       = c(2, NA, NA)     # only ego 1 has an exact roster
+)
+
+chain <- vis_coalesce(
+  vis_from_clique(),                                    # exact where it exists
+  vis_from_donor(match_on = c(.sib.sex = "sex"),        # matched approximation
+                 min_donors = 10, on_missing = "na"),
+  vis_from_donor(match_on = NULL, min_donors = 1)       # global, last resort
+)
+
+out <- chain$predict(mixed, chain$fit(donors, "w"))
+out
+#> # A tibble: 3 × 4
+#>     vis vis_weight vis_rule        vis_tier
+#>   <dbl>      <dbl> <chr>              <int>
+#> 1     3      0.333 clique                 1
+#> 2     4      0.25  donor(.sib.sex)        2
+#> 3     4      0.25  donor(.sib.sex)        2
+```
+
+Ego 1 is resolved exactly by tier 1; the others fall through to the
+donor tier. `vis_tier` records which one caught each row.
+
+That example falls through because tier 1 had no `y.F` to work with. The
+other way a chain falls through is by *declaration*: on a tie the clique
+rule does not apply to, the tier is dropped outright.
+
+``` r
+
+res <- apply_visibility_rule(
+  vis_coalesce(vis_from_clique(), vis_from_donor(match_on = NULL, min_donors = 1)),
+  esc.dat = tibble(.ego.id = c(1, 2), .sib.in.F = c(0, 1), y.F = c(2, 2)),
+  ego.dat = donors, weights = "w",
+  tie     = tie_config("group", name = "cousins"))
+
+res$provenance$dropped_tiers
+#> [1] "clique"
+```
+
+This is the distinction worth holding onto: the clique tier is removed
+because it is *inapplicable*, not skipped because it returned `NA`. It
+never returns `NA` – which is why, before the tie had to be declared, a
+chain like this one claimed every cousin alter for the exact tier.
+
+## Reading the provenance table
+
+[`apply_visibility_rule()`](http://dennisfeehan.org/networkreporting/reference/apply_visibility_rule.md)
+returns the values alongside a provenance object, and
+`sibling_estimator()` attaches that object to its result. It is what
+turns “some of this was approximated” into a number.
+
+``` r
+
+res <- apply_visibility_rule(vis_from_clique(), esc.dat = tibble(
+  .ego.id   = c(1, 1, 1, 2, 2),
+  .sib.in.F = c(1, 1, 0, 1, 0),
+  y.F       = c(2, 2, 2, 1, 1),
+  sib.occ   = c(0, 0, 1, 0, 1),
+  sib.exp   = c(10, 10, 4, 10, 6)
+), tie = tie_config("clique", name = "siblings"))
+
+res$provenance
+#> <vis_provenance>
+#>   rule:         clique
+#>   is_estimated: FALSE
+#>   tie:          clique (siblings)
+#>   alters:       5
+#>   resolved by:
+#>     clique                              5  (100.0%)
+#>   approximated: 0.0% of alters, 0.0% of deaths, 0.0% of exposure
+#>   assumptions:
+#>     - the tie partitions the population into disjoint groups
+#>     - ego is a member of the group ego reports about
+#>     - reporting within the group is complete
+```
+
+The two share-of lines are separate on purpose. The share of *deaths*
+that were approximated and the share of *exposure* that were
+approximated are different numbers, and an approximation touching very
+little exposure but most of the deaths is not a small approximation.
+Reporting only one of them would hide exactly the case worth worrying
+about.
+
+## Where this is going
+
+[`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md)
+and
+[`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md)
+are two implementations of one interface, split into `fit` and
+`predict`. That split is deliberate: a fitted model is just a `fit()`
+that returns a model object and a
+[`predict()`](https://rdrr.io/r/stats/predict.html) that calls
+[`predict()`](https://rdrr.io/r/stats/predict.html) on it. Two
+consequences are already honoured here so that a model rule needs no
+interface change — a non-integer visibility works end to end, and
+`is_estimated` already drives the bootstrap path rather than waiting for
+a model to appear.

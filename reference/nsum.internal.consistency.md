@@ -123,8 +123,9 @@ populations to compute the degree and an estimate of the size of the
 known population, and comparing the result to the actual size of the
 known population
 
-\* TODO – document bootstrap ci option better  
-\* TODO – make amenable to parallelization  
+- TODO – document bootstrap ci option better  
+
+- TODO – make amenable to parallelization  
 
 ## Examples
 
