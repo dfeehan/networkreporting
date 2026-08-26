@@ -802,7 +802,8 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   deprecation note is corrected to say so rather than to promise a bridge that only half exists —
   and that means **retiring `network.survival.estimator()` is still blocked**, on the roster
   requirement and on `within.alter.weights`.
-- **Splitting ARD / scale-up back out.** With the spine living in `networkreporting`, the plausible
+- **Splitting ARD / scale-up back out.** *(Now tracked in `dev/FUTURE-IMPROVEMENTS.md` item 1,
+  along with everything else left open at the end of this plan.)* With the spine living in `networkreporting`, the plausible
   next structural move is the reverse of this one: lift the ARD / known-population / scale-up code
   (`scale_up.r`, `known_population.r`, `summation.r`, `indirect_sampling.r`, `rds.r`) into a package
   of its own that depends on the spine, leaving `networkreporting` as the spine plus its estimators.
@@ -849,6 +850,12 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   30,193 sibling alters and 49,886 cousin-union alters, and the scoring reproduces the published
   differentials of 1.000 and 1.026. `04_visibility_rule_check.R` could now call these instead of
   computing truth inline, which is an analysis-repo change and out of scope here.
+
+> **Where the rest went.** The deferred list above has been worked through. What remains open ---
+> splitting ARD/scale-up out, means and prevalences, union across ties, retiring
+> `network.survival.estimator()` --- is tracked in `dev/FUTURE-IMPROVEMENTS.md`, with the reason
+> each is still open rather than merely undone. This plan is a record of what was decided and
+> measured; that document is the running list.
 
 ## Interface the Matlab analysis repo will need
 

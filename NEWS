@@ -1,5 +1,19 @@
 networkreporting 0.3.2
 ========================
+* the *Approximating visibility* vignette moves to `vignettes/draft/`, so it no
+  longer ships or is checked. It covers the whole rule family and its examples
+  all ran when it was moved; what makes it a draft is shape rather than
+  correctness -- it grew a section per rule in the order the rules were built,
+  not the order a reader needs them. Note that out of the build nothing runs its
+  code, which cost a real check: while it was a vignette, `R CMD check`
+  confirmed that `vis_from_donor(statistic = "arithmetic")` reproduces the
+  historical `adj.factor`. The substantive claims remain covered by unit tests.
+
+* `dev/FUTURE-IMPROVEMENTS.md` tracks what is left open and why, in the style
+  siblingsurvival uses: splitting the ARD/scale-up half into its own package,
+  means and prevalences, union across ties, and retiring
+  `network.survival.estimator()`.
+
 * `vis_aggregate()` -- visibility from aggregate relational data, bridging this
   package's two halves. The ARD / scale-up side estimates how many people a
   respondent knows; the estimator spine needs to know how many people could have
