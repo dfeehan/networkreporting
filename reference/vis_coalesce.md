@@ -40,7 +40,7 @@ vis_coalesce(vis_from_clique(),
              vis_from_donor(match_on = c(.sib.sex = "sex")),
              vis_from_donor(match_on = NULL))
 #> <visibility_rule: coalesce(clique > donor(.sib.sex) > donor(global))>
-#>   requires:     y.F, .sib.in.F
+#>   requires:     y.F, .sib.in.F, .sib.sex
 #>   is_estimated: TRUE  (refit within each bootstrap replicate)
 #>   parameters:
 #>     tier1 = <clique>

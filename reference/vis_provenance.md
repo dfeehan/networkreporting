@@ -5,7 +5,15 @@ Summarise how a set of visibilities was arrived at
 ## Usage
 
 ``` r
-vis_provenance(rule, values, esc.dat, tie = NULL, dropped.tiers = NULL)
+vis_provenance(
+  rule,
+  values,
+  esc.dat,
+  tie = NULL,
+  dropped.tiers = NULL,
+  ego.in.group = NA,
+  frame.indicator = NA_character_
+)
 ```
 
 ## Arguments

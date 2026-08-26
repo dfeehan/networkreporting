@@ -98,7 +98,7 @@ to fall back to a coarser rule rather than to `NA`.
 ``` r
 vis_from_donor(match_on = c(.sib.sex = "sex"))
 #> <visibility_rule: donor(.sib.sex)>
-#>   requires:     .sib.in.F
+#>   requires:     .sib.in.F, .sib.sex
 #>   is_estimated: TRUE  (refit within each bootstrap replicate)
 #>   parameters:
 #>     donor = egos

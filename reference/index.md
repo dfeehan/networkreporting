@@ -16,6 +16,8 @@
   sib
 - [`cell_config()`](http://dennisfeehan.org/networkreporting/reference/cell_config.md)
   : Specify the cells (age groups, time period) to produce estimates for
+- [`compare_ties()`](http://dennisfeehan.org/networkreporting/reference/compare_ties.md)
+  : Put estimates from several ties side by side
 - [`cpp_compute_occ_exp()`](http://dennisfeehan.org/networkreporting/reference/cpp_compute_occ_exp.md)
   : cpp_compute_occ_exp
 - [`cpp_compute_occ_exp2()`](http://dennisfeehan.org/networkreporting/reference/cpp_compute_occ_exp2.md)
@@ -25,6 +27,8 @@
 - [`estimate.error()`](http://dennisfeehan.org/networkreporting/reference/estimate.error.md)
   : given an estimated subpopn size or prevalence and the correct value,
   produce some measurements of how close the esimate is
+- [`estimated_total()`](http://dennisfeehan.org/networkreporting/reference/estimated_total.md)
+  : Read a population total off an estimate
 - [`example.knownpop.dat`](http://dennisfeehan.org/networkreporting/reference/example.knownpop.dat.md)
   : Example known population data
 - [`example.survey`](http://dennisfeehan.org/networkreporting/reference/example.survey.md)
@@ -72,11 +76,16 @@
 - [`make_vis_refit()`](http://dennisfeehan.org/networkreporting/reference/make_vis_refit.md)
   : Build a per-replicate refit function for an estimated visibility
   rule
+- [`make_vis_refit_esc()`](http://dennisfeehan.org/networkreporting/reference/make_vis_refit_esc.md)
+  : Build a per-replicate refit that recomputes visibility at the report
+  level
 - [`multiplicity.estimator()`](http://dennisfeehan.org/networkreporting/reference/multiplicity.estimator.md)
   : multiplicity.estimator
 - [`network.survival.estimator_()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
   [`network.survival.estimator()`](http://dennisfeehan.org/networkreporting/reference/network.survival.estimator.md)
   : network survival estimator
+- [`network_survival_estimator()`](http://dennisfeehan.org/networkreporting/reference/network_survival_estimator.md)
+  : Estimate death rates from network reporting data
 - [`networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
   [`networkreporting-package`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
   [`package-networkreporting`](http://dennisfeehan.org/networkreporting/reference/networkreporting-package.md)
@@ -91,6 +100,8 @@
   : tabulate occurrences and exposures
 - [`plot_meanties_truth()`](http://dennisfeehan.org/networkreporting/reference/plot_meanties_truth.md)
   : plot_meanties_truth
+- [`pool_ties()`](http://dennisfeehan.org/networkreporting/reference/pool_ties.md)
+  : Average estimates from several ties into one
 - [`q15_to_50()`](http://dennisfeehan.org/networkreporting/reference/q15_to_50.md)
   : probability of dying between exact ages 15 and 50
 - [`rdsII.estimator()`](http://dennisfeehan.org/networkreporting/reference/rdsII.estimator.md)
@@ -105,17 +116,33 @@
 - [`tie_config()`](http://dennisfeehan.org/networkreporting/reference/tie_config.md)
   [`print(`*`<tie_config>`*`)`](http://dennisfeehan.org/networkreporting/reference/tie_config.md)
   : Declare what kind of tie a set of reports is about
+- [`ties_union_check()`](http://dennisfeehan.org/networkreporting/reference/ties_union_check.md)
+  : Can these ties be unioned?
 - [`topcode.data()`](http://dennisfeehan.org/networkreporting/reference/topcode.data.md)
   : topcode a group of variables
 - [`topcode.var()`](http://dennisfeehan.org/networkreporting/reference/topcode.var.md)
   : topcode a vector of numerical values
 - [`total.degree.estimator()`](http://dennisfeehan.org/networkreporting/reference/total.degree.estimator.md)
   : total.degree
+- [`true_visibility_from_network()`](http://dennisfeehan.org/networkreporting/reference/true_visibility_from_network.md)
+  : True visibility, read off a known reporting network
+- [`vis_aggregate()`](http://dennisfeehan.org/networkreporting/reference/vis_aggregate.md)
+  : Visibility from aggregate relational data
 - [`vis_coalesce()`](http://dennisfeehan.org/networkreporting/reference/vis_coalesce.md)
   : Try visibility rules in priority order
 - [`vis_from_clique()`](http://dennisfeehan.org/networkreporting/reference/vis_from_clique.md)
   : Visibility from a clique tie
 - [`vis_from_donor()`](http://dennisfeehan.org/networkreporting/reference/vis_from_donor.md)
   : Visibility borrowed from a donor population
+- [`vis_from_group_size()`](http://dennisfeehan.org/networkreporting/reference/vis_from_group_size.md)
+  : Visibility from a group size the caller supplies
+- [`vis_from_model()`](http://dennisfeehan.org/networkreporting/reference/vis_from_model.md)
+  : Visibility predicted from a fitted model
+- [`vis_from_report()`](http://dennisfeehan.org/networkreporting/reference/vis_from_report.md)
+  : Visibility as reported by the respondent
+- [`vis_is_cell_constant()`](http://dennisfeehan.org/networkreporting/reference/vis_is_cell_constant.md)
+  : Can a rule's visibility be predicted from ego X cell data?
+- [`visibility_accuracy()`](http://dennisfeehan.org/networkreporting/reference/visibility_accuracy.md)
+  : Score a visibility rule against a known truth
 - [`window_intersect()`](http://dennisfeehan.org/networkreporting/reference/window_intersect.md)
   : window_intersect

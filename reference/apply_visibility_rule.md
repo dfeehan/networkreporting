@@ -13,9 +13,9 @@ apply_visibility_rule(
   ego.dat = NULL,
   sib.dat = NULL,
   ego.id = ".ego.id",
-  frame.indicator = ".sib.in.F",
+  frame.indicator = NULL,
   weights = NULL,
-  ego.in.group = TRUE,
+  ego.in.group = NULL,
   tie = NULL
 )
 ```
@@ -48,7 +48,9 @@ apply_visibility_rule(
 
 - frame.indicator:
 
-  name of the 0/1 frame membership column
+  name of the 0/1 frame membership column. `NULL` (the default) takes it
+  from `tie`, falling back to `".sib.in.F"`. Setting it here as well as
+  on the tie is an error if the two disagree
 
 - weights:
 
@@ -56,7 +58,10 @@ apply_visibility_rule(
 
 - ego.in.group:
 
-  passed through when deriving `y.F`
+  is ego a member of the group ego reports about? Governs how `y.F` is
+  derived. `NULL` (the default) takes it from `tie`, falling back to
+  `TRUE`. Setting it here as well as on the tie is an error if the two
+  disagree; the tie is where it belongs
 
 - tie:
 

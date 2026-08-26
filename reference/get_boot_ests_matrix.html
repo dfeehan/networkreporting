@@ -24,7 +24,7 @@ intermediate dataframes."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/approximating-visibility.html">Approximating visibility</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/draft/approximating-visibility.html">Approximating visibility</a></li>
     <li><a class="dropdown-item" href="../articles/network_scaleup.html">Analyzing network scale-up data using the networkreporting package</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -58,7 +58,8 @@ intermediate dataframes.</p>
 <span>  <span class="va">cell_vars</span>,</span>
 <span>  <span class="va">estimator_type</span>,</span>
 <span>  visibility <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  refit <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  refit <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  refit_sums <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,7 +95,15 @@ rule is refit inside every replicate rather than frozen; see Details</p></dd>
 <dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
 <dd><p>optional <code>function(replicate_index)</code> returning the group size
 <code>S.hat</code> for each row of <code>ec_dat</code> under that replicate. Supplied by
-<code><a href="apply_visibility_rule.html">apply_visibility_rule()</a></code>-aware callers for an estimated rule</p></dd>
+<code><a href="apply_visibility_rule.html">apply_visibility_rule()</a></code>-aware callers for an estimated rule whose
+visibility is constant within a cell</p></dd>
+
+
+<dt id="arg-refit-sums">refit_sums<a class="anchor" aria-label="anchor" href="#arg-refit-sums"></a></dt>
+<dd><p>optional <code>function(replicate_index)</code> returning a data frame
+of <code>num</code> and <code>denom</code>, one row per row of <code>ec_dat</code>, for an estimated
+rule whose visibility is <em>not</em> constant within a cell. Takes
+precedence over <code>refit</code>; see <code><a href="make_vis_refit_esc.html">make_vis_refit_esc()</a></code></p></dd>
 
 </dl></div>
     <div class="section level2">

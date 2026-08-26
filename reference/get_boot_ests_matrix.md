@@ -15,7 +15,8 @@ get_boot_ests_matrix(
   cell_vars,
   estimator_type,
   visibility = NULL,
-  refit = NULL
+  refit = NULL,
+  refit_sums = NULL
 )
 ```
 
@@ -53,7 +54,16 @@ get_boot_ests_matrix(
   optional `function(replicate_index)` returning the group size `S.hat`
   for each row of `ec_dat` under that replicate. Supplied by
   [`apply_visibility_rule()`](http://dennisfeehan.org/networkreporting/reference/apply_visibility_rule.md)-aware
-  callers for an estimated rule
+  callers for an estimated rule whose visibility is constant within a
+  cell
+
+- refit_sums:
+
+  optional `function(replicate_index)` returning a data frame of `num`
+  and `denom`, one row per row of `ec_dat`, for an estimated rule whose
+  visibility is *not* constant within a cell. Takes precedence over
+  `refit`; see
+  [`make_vis_refit_esc()`](http://dennisfeehan.org/networkreporting/reference/make_vis_refit_esc.md)
 
 ## Value
 
