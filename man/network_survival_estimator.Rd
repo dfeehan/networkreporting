@@ -87,11 +87,12 @@ histories, use that.
 There is no default \code{tie}, and that is the point. Which kind of tie a set of
 reports is about cannot be read off the data: on a tie that is not a clique,
 the default \code{\link[=vis_from_clique]{vis_from_clique()}} rule still returns a finite, plausible
-number, and it is wrong --- overstating visibility by around 1.55x for
-off-frame alters against 1.29x for on-frame ones, measured against socsim
-ground truth on cousins. Because a death is always off-frame while exposure
-is a mixture, that differential biases the rate rather than cancelling out of
-it. See \code{\link[=tie_config]{tie_config()}}.
+number, and it can be wrong. Measured against socsim ground truth on a
+roster that pools maternal and paternal cousins --- which is not a clique,
+even though each line separately is --- it overstates visibility by 1.089x
+for off-frame alters against 1.061x for on-frame ones. Because a death is
+always off-frame while exposure is a mixture, that differential biases the
+rate rather than cancelling out of it. See \code{\link[=tie_config]{tie_config()}}.
 }
 
 \section{Details}{

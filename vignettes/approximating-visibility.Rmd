@@ -201,17 +201,31 @@ rule was used".
 How wrong? Socsim gives the true reporting network, and therefore each alter's
 true visibility, so this is measurable rather than a matter of opinion:
 
-| tie | off-frame (carries the deaths) | on-frame (exposure only) | differential |
+| roster | off-frame (carries the deaths) | on-frame (exposure only) | differential |
 |---|---|---|---|
-| siblings (a clique) | exact | exact | 1.00 |
-| maternal cousins | 1.55x too high | 1.29x too high | **1.20** |
-| paternal cousins | 1.56x too high | 1.28x too high | **1.22** |
+| maternal siblings | exact (100%) | exact (100%) | 1.000 |
+| maternal cousins | exact (100%) | exact (100%) | 1.000 |
+| paternal cousins | exact (100%) | exact (100%) | 1.000 |
+| maternal **union** paternal cousins | 1.089x too high (65% exact) | 1.061x too high (63% exact) | **1.026** |
 
-Siblings are a clique and the rule is exact for 100% of alters. Cousinship is
-not transitive -- your cousins need not be each other's cousins -- and there the
-rule overstates visibility. Note *where* it overstates: more on the off-frame
-side, which carries every death, than on the on-frame side. By the argument
-above, a uniform error would cancel; this differential one does not.
+The interesting row is the last one, and the interesting non-rows are the two
+above it.
+
+"Cousinship is not transitive" is the usual reason given for cousins not being a
+clique, and in general it is true: your maternal cousin and your paternal cousin
+are not each other's cousins. But *within one line* it is transitive --- everyone
+sharing a maternal grandmother forms an equivalence class --- so a
+maternal-cousin roster is a clique, and the rule is exact on it. What breaks is
+pooling the two lines.
+
+So the lesson is not that cousins are a special case to be careful of. It is that
+whether a given roster is a clique is a question about **how that roster was
+built**, which no amount of looking at the data will answer. Hence the
+declaration.
+
+Note *where* the pooled roster goes wrong: more on the off-frame side, which
+carries every death, than on the on-frame side. By the argument above, a uniform
+error would cancel out of the rate; this differential one does not.
 
 So declare the tie:
 

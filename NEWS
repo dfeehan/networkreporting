@@ -124,8 +124,8 @@ networkreporting 0.3.2
   Measured against socsim ground truth on the Bangladesh reporting networks:
   exact for 100% of sibling alters, on both sides of the frame split. On
   maternal cousins -- not a clique, since cousinship is not transitive -- it
-  overstates visibility by 1.55x off-frame against 1.29x on-frame. Because every
-  death is off-frame while exposure is a mixture, that 1.20x *differential* does
+  overstates visibility by 1.089x off-frame against 1.061x on-frame. Because every
+  death is off-frame while exposure is a mixture, that 1.026x *differential* does
   not cancel out of a death rate; it biases it. The paternal cousin network
   agrees at 1.22x, so it is structural, not noise.
 

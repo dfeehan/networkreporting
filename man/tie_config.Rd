@@ -55,13 +55,28 @@ number either way. Applied to a non-clique tie it therefore produces a wrong
 answer with no outward sign of trouble --- which is why the structure has to
 be stated rather than inferred or defaulted.
 
-Checked against socsim ground truth on the Bangladesh reporting networks: on
-siblings, \code{vis_from_clique()} recovers the true visibility of \strong{100\%} of
-alters. On maternal cousins --- which are not a clique, since cousinship is
-not transitive --- it overstates visibility by 1.55x for off-frame alters
-and 1.29x for on-frame ones. Because a death is always off-frame while
-exposure is a mixture, that 1.20x \emph{differential} does not cancel out of a
-death rate; it biases it. Both cousin networks agree, so it is structural.
+Checked against socsim ground truth on the Bangladesh reporting networks,
+where the true reporting network is known and so is every alter's true
+visibility.
+
+Where the tie really is a clique, the rule is exact: on maternal siblings, on
+maternal cousins and on paternal cousins it recovers the true visibility of
+\strong{100\%} of alters, on both sides of the frame split.
+
+Maternal cousins being a clique is worth pausing on, because it is the
+opposite of what "cousinship is not transitive" suggests. Within one line it
+\emph{is} transitive: everyone sharing a maternal grandmother forms an
+equivalence class. What breaks is the \strong{union} of the two lines --- your
+maternal cousin and your paternal cousin are not each other's cousins --- and
+that is the genuine non-clique case. There the clique rule overstates
+visibility by 1.089x for off-frame alters against 1.061x for on-frame ones,
+and is exactly right for only 65\% and 63\% of them respectively. Because a
+death is always off-frame while exposure is a mixture, that 1.026x
+\emph{differential} does not cancel out of a death rate; it biases it.
+
+So the lesson is not "cousins are not a clique". It is that whether a
+particular roster is one is a question about how the roster was built, which
+is why it has to be declared rather than guessed at from a name.
 }
 
 \section{The structures}{

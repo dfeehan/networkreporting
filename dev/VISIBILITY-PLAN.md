@@ -584,7 +584,16 @@ That is the exact failure mode this architecture exists to prevent: a silent
 assumption producing an unquestioned number.
 
 **And the resulting error is differential, so it does not cancel.** Visibility
-survives into a rate only through the on-frame/off-frame asymmetry. For cousins:
+survives into a rate only through the on-frame/off-frame asymmetry.
+
+> **Superseded later on 2026-08-26 --- read the revision below before using these
+> numbers.** The figures in this paragraph came from the saved
+> `net_reporting_*.rds` files in `old_test_Bangladesh_2020`, which have since
+> been retired. They carried a stale `eligible` attribute marking 0.07-0.09% of
+> alters as being in the frame population *while also carrying a date of death* --
+> exactly the miscoding `get_ec_reports(check.frame.consistency = TRUE)` now
+> warns about. The check script builds the censuses live from the raw graphs
+> instead, and the picture changes.
 
 | network | off-frame (deaths) | on-frame (exposure) | differential |
 |---|---|---|---|
@@ -592,11 +601,37 @@ survives into a rate only through the on-frame/off-frame asymmetry. For cousins:
 | paternal cousins | 1.562x too high | 1.277x too high | **1.223** |
 | siblings | 1.000 | 1.000 | 1.000 |
 
-Both cousin networks agree, so this is structural, not noise. A ~20% differential
-biases a cousin-based death rate downward by roughly the same order. The exact
-factor needs working through -- the exposure denominator is a mixture, so it is
-not a clean ratio -- but the direction is unambiguous and the magnitude is not
-small.
+### Revised, later on 2026-08-26
+
+Rebuilt live from `socsim/Bangladesh_2020`, the measurement is:
+
+| roster | complete components | off-frame (deaths) | on-frame (exposure) | differential |
+|---|---|---|---|---|
+| maternal siblings | 100% | exact (100%) | exact (100%) | 1.000 |
+| maternal cousins | 100% | exact (100%) | exact (100%) | 1.000 |
+| paternal cousins | 100% | exact (100%) | exact (100%) | 1.000 |
+| maternal **union** paternal cousins | 68% | 1.089x (65% exact) | 1.061x (63% exact) | **1.026** |
+
+**The correction that matters is conceptual, not arithmetic.** "Cousinship is not
+transitive, so a cousin roster is not a clique" is too coarse, and it was the
+reasoning behind the original entry. Within *one line* cousinship **is**
+transitive: everyone sharing a maternal grandmother forms an equivalence class.
+So a maternal-cousin roster is a clique, and `vis_from_clique()` is exact on it.
+What breaks is the **union** of the two lines, since your maternal cousin and
+your paternal cousin are not each other's cousins --- and that is the genuine
+non-clique case.
+
+So the tie gate is *not* justified by "cousins need care". It is justified by
+something stronger and less obvious: **whether a given roster is a clique is a
+fact about how that roster was built, and two rosters both called "cousins" can
+differ on it.** No amount of inspecting the data distinguishes them, which is
+precisely why the structure has to be declared.
+
+The differential is also smaller than first recorded --- 1.026 rather than
+1.201 --- so the *cost* of getting it wrong on this particular data is more
+modest than the original entry implied. The direction is unchanged, and the
+`complete components` column is the useful diagnostic: 100% means the roster
+really does partition, 68% means it does not.
 
 ### Fixed, 2026-08-26
 
@@ -700,8 +735,10 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   defined groups: *Pooled cousins* and *True cousins with siblings* are `G_F - in.F` (so
   `vis_from_group_size(col)`), and *Pooled cousins without siblings* is `G_F` with no frame
   split (so `subtract.self = FALSE`). Measured against socsim ground truth, the pooled basis
-  has a differential error of 1.056 against 1.865 for the global donor rule; the
-  pooled-minus-sibship basis errs the other way at 0.902. **Which basis is right for cousins
+  had a differential error of 1.056 against 1.865 for the global donor rule, and the
+  pooled-minus-sibship basis erred the other way at 0.902. (Those were measured on the
+  superseded `old_test_Bangladesh_2020` data; see the revision note above. The comparison
+  between bases is still informative, the absolute figures less so.) **Which basis is right for cousins
   is not settled here** --- the point is that the package can now state all of them and say
   in provenance which produced which estimate.
 - `vis_from_report()` — ego directly reports the alter's degree. A survey-design choice, and arguably
