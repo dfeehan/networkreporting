@@ -1,5 +1,27 @@
 networkreporting 0.3.2
 ========================
+* `network_survival_estimator()` -- the generic entry point. Given reports about
+  alters connected to respondents by some tie, it produces age-specific rates
+  under both the individual- and aggregate-visibility estimators.
+
+  `siblingsurvival::sibling_estimator()` is now a thin wrapper over it, keeping
+  its exact signature and output, so there is one implementation rather than two
+  that can drift. The estimator was never sibling-specific in anything but
+  naming: nothing in the pipeline assumes anything about siblings, only about a
+  tie.
+
+  It has NO default `tie`, and refuses to run without one, for the same reason
+  `tie_config()` has no default structure. `sibling_estimator()` supplies the
+  clique tie, which is correct there.
+
+  Output columns are generic: `alter.age` where the sibling wrapper returns
+  `sib.age`.
+
+* the estimator carries whatever columns a visibility rule declares in
+  `requires` through its covariate join. Without this `vis_from_group_size()`
+  was usable through `apply_visibility_rule()` but not through the estimator,
+  because the join dropped the group-size column.
+
 * `vis_from_group_size()` -- visibility from a group size the CALLER supplies,
   rather than one derived by counting ego's roster.
 

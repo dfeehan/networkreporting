@@ -648,10 +648,30 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
       clique the respondent is outside of, and the Matlab rosters carry the respondent as a
       row (so their count is `yprime.F`, not `y.F`). The package's job is to let those be
       stated, not to rule them out.
-- `network_survival_estimator()`. Note the shape assumed here has already drifted:
-  `sibling_estimator()` now *takes* a `tie` argument defaulting to `tie_config("clique")`,
-  rather than being a wrapper over a generic estimator. Either is workable; decide
-  deliberately rather than inheriting this line.
+- ~~`network_survival_estimator()`~~ **built, 2026-08-26, as the wrapper shape.**
+  `network_survival_estimator(rel.dat, ego.id, alter.id, frame.indicator, alter.sex,
+  cell.config, weights, ..., visibility, tie)` lives in `networkreporting`, and
+  `siblingsurvival::sibling_estimator()` is now a thin wrapper over it, keeping its exact
+  signature and output.
+
+  The shape was chosen deliberately, per the note this replaces. What settled it: the
+  pipeline turned out to be sibling-specific only in its **naming** --- the argument names,
+  the `sib.age` output column, and the default tie. Nothing in `get_esc_reports()` ->
+  visibility -> `get_ec_reports()` -> estimators -> bootstrap assumes anything about
+  siblings. With the difference that thin, two implementations would have been two copies
+  of the same code waiting to drift, and multi-tie work would have had to switch APIs by
+  tie rather than calling one entry point in a loop.
+
+  Two details worth knowing:
+    * **The generic has no default `tie`**, and refuses to run without one, for the same
+      reason `tie_config()` has no default structure. `sibling_estimator()` supplies
+      `tie_config("clique", "siblings")`, which is correct *there* because siblings are a
+      clique.
+    * The estimator now carries whatever columns the visibility rule declares in
+      `requires` through its covariate join. Without that, `vis_from_group_size()` was
+      usable through `apply_visibility_rule()` but **not** through the estimator, since the
+      join dropped the group-size column. Found by exercising the generic on a group tie;
+      it is the gap that most justified building it.
 - Combination across ties: **compare** (separate estimates, same cells), **union** (visibilities add
   only if alter sets are disjoint — and the package has no cross-tie alter identity today, `sib.id`
   being unique only within ego), **pool** (variance-weighted).
