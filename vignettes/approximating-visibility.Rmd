@@ -272,6 +272,62 @@ apply_visibility_rule(
                        ego.in.group = FALSE))$provenance
 ```
 
+## When the group is not the roster
+
+`vis_from_clique()` works out the group by counting ego's roster. Sometimes the
+group whose size sets an alter's visibility is *not* the roster the alter was
+reported on, and only you can say what it is:
+
+* **Pooled ties.** Cousins are reported through the maternal and paternal sides
+  separately, but an alter's visibility depends on everyone who could have
+  reported them — both sides, plus ego's own siblings. That group is not any
+  single roster.
+* **Nested ties.** "Pooled cousins, excluding ego's siblings" is a difference of
+  two counts. No roster holds it.
+* **Borrowed groups.** A parent's visibility is the number of their children on
+  the frame — a fact about the *sibship*, not the parent roster.
+
+`vis_from_group_size()` takes the count from a column instead of deriving it:
+
+```{r}
+cousins <- tibble(
+  .ego.id   = c(1, 1, 2),
+  .sib.in.F = c(1, 0, 1),
+  n_pooled_and_F  = c(5, 5, 3),   # ego's pooled cousinship, on frame
+  n_sibship_and_F = c(2, 2, 1))
+cousins$n_pooled_nosib_and_F <-
+  cousins$n_pooled_and_F - cousins$n_sibship_and_F
+
+pooled <- vis_from_group_size("n_pooled_and_F", label = "pooled cousins")
+pooled$predict(cousins, pooled$fit(NULL, NULL))$vis
+```
+
+The rule still does the frame split — an alter who is themselves in the frame
+population cannot report themselves — because that asymmetry is the only route
+by which visibility reaches a rate. A basis that deliberately omits it says so:
+
+```{r}
+nosib <- vis_from_group_size("n_pooled_nosib_and_F",
+                             subtract.self = FALSE,
+                             label = "pooled without siblings")
+nosib$predict(cousins, nosib$fit(NULL, NULL))$vis
+```
+
+Two things to be clear about. This rule makes **no structural assumption**, so
+it needs no `tie` and accepts any — but that is not because it is safe the way
+`vis_from_donor()` is safe. It is because you have taken on the part
+`vis_from_clique()` would have derived. The package checks the arithmetic; it
+cannot check that your column counts the right people, and the assumptions say
+so:
+
+```{r}
+pooled$assumptions
+```
+
+And `label` earns its place when you are comparing bases rather than committing
+to one: run the same cells under each, and the provenance says which produced
+which.
+
 ## Coalescing: exact where possible, approximate where not
 
 `vis_coalesce()` takes rules in priority order. For each row the first rule

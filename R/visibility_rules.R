@@ -545,6 +545,138 @@ vis_from_donor <- function(donor      = "egos",
 }
 
 ## ---------------------------------------------------------------------------
+## visibility from a supplied group size
+## ---------------------------------------------------------------------------
+
+##' Visibility from a group size the caller supplies
+##'
+##' [vis_from_clique()] works out the group by counting ego's roster. Sometimes
+##' the group whose size sets an alter's visibility is *not* the roster the
+##' alter was reported on, and only the caller can say what it is. This rule
+##' takes that count from a column instead of deriving it.
+##'
+##' @section When the group is not the roster:
+##'
+##' Three cases, all real:
+##'
+##' \describe{
+##'   \item{Pooled ties}{Cousins are reported through the maternal and the
+##'     paternal side separately, but an alter's visibility depends on everyone
+##'     who could have reported them --- both sides, plus ego's own siblings.
+##'     That pooled group is not any single roster.}
+##'   \item{Nested ties}{"Pooled cousins, excluding ego's siblings" is the
+##'     pooled group minus the sibship. A difference of two counts, which no
+##'     roster holds directly.}
+##'   \item{Borrowed groups}{A parent's visibility is the number of their
+##'     children on the frame --- a fact about the *sibship*, not about the
+##'     parent roster the parent was reported on. This is the mechanism the
+##'     parents case needs.}
+##' }
+##'
+##' @section What this rule does and does not assume:
+##'
+##' It makes **no structural assumption**, so it needs no `tie` and is valid for
+##' any structure. That is not because it is safe in the way
+##' [vis_from_donor()] is safe --- it is because the caller has taken
+##' responsibility for the part [vis_from_clique()] would have derived. The
+##' package can check the arithmetic; it cannot check that the column counts the
+##' right people.
+##'
+##' What it still does for you is the frame split, which is easy to get wrong and
+##' matters more than it looks. An alter who is themselves in the frame
+##' population cannot report themselves, so their visibility is one lower than
+##' the group total. Since a death is always off-frame while exposure is a
+##' mixture, that asymmetry is the only route by which visibility reaches a
+##' rate. Set `subtract.self = FALSE` only deliberately.
+##'
+##' @param size.var name of the column giving the number of frame-population
+##'        members in the alter's group
+##' @param counts.ego does `size.var` already count ego? Rosters that carry the
+##'        respondent as a row do, in which case the column is the package's
+##'        `yprime.F` rather than `y.F`. When `FALSE` and ego belongs to the
+##'        group, one is added
+##' @param subtract.self subtract one for an alter who is themselves in the
+##'        frame population, since they cannot report themselves. `TRUE` unless
+##'        you have a reason
+##' @param ego.in.group is ego a member of the group being sized? Only consulted
+##'        when `counts.ego` is `FALSE`. May be declared on the [tie_config()]
+##'        instead
+##' @param label optional short name for this basis, used in provenance. Worth
+##'        setting when comparing several bases, so the output says which
+##'        produced which estimate
+##' @return a [visibility_rule]
+##' @examples
+##' # a roster that carries the respondent as a row, so the count includes ego
+##' vis_from_group_size("n_in_cousinship_and_F")
+##'
+##' # the same, named for provenance
+##' vis_from_group_size("n_in_pooled_and_F", label = "pooled cousins")
+##' @seealso [vis_from_clique()], which derives the group instead of taking it
+##' @export
+##' @md
+vis_from_group_size <- function(size.var,
+                                counts.ego    = TRUE,
+                                subtract.self = TRUE,
+                                ego.in.group  = TRUE,
+                                label         = NULL) {
+
+  if (missing(size.var) || !is.character(size.var) || length(size.var) != 1) {
+    stop("vis_from_group_size() needs size.var: the name of one column giving ",
+         "the number of frame-population members in each alter's group.")
+  }
+
+  ego.in.group.declared <- !missing(ego.in.group)
+
+  rule.label <- if (is.null(label)) paste0("group_size(", size.var, ")")
+                else                label
+
+  visibility_rule(
+    label        = rule.label,
+    requires     = c(size.var, ".sib.in.F"),
+    ## The group size is read off the data, not estimated from the sample, so
+    ## it is frozen across bootstrap replicates exactly as the clique rule is.
+    ## If a caller computed the column FROM the sample, that is a dependence
+    ## the package cannot see; say so in the assumptions below.
+    is_estimated = FALSE,
+    fit          = function(donor.dat, weights) list(ego.in.group = ego.in.group),
+    predict      = function(alter.rows, state) {
+
+      size <- alter.rows[[size.var]]
+
+      ## add ego only when the column does not already count them
+      ego.term <- if (isTRUE(counts.ego)) 0L
+                  else as.integer(isTRUE(state$ego.in.group))
+
+      ## an on-frame alter cannot report themselves
+      self.term <- if (isTRUE(subtract.self)) alter.rows$.sib.in.F else 0
+
+      vis <- size + ego.term - self.term
+
+      dplyr::tibble(vis        = as.numeric(vis),
+                    vis_weight = 1 / vis,
+                    vis_rule   = rule.label)
+    },
+    assumptions  = c(
+      paste0("visibility is taken from the supplied column '", size.var,
+             "', which the caller has computed; the package does not check ",
+             "that it counts the right people"),
+      if (isTRUE(counts.ego)) "that column already counts ego"
+      else if (isTRUE(ego.in.group)) "that column excludes ego, who is added back"
+      else "that column excludes ego, who is not a member of the group",
+      if (isTRUE(subtract.self))
+        "an alter in the frame population does not count themselves"
+      else
+        "an alter in the frame population DOES count themselves, so the on-frame and off-frame visibilities are equal; note that a visibility with no frame split cancels out of a rate to the extent that it is constant within a cell"),
+    params       = list(size.var      = size.var,
+                        counts.ego    = counts.ego,
+                        subtract.self = subtract.self,
+                        ego.in.group  = ego.in.group,
+                        label         = label),
+    tie_overridable = "ego.in.group",
+    declared     = list(ego.in.group = ego.in.group.declared))
+}
+
+## ---------------------------------------------------------------------------
 ## coalescing rules
 ## ---------------------------------------------------------------------------
 

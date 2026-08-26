@@ -1,5 +1,35 @@
 networkreporting 0.3.2
 ========================
+* `vis_from_group_size()` -- visibility from a group size the CALLER supplies,
+  rather than one derived by counting ego's roster.
+
+  Sometimes the group whose size sets an alter's visibility is not the roster
+  the alter was reported on, and only the caller can say what it is. Cousins
+  are reported through the maternal and paternal sides separately, but an
+  alter's visibility depends on everyone who could have reported them -- both
+  sides, plus ego's own siblings. "Pooled cousins excluding ego's siblings" is
+  a difference of two counts, which no roster holds at all. A parent's
+  visibility is the number of their children on the frame, a fact about the
+  sibship rather than the parent roster. None of those can be derived; all
+  three are now expressible.
+
+  The rule still does the frame split for you -- an alter in the frame
+  population cannot report themselves -- since that asymmetry is the only route
+  by which visibility reaches a rate. `subtract.self = FALSE` turns it off for
+  a basis that deliberately omits it, and says so in the assumptions.
+
+  It makes no structural assumption, so it needs no `tie` and accepts any. That
+  is not because it is safe the way `vis_from_donor()` is safe: it is because
+  the caller has taken on the part `vis_from_clique()` would have derived. The
+  package checks the arithmetic; it cannot check that the column counts the
+  right people, and the assumptions say so.
+
+  Checked against socsim ground truth on the Bangladesh reporting networks:
+  given the group `vis_from_clique()` would itself derive, the two agree
+  exactly, on both sides of the frame split. On a pooled cousinship the
+  differential error against ground truth is 1.056, against 1.865 for the
+  global donor rule the tie gate currently falls through to.
+
 * `tie_config()` gains `ego.in.group` and `frame.indicator`. Both are facts
   about the tie rather than about the rule, so this is where they belong. Both
   default to NULL, meaning "not declared", and a tie that declares neither

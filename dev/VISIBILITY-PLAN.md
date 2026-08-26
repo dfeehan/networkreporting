@@ -655,7 +655,23 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
 - Combination across ties: **compare** (separate estimates, same cells), **union** (visibilities add
   only if alter sets are disjoint — and the package has no cross-tie alter identity today, `sib.id`
   being unique only within ego), **pool** (variance-weighted).
-- `vis_from_other_group()` — the parents case, where visibility for tie A comes from tie B's roster.
+- ~~`vis_from_other_group()` — the parents case, where visibility for tie A comes from tie B's
+  roster.~~ **mechanism built, 2026-08-26.** `vis_from_group_size(size.var)` takes the group
+  size from a column instead of deriving it, which is exactly what "visibility for tie A comes
+  from tie B's roster" needs: compute the sibship size, pass it as the column. A named
+  `vis_from_other_group()` convenience wrapper is still open, and would have to decide how a
+  caller identifies "tie B" — by name, once ties are first-class objects, which is the
+  multi-tie estimator's problem rather than this rule's.
+
+  The same rule makes `targets_cousins.R`'s bases expressible, which was the open question
+  in the analysis-repo section below. All three are the same arithmetic on differently
+  defined groups: *Pooled cousins* and *True cousins with siblings* are `G_F - in.F` (so
+  `vis_from_group_size(col)`), and *Pooled cousins without siblings* is `G_F` with no frame
+  split (so `subtract.self = FALSE`). Measured against socsim ground truth, the pooled basis
+  has a differential error of 1.056 against 1.865 for the global donor rule; the
+  pooled-minus-sibship basis errs the other way at 0.902. **Which basis is right for cousins
+  is not settled here** --- the point is that the package can now state all of them and say
+  in provenance which produced which estimate.
 - `vis_from_report()` — ego directly reports the alter's degree. A survey-design choice, and arguably
   the honest answer for non-clique ties.
 - **`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean. The
