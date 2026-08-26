@@ -604,9 +604,9 @@ provenance table that looked clean.
 * `sibling_estimator(tie = )` defaults to `tie_config("clique", "siblings")`,
   so no existing estimate moves; both validation harnesses reproduce exactly.
 
-**Still deferred:** the rest of what `tie_config()` was sketched to carry ---
-`ego.in.group` (which stays on the rule for now), a per-tie `frame.indicator`,
-and the multi-tie estimator. Only the applicability gate was pulled forward.
+**Still deferred:** the multi-tie estimator. `ego.in.group` and the per-tie
+`frame.indicator` were finished later the same day; see the struck `tie_config()`
+item in the deferred list for what was decided and why.
 
 ---
 
@@ -614,24 +614,40 @@ and the multi-tie estimator. Only the applicability gate was pulled forward.
 
 Do **not** build these now; they are recorded so the Phase 1 interfaces do not foreclose them.
 
-> **Read this first if you are starting Phase 2.** Part of `tie_config()` has already been
-> built --- it was pulled forward on 2026-08-26 because the socsim check above showed the
-> API would otherwise produce a biased cousin estimate behind a clean-looking provenance
-> table. See "Finding from verification step 5" for what landed. **Start from that code,
-> not from a fresh design**, and check you are on a branch that contains it:
-> `networkreporting` commit `87f36f2`, `siblingsurvival` commits `1235d6d` and `12a5ff8`.
-> Building `tie_config()` again from this list will conflict with it.
+> **Read this first if you are starting Phase 2.** `tie_config()` is **built and finished**
+> --- pulled forward on 2026-08-26 because the socsim check above showed the API would
+> otherwise produce a biased cousin estimate behind a clean-looking provenance table, and
+> completed the same day. See "Finding from verification step 5" for what landed, and the
+> struck item below for the design decisions taken. **Start from that code, not from a
+> fresh design**, and check you are on a branch that contains it: `networkreporting`
+> commits `87f36f2` and the tie-settings work that follows it, `siblingsurvival` commits
+> `1235d6d` and `12a5ff8` and likewise. Building `tie_config()` again from this list will
+> conflict with it.
 
-- ~~`tie_config()` — declaring tie structure~~ **partly done.** `tie_config(structure, name)`
-  exists, with `"clique"` / `"group"` / `"star"` / `"unbounded"`, and rules carry `applies_to`
-  so an inapplicable one refuses rather than misleads. **Still open**, and both are real
-  decisions rather than leftovers:
-    * **`ego.in.group` was deliberately left on the rule**, not moved onto `tie_config`, to
-      avoid two places to set it and a precedence question to get wrong. Moving it is
-      defensible — it *is* a property of the tie — but it is a change, not a completion, and
-      it needs a rule for what happens when the two disagree.
-    * **A per-tie `frame.indicator`** is not built at all. It matters once ties differ in who
-      is eligible to report or be reported about (neighbours bounded by bari, say).
+- ~~`tie_config()` — declaring tie structure, `ego.in.group`, and a per-tie `frame.indicator`~~
+  **done, 2026-08-26.** `tie_config(structure, name, ego.in.group, frame.indicator)`.
+  Rules carry `applies_to`, so an inapplicable one refuses rather than misleads.
+    * **`ego.in.group` and `frame.indicator` moved onto the tie**, where they belong: both
+      are facts about the tie, not about the rule. Both default to `NULL`, meaning "not
+      declared", so a tie that declares neither behaves exactly as before.
+    * **The precedence question is answered by refusing to have one.** Where a tie
+      declaration meets a value set on the rule or passed as an argument, agreement is fine
+      and *disagreement is an error naming both sources*. Silent precedence was rejected
+      because it reintroduces exactly the failure this layer exists to prevent: a number
+      computed under an assumption the caller did not know was in force.
+    * Worth knowing: `ego.in.group` was **already** in two places that did not talk to each
+      other — `vis_from_clique(ego.in.group =)` and `apply_visibility_rule(ego.in.group =)`,
+      the first governing what the rule does and the second how `y.F` is derived. The
+      duplication the plan worried about creating already existed; this removes it.
+    * A rule's `assumptions` are now computed from the *resolved* state, not fixed at
+      construction. Otherwise provenance reported "ego is a member of the group ego reports
+      about" on a tie that had just declared the opposite.
+    * Deliberately **not** enforced: that `structure` and `ego.in.group` agree. It is
+      tempting — `"clique"` is described as ego belonging to the group — but enforcing it
+      removes real configurations. A household roster that excludes the respondent is a
+      clique the respondent is outside of, and the Matlab rosters carry the respondent as a
+      row (so their count is `yprime.F`, not `y.F`). The package's job is to let those be
+      stated, not to rule them out.
 - `network_survival_estimator()`. Note the shape assumed here has already drifted:
   `sibling_estimator()` now *takes* a `tie` argument defaulting to `tie_config("clique")`,
   rather than being a wrapper over a generic estimator. Either is workable; decide

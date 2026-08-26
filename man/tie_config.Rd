@@ -5,7 +5,7 @@
 \alias{print.tie_config}
 \title{Declare what kind of tie a set of reports is about}
 \usage{
-tie_config(structure, name = NULL)
+tie_config(structure, name = NULL, ego.in.group = NULL, frame.indicator = NULL)
 
 \method{print}{tie_config}(x, ...)
 }
@@ -14,6 +14,18 @@ tie_config(structure, name = NULL)
 Details. There is no default: that is the point.}
 
 \item{name}{optional label for the tie, used in provenance output}
+
+\item{ego.in.group}{is ego a member of the group ego reports about? \code{TRUE}
+for siblings and household members; \code{FALSE} for parents, whose
+visibility is a fact about the sibship rather than the parent roster.
+\code{NULL} (the default) leaves it undeclared, in which case the rule's
+own setting is used}
+
+\item{frame.indicator}{name of the 0/1 column saying whether each alter is
+in the frame population \strong{for this tie}. \code{NULL} (the default) leaves
+it undeclared. Worth setting once ties differ in who is eligible to
+report or be reported about --- neighbours bounded by a compound,
+say, against siblings who are not}
 
 \item{x}{a \code{tie_config}}
 
@@ -71,9 +83,27 @@ which visibility could be derived. Neighbours, acquaintances.}
 }
 }
 
+\section{Properties of the tie, not of the rule}{
+
+
+\code{ego.in.group} and \code{frame.indicator} are facts about the \emph{tie}, so this is
+where they belong. Both default to \code{NULL}, meaning "not declared", and a tie
+that declares neither behaves exactly as before.
+
+Where a declared value meets one set somewhere else --- \code{ego.in.group} on
+\code{\link[=vis_from_clique]{vis_from_clique()}}, or \code{frame.indicator} passed to
+\code{\link[=apply_visibility_rule]{apply_visibility_rule()}} --- \strong{disagreement is an error, never a silent
+precedence.} Quietly overriding one with the other would reintroduce the
+failure this class exists to prevent: a number produced under an assumption
+the caller did not know was in force. A value declared in only one place is
+simply used.
+}
+
 \examples{
   tie_config("clique", name = "siblings")
   tie_config("group",  name = "maternal cousins")
+  # parents: ego is not a member of the group whose size sets visibility
+  tie_config("star", name = "parents", ego.in.group = FALSE)
 }
 \seealso{
 \code{\link[=vis_from_clique]{vis_from_clique()}}, \code{\link[=apply_visibility_rule]{apply_visibility_rule()}}

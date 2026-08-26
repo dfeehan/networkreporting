@@ -226,6 +226,52 @@ roster; `"unbounded"` is neighbours and acquaintances. A rule that makes no
 structural assumption, such as `vis_from_donor()`, needs no declaration and
 accepts any.
 
+### What else belongs on the tie
+
+Two further things are facts about the tie rather than about the rule, and a
+`tie_config()` can carry both:
+
+```{r}
+tie_config("star", name = "parents",
+           ego.in.group    = FALSE,     # ego is not in the group being sized
+           frame.indicator = "in.frame") # this tie's own eligibility column
+```
+
+`ego.in.group` is the `+ 1`: it says whether ego is counted among the group
+members who could report an alter. `frame.indicator` names the column saying who
+is in the frame population *for this tie*, which starts to matter once ties
+differ in who is eligible — neighbours bounded by a compound, say, against
+siblings who are not.
+
+Both default to undeclared, in which case nothing changes: the rule's own
+setting is used, and the frame column defaults to `.sib.in.F`.
+
+Where a tie declares one of these and the rule or the call also sets it,
+**agreement is fine and disagreement is an error naming both sources**:
+
+```{r, error = TRUE}
+apply_visibility_rule(
+  vis_from_clique(ego.in.group = TRUE),
+  esc.dat = tibble(.ego.id = 1, .sib.in.F = 0, y.F = 2),
+  tie     = tie_config("clique", name = "siblings", ego.in.group = FALSE))
+```
+
+There is deliberately no rule for which one wins. Silent precedence would
+compute a number under an assumption you did not choose — the same failure the
+tie gate itself exists to prevent — so the package makes you say it once.
+
+Note that what a tie declares reaches the provenance table, including the
+assumptions, which are recomputed from the setting actually used rather than
+from whatever the rule was built with:
+
+```{r}
+apply_visibility_rule(
+  vis_from_clique(),
+  esc.dat = tibble(.ego.id = c(1, 1), .sib.in.F = c(1, 0), y.F = c(2, 2)),
+  tie     = tie_config("clique", name = "households",
+                       ego.in.group = FALSE))$provenance
+```
+
 ## Coalescing: exact where possible, approximate where not
 
 `vis_coalesce()` takes rules in priority order. For each row the first rule

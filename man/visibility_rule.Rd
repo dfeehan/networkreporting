@@ -12,7 +12,10 @@ visibility_rule(
   predict,
   assumptions = character(0),
   params = list(),
-  applies_to = NA_character_
+  applies_to = NA_character_,
+  tie_overridable = character(0),
+  declared = list(),
+  assumptions_fn = NULL
 )
 }
 \arguments{

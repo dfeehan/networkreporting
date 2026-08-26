@@ -50,7 +50,10 @@ visibility_rule <- function(label,
                             predict,
                             assumptions = character(0),
                             params = list(),
-                            applies_to = NA_character_) {
+                            applies_to = NA_character_,
+                            tie_overridable = character(0),
+                            declared = list(),
+                            assumptions_fn = NULL) {
 
   stopifnot(is.character(label), length(label) == 1)
   stopifnot(is.logical(is_estimated), length(is_estimated) == 1)
@@ -67,7 +70,20 @@ visibility_rule <- function(label,
                  ## which tie structures this rule is valid for; NA = any.
                  ## Checked by apply_visibility_rule() against a tie_config,
                  ## because applicability is not detectable from the data.
-                 applies_to   = applies_to),
+                 applies_to   = applies_to,
+                 ## Names in the fit() state that a tie_config may set, because
+                 ## they are properties of the tie rather than of the rule.
+                 ## apply_visibility_rule() resolves these, and errors rather
+                 ## than silently preferring one source over the other.
+                 tie_overridable = tie_overridable,
+                 ## Which of those the caller actually SET, as against leaving
+                 ## at a default. Only a set value can disagree with a tie.
+                 declared        = declared,
+                 ## Assumptions that depend on a setting a tie may override
+                 ## have to be computed from the FINAL state, not from the
+                 ## constructor's arguments -- otherwise provenance can report
+                 ## an assumption the rule did not actually make.
+                 assumptions_fn  = assumptions_fn),
             class = "visibility_rule")
 }
 
@@ -217,6 +233,21 @@ get_group_info <- function(dat,
 ## the clique rule
 ## ---------------------------------------------------------------------------
 
+##' Assumptions the clique rule makes, given whether ego is in the group
+##'
+##' Internal. Computed from a value rather than fixed at construction, because a
+##' [tie_config()] may override `ego.in.group` after the rule is built.
+##'
+##' @param ego.in.group is ego a member of the group ego reports about?
+##' @return a character vector of assumptions
+##' @keywords internal
+clique_assumptions <- function(ego.in.group) {
+  c("the tie partitions the population into disjoint groups",
+    if (isTRUE(ego.in.group)) "ego is a member of the group ego reports about"
+    else "ego is NOT a member of the group ego reports about, so ego is not counted",
+    "reporting within the group is complete")
+}
+
 ##' Visibility from a clique tie
 ##'
 ##' The exact rule, and the default everywhere. Reproduces
@@ -255,6 +286,12 @@ get_group_info <- function(dat,
 ##' @export
 vis_from_clique <- function(ego.in.group = TRUE) {
 
+  ## Whether the caller SET this, as against accepting the default, is what
+  ## makes it possible to tell a real disagreement with a tie_config from a
+  ## default quietly being overridden. Captured here because missing() only
+  ## works in the frame the argument belongs to.
+  ego.in.group.declared <- !missing(ego.in.group)
+
   label <- "clique"
 
   visibility_rule(
@@ -274,11 +311,11 @@ vis_from_clique <- function(ego.in.group = TRUE) {
                     vis_weight = 1 / vis,
                     vis_rule   = label)
     },
-    assumptions  = c(
-      "the tie partitions the population into disjoint groups",
-      if (isTRUE(ego.in.group)) "ego is a member of the group ego reports about",
-      "reporting within the group is complete"),
+    assumptions  = clique_assumptions(ego.in.group),
+    assumptions_fn = function(state) clique_assumptions(state$ego.in.group),
     params       = list(ego.in.group = ego.in.group),
+    tie_overridable = "ego.in.group",
+    declared     = list(ego.in.group = ego.in.group.declared),
     ## The 1/y.F vs 1/(y.F+1) rule is a theorem about cliques. On a tie that is
     ## not one it still returns a finite, plausible number -- silently wrong.
     ## See tie_config() for the socsim measurement of how wrong.
@@ -644,6 +681,79 @@ restrict_to_tie <- function(rule, tie) {
 ## applying a rule
 ## ---------------------------------------------------------------------------
 
+##' Reconcile a value declared on a tie with one set on a rule or argument
+##'
+##' Internal. Returns the value to use, or stops when two explicitly-set values
+##' disagree. Silent precedence is deliberately not offered: quietly preferring
+##' one source would produce a number computed under an assumption the caller
+##' did not know was in force, which is the failure this whole layer exists to
+##' prevent.
+##'
+##' @param what name of the setting, for the message
+##' @param tie.value value declared on the `tie_config`, or `NULL`
+##' @param other.value value set elsewhere
+##' @param other.declared was `other.value` actually set, or just a default?
+##' @param other.where human-readable description of where `other.value` came from
+##' @param default value to use when neither source declared one
+##' @return the resolved value
+##' @keywords internal
+reconcile_tie_setting <- function(what, tie.value, other.value, other.declared,
+                                  other.where, default) {
+
+  tie.declared <- !is.null(tie.value)
+
+  if (tie.declared && other.declared && !identical(tie.value, other.value)) {
+    stop("conflicting values for '", what, "'.\n",
+         "  tie_config() declares: ", format(tie.value), "\n",
+         "  ", other.where, ": ", format(other.value), "\n\n",
+         "These disagree, and neither silently wins: '", what, "' is a property ",
+         "of the tie, so a rule set against it would compute under an ",
+         "assumption you did not choose. Set it in one place, or set both to ",
+         "the same value.")
+  }
+
+  if (tie.declared)   return(tie.value)
+  if (other.declared) return(other.value)
+  default
+}
+
+##' Apply a tie\'s declared settings to a fitted rule state
+##'
+##' Internal. A rule names, in `tie_overridable`, the state entries a tie may
+##' set. Handles a coalesced rule by descending into each tier.
+##'
+##' @param rule the rule
+##' @param state the state returned by the rule\'s `fit()`
+##' @param tie a `tie_config`, or `NULL`
+##' @return `state`, with tie-declared settings applied
+##' @keywords internal
+apply_tie_settings <- function(rule, state, tie) {
+
+  if (is.null(tie)) return(state)
+
+  ## a coalesced rule: state is one entry per tier
+  if (!is.null(rule$tiers) && is.list(state) &&
+      length(state) == length(rule$tiers)) {
+    for (i in seq_along(rule$tiers)) {
+      state[[i]] <- apply_tie_settings(rule$tiers[[i]], state[[i]], tie)
+    }
+    return(state)
+  }
+
+  for (nm in rule$tie_overridable) {
+    tie.value <- tie[[nm]]
+    if (is.null(tie.value)) next
+    state[[nm]] <- reconcile_tie_setting(
+      what           = nm,
+      tie.value      = tie.value,
+      other.value    = state[[nm]],
+      other.declared = isTRUE(rule$declared[[nm]]),
+      other.where    = paste0("visibility rule '", rule$label, "' sets"),
+      default        = tie.value)
+  }
+  state
+}
+
 ##' Apply a visibility rule to ego X alter X cell reports
 ##'
 ##' Validates the rule's `requires` against the columns actually present, fits
@@ -658,9 +768,14 @@ restrict_to_tie <- function(rule, tie) {
 ##' @param sib.dat long-form alter data, used to derive `y.F` when `esc.dat` or
 ##'        `ego.dat` lacks it
 ##' @param ego.id name of the ego id column
-##' @param frame.indicator name of the 0/1 frame membership column
+##' @param frame.indicator name of the 0/1 frame membership column. `NULL` (the
+##'        default) takes it from `tie`, falling back to `".sib.in.F"`. Setting
+##'        it here as well as on the tie is an error if the two disagree
 ##' @param weights name of the column holding donor sampling weights
-##' @param ego.in.group passed through when deriving `y.F`
+##' @param ego.in.group is ego a member of the group ego reports about? Governs
+##'        how `y.F` is derived. `NULL` (the default) takes it from `tie`,
+##'        falling back to `TRUE`. Setting it here as well as on the tie is an
+##'        error if the two disagree; the tie is where it belongs
 ##' @param tie a [tie_config()] saying what kind of tie these reports are about.
 ##'        Required when `rule` assumes a tie structure --- [vis_from_clique()]
 ##'        does --- because applicability cannot be read off the data: on a tie
@@ -678,10 +793,17 @@ apply_visibility_rule <- function(rule,
                                   ego.dat         = NULL,
                                   sib.dat         = NULL,
                                   ego.id          = ".ego.id",
-                                  frame.indicator = ".sib.in.F",
+                                  frame.indicator = NULL,
                                   weights         = NULL,
-                                  ego.in.group    = TRUE,
+                                  ego.in.group    = NULL,
                                   tie             = NULL) {
+
+  ## Both of these are properties of the TIE. They stay as arguments so that a
+  ## caller with no tie_config can still set them, but a tie that declares one
+  ## is authoritative, and a genuine disagreement is an error rather than a
+  ## silent precedence. NULL means "not set here".
+  frame.indicator.declared <- !is.null(frame.indicator)
+  ego.in.group.declared    <- !is.null(ego.in.group)
 
   if (!is_visibility_rule(rule)) {
     stop("rule must be a visibility_rule, such as vis_from_clique(). Got: ",
@@ -725,6 +847,28 @@ apply_visibility_rule <- function(rule,
          "vis_from_donor() -- or vis_coalesce() them so the inapplicable tier ",
          "is dropped.")
   }
+
+  ## ---- settings that belong to the tie -----------------------------------
+  frame.indicator <- reconcile_tie_setting(
+    what           = "frame.indicator",
+    tie.value      = if (is.null(tie)) NULL else tie$frame.indicator,
+    other.value    = frame.indicator,
+    other.declared = frame.indicator.declared,
+    other.where    = "apply_visibility_rule(frame.indicator =) was passed",
+    default        = ".sib.in.F")
+
+  ## ego.in.group is resolved twice over: once here, against this function's own
+  ## argument, and again against the rule's setting inside apply_tie_settings()
+  ## once the rule has been fitted. Both matter -- this one governs how y.F is
+  ## derived, the other governs what the rule does with it, and before now
+  ## nothing made the two agree.
+  ego.in.group <- reconcile_tie_setting(
+    what           = "ego.in.group",
+    tie.value      = if (is.null(tie)) NULL else tie$ego.in.group,
+    other.value    = ego.in.group,
+    other.declared = ego.in.group.declared,
+    other.where    = "apply_visibility_rule(ego.in.group =) was passed",
+    default        = TRUE)
 
   ## Drop coalesce tiers that do not apply to this tie. This is what makes a
   ## chain fall through for a non-clique tie.
@@ -803,6 +947,15 @@ apply_visibility_rule <- function(rule,
   }
 
   state  <- rule$fit(donor.dat, weights)
+  ## A tie's declared settings reach the rule here, after fit and before
+  ## predict, so that one declaration governs both how y.F was derived above
+  ## and what the rule does with it.
+  state  <- apply_tie_settings(rule, state, tie)
+  ## Assumptions are recomputed from the final state, so provenance cannot
+  ## report an assumption a tie declaration has since overridden.
+  if (is.function(rule$assumptions_fn)) {
+    rule$assumptions <- rule$assumptions_fn(state)
+  }
   values <- rule$predict(esc.dat, state)
 
   if (nrow(values) != nrow(esc.dat)) {
@@ -819,7 +972,9 @@ apply_visibility_rule <- function(rule,
        donor.dat  = donor.dat,
        state      = state,
        provenance = vis_provenance(rule, values, esc.dat,
-                                   tie = tie, dropped.tiers = dropped.tiers))
+                                   tie = tie, dropped.tiers = dropped.tiers,
+                                   ego.in.group = ego.in.group,
+                                   frame.indicator = frame.indicator))
 }
 
 ##' Build a per-replicate refit function for an estimated visibility rule
@@ -876,7 +1031,8 @@ make_vis_refit <- function(rule, donor.dat, boot.weights, ec.dat, ego.id = ".ego
 ##' @return a `vis_provenance` object
 ##' @keywords internal
 vis_provenance <- function(rule, values, esc.dat,
-                           tie = NULL, dropped.tiers = NULL) {
+                           tie = NULL, dropped.tiers = NULL,
+                           ego.in.group = NA, frame.indicator = NA_character_) {
 
   n <- nrow(values)
 
@@ -906,6 +1062,11 @@ vis_provenance <- function(rule, values, esc.dat,
          ## dropped as inapplicable to it. Both belong in output: an estimate
          ## that silently discarded its exact tier should say so.
          tie               = if (is.null(tie)) NA_character_ else tie$structure,
+         ## The settings as RESOLVED, after any tie declaration was applied.
+         ## They change the arithmetic, so they belong in output rather than
+         ## only in whichever call happened to set them.
+         ego_in_group      = ego.in.group,
+         frame_indicator   = frame.indicator,
          tie_name          = if (is.null(tie) || is.null(tie$name)) NA_character_
                              else tie$name,
          dropped_tiers     = dropped.tiers,
@@ -934,6 +1095,13 @@ print.vis_provenance <- function(x, ...) {
     cat("  tie:          ", x$tie,
         if (!is.na(x$tie_name)) paste0(" (", x$tie_name, ")") else "",
         "\n", sep = "")
+  }
+  if (!is.null(x$ego_in_group) && !is.na(x$ego_in_group)) {
+    cat("  ego.in.group: ", x$ego_in_group, "\n", sep = "")
+  }
+  if (!is.null(x$frame_indicator) && !is.na(x$frame_indicator) &&
+      !identical(x$frame_indicator, ".sib.in.F")) {
+    cat("  frame.indic.: ", x$frame_indicator, "\n", sep = "")
   }
   if (length(x$dropped_tiers)) {
     cat("  dropped:      ", paste(x$dropped_tiers, collapse = ", "),
