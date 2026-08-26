@@ -10,8 +10,7 @@
 
 ####################################
 ## df.to.kpvec
-context("helpers - df.to.kpvec")
-
+## --- helpers - df.to.kpvec ---
 test_that("df.to.kpvec returns correctly named vector", {
   kp.df <- data.frame(known.popn = c("nurses", "teachers", "widowers"),
                       size       = c(50000, 120000, 80000),
@@ -27,8 +26,7 @@ test_that("df.to.kpvec returns correctly named vector", {
 
 ####################################
 ## add.kp
-context("helpers - add.kp")
-
+## --- helpers - add.kp ---
 test_that("add.kp attaches known.popns attribute", {
   df <- data.frame(x = 1:5)
   kp.vec <- c(nurses = 50000, teachers = 120000)
@@ -59,8 +57,7 @@ test_that("add.kp does not attach total.popn.size when not provided", {
 
 ####################################
 ## topcode.var
-context("helpers - topcode.var")
-
+## --- helpers - topcode.var ---
 test_that("topcode.var replaces values above max with max", {
   x <- c(1, 5, 10, 20, 100)
   result <- topcode.var(x, max = 10)
@@ -96,8 +93,7 @@ test_that("topcode.var stops on non-numeric input", {
 
 ####################################
 ## topcode.data
-context("helpers - topcode.data")
-
+## --- helpers - topcode.data ---
 test_that("topcode.data topcodes specified columns", {
   df <- data.frame(a = c(1, 5, 20),
                    b = c(3, 15, 7),
@@ -113,8 +109,7 @@ test_that("topcode.data topcodes specified columns", {
 
 ####################################
 ## estimate.error
-context("helpers - estimate.error")
-
+## --- helpers - estimate.error ---
 test_that("estimate.error computes correct error metrics (positive error)", {
   result <- estimate.error(estimate = 5, truth = 4)
   expect_equal(as.numeric(result[, "err"]),    1)
@@ -142,8 +137,7 @@ test_that("estimate.error handles zero error", {
 
 ####################################
 ## summation.estimator
-context("helpers - summation.estimator")
-
+## --- helpers - summation.estimator ---
 test_that("summation.estimator returns rowSums of specified columns", {
   df <- data.frame(A = c(1, 4),
                    B = c(2, 5),
@@ -172,8 +166,7 @@ test_that("summation.estimator stops for missing != 'ignore'", {
 
 ####################################
 ## rdsII.estimator
-context("helpers - rdsII.estimator")
-
+## --- helpers - rdsII.estimator ---
 test_that("rdsII.estimator returns correct hand-computed value", {
   # d.hat = c(2, 4, 2), y = c(1, 0, 1)
   # num = c(0.5, 0, 0.5), denom = c(0.5, 0.25, 0.5)
