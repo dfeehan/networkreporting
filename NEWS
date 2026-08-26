@@ -1,5 +1,26 @@
 networkreporting 0.3.2
 ========================
+* `vis_from_model()` -- visibility predicted by a fitted model rather than a
+  cell mean. The third member of the predict-from-data family, and the one the
+  fit/predict split was designed to accommodate: it needed a constructor and
+  nothing else, no interface change anywhere.
+
+  A cell mean is a model with one categorical predictor and no pooling. This
+  adds continuous predictors, several covariates without the cell counts
+  collapsing, and borrowing strength across cells rather than treating each in
+  isolation.
+
+  The formula is one-sided and written in the alter's column names -- the
+  response is always the donor's own group size -- with `predictors` mapping
+  names where the donor frame spells one differently, exactly as `match_on`
+  does.
+
+  Two things worth expecting. Bootstrapping it takes the expensive path, since a
+  model with continuous predictors is not constant within a cell; the estimator
+  warns and refits per replicate. And a predicted group size at or below zero is
+  an error rather than a very small weight, since the alter was reported by
+  somebody: the message points at a log link, which cannot predict one.
+
 * **bug fix in the bootstrap for an estimated visibility rule.** The per-replicate
   refit returns one group size per row of `ec_dat`, but it was being indexed by
   bootstrap-weight row position instead, so every cell was handed the same few

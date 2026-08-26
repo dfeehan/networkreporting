@@ -683,6 +683,221 @@ vis_from_group_size <- function(size.var,
 }
 
 ## ---------------------------------------------------------------------------
+## visibility from a fitted model
+## ---------------------------------------------------------------------------
+
+##' Visibility predicted from a fitted model
+##'
+##' The third member of the predict-from-data family. [vis_from_donor()] fits a
+##' grouped weighted mean; this fits a model, and is otherwise the same idea:
+##' learn how big a reporting group tends to be from donors whose group size is
+##' known, then predict it for alters whose is not.
+##'
+##' A cell mean is a model with one categorical predictor and no pooling. This
+##' buys three things over that: continuous predictors, several covariates
+##' without the cell count collapsing, and borrowing strength across cells
+##' rather than treating each in isolation --- which is what makes it usable
+##' where `min_donors` would otherwise empty a cell.
+##'
+##' @section The formula is one-sided, and speaks the alter's vocabulary:
+##'
+##' Pass predictors only --- `~ age + sex`, not `S ~ age + sex`. The response is
+##' always the donor's own group size, which the rule computes; naming it would
+##' mean knowing an internal.
+##'
+##' Write the predictors as the **alter** rows spell them, since that is where
+##' the model has to predict. Where the donor frame spells one differently, say
+##' so with `predictors`, exactly as [vis_from_donor()]'s `match_on` does:
+##' `predictors = c(.sib.sex = "sex")` reads "the alter column `.sib.sex` is the
+##' donor column `sex`". The donor frame is renamed before fitting, so the
+##' fitted object speaks one vocabulary throughout.
+##'
+##' @section Bootstrapping this is expensive, and has to be:
+##'
+##' A model with continuous predictors is not constant within an estimation
+##' cell, so the cheap per-cell identity does not apply to it. The estimator
+##' detects that and refits the model inside every bootstrap replicate, at
+##' roughly M times the cost of a point estimate, warning as it goes. That is
+##' the only correct route: holding a fitted model fixed across replicates would
+##' treat an estimated quantity as known and understate the variance.
+##'
+##' @section What it does not check:
+##'
+##' That the model is any good. The package will tell you if a prediction is
+##' impossible --- a non-positive group size --- but not if it is merely wrong.
+##' Donors are alive and on the frame while many alters needing an imputed
+##' visibility are dead, so a model fitted on donors extrapolates to a
+##' population it never saw; that assumption is recorded in the provenance
+##' rather than left implied.
+##'
+##' @param formula one-sided formula giving the predictors, in the alter's
+##'        column names
+##' @param predictors optional named vector mapping alter column names to donor
+##'        column names, for predictors the two frames spell differently
+##' @param family a `family` for `engine`. Defaults to `gaussian()`; a log link
+##'        such as `poisson(link = "log")` is often the better choice, since it
+##'        cannot predict a non-positive group size
+##' @param engine the fitting function, taking `formula`, `data`, `family` and
+##'        `weights`. Defaults to [stats::glm()]
+##' @param donor `"egos"` to fit on the survey respondents, or a data frame
+##' @param on_missing what to do about an alter the model cannot predict for:
+##'        `"error"` or `"na"` (leave unresolved, so [vis_coalesce()] can try the
+##'        next tier)
+##' @param label optional short name for provenance
+##' @return a [visibility_rule]
+##' @examples
+##' vis_from_model(~ .sib.sex, predictors = c(.sib.sex = "sex"))
+##' @seealso [vis_from_donor()], the same idea with a cell mean in place of a model
+##' @export
+##' @md
+vis_from_model <- function(formula,
+                           predictors = NULL,
+                           family     = stats::gaussian(),
+                           engine     = stats::glm,
+                           donor      = "egos",
+                           on_missing = c("error", "na"),
+                           label      = NULL) {
+
+  if (missing(formula) || !inherits(formula, "formula")) {
+    stop("vis_from_model() needs a one-sided formula giving the predictors, ",
+         "such as ~ age + sex.")
+  }
+  if (length(formula) != 2) {
+    stop("formula must be ONE-SIDED: ~ age + sex, not S ~ age + sex.\n",
+         "The response is always the donor's own group size, which the rule ",
+         "computes for you.")
+  }
+
+  on_missing <- match.arg(on_missing)
+  pred.map   <- normalise_match_on(predictors)
+  rhs.vars   <- all.vars(formula)
+
+  rule.label <- if (is.null(label))
+                  paste0("model(", paste(rhs.vars, collapse = "+"), ")")
+                else label
+
+  visibility_rule(
+    label        = rule.label,
+    requires     = c(".sib.in.F", rhs.vars),
+    ## a fitted model is a sample quantity, so it must be refit per replicate
+    is_estimated = TRUE,
+    ## no structural assumption: the caller supplies the model, not a claim
+    ## about how the tie is shaped
+    applies_to   = NA_character_,
+    fit          = function(donor.dat, weights) {
+
+      if (is.data.frame(donor)) donor.dat <- donor
+      if (is.null(donor.dat)) {
+        stop("vis_from_model() has no donor data to fit on. Pass ",
+             "donor = <a data frame>, or call apply_visibility_rule() with ",
+             "ego.dat so that donor = 'egos' has something to use.")
+      }
+      if (!"y.F" %in% names(donor.dat)) {
+        stop("donor data needs a 'y.F' column giving each donor's own count ",
+             "of on-frame group members. donor data has: ",
+             paste(names(donor.dat), collapse = ", "))
+      }
+
+      ## rename donor columns into the alter vocabulary the formula is written
+      ## in, so the fitted object predicts on alter rows without translation
+      if (length(pred.map)) {
+        missing.donor <- setdiff(unname(pred.map), names(donor.dat))
+        if (length(missing.donor)) {
+          stop("donor data is missing the predictor column(s): ",
+               paste(missing.donor, collapse = ", "), ".\n",
+               "donor data has: ", paste(names(donor.dat), collapse = ", "))
+        }
+        for (i in seq_along(pred.map)) {
+          donor.dat[[names(pred.map)[i]]] <- donor.dat[[unname(pred.map)[i]]]
+        }
+      }
+
+      missing.pred <- setdiff(rhs.vars, names(donor.dat))
+      if (length(missing.pred)) {
+        stop("donor data is missing the predictor column(s) named in the ",
+             "formula: ", paste(missing.pred, collapse = ", "), ".\n",
+             "donor data has: ", paste(names(donor.dat), collapse = ", "), "\n",
+             "The formula is written in the ALTER's column names; where the ",
+             "donor frame spells one differently, map it with ",
+             "predictors = c(alter_name = 'donor_name').")
+      }
+
+      ## the response: the donor's own group size
+      donor.dat$.donor.S <- donor.dat$y.F + 1
+
+      w <- if (!is.null(weights) && weights %in% names(donor.dat)) {
+             donor.dat[[weights]]
+           } else {
+             rep(1, nrow(donor.dat))
+           }
+
+      full.formula <- stats::reformulate(
+        termlabels = attr(stats::terms(formula), "term.labels"),
+        response   = ".donor.S")
+
+      fitted <- engine(full.formula, data = donor.dat, family = family,
+                       weights = w)
+
+      list(model = fitted)
+    },
+    predict      = function(alter.rows, state) {
+
+      missing.cols <- setdiff(rhs.vars, names(alter.rows))
+      if (length(missing.cols)) {
+        stop("alter data is missing the predictor column(s): ",
+             paste(missing.cols, collapse = ", "), ".\n",
+             "alter data has: ", paste(names(alter.rows), collapse = ", "))
+      }
+
+      S.hat <- tryCatch(
+        as.numeric(stats::predict(state$model, newdata = alter.rows,
+                                  type = "response")),
+        error = function(e) rep(NA_real_, nrow(alter.rows)))
+
+      unresolved <- is.na(S.hat)
+      if (any(unresolved) && on_missing == "error") {
+        stop(sum(unresolved), " of ", nrow(alter.rows), " alter row(s) got no ",
+             "prediction from the model -- usually a factor level the donors ",
+             "never showed.\n",
+             "Use on_missing = 'na', or wrap this rule in vis_coalesce() so a ",
+             "coarser tier picks them up.")
+      }
+
+      ## A group size at or below zero is not a near miss, it is impossible:
+      ## the alter was reported, so somebody could report them. Catch it here
+      ## rather than letting a negative visibility become a negative weight.
+      bad <- !is.na(S.hat) & S.hat <= 0
+      if (any(bad)) {
+        stop(sum(bad), " of ", nrow(alter.rows), " predicted group size(s) are ",
+             "zero or negative, which cannot be: every alter here was reported ",
+             "by somebody.\n",
+             "This is what an identity link does when it extrapolates. Fit with ",
+             "a log link -- family = poisson(link = 'log') -- which cannot ",
+             "predict a non-positive value.")
+      }
+
+      vis <- S.hat - alter.rows$.sib.in.F
+
+      dplyr::tibble(vis        = as.numeric(vis),
+                    vis_weight = 1 / vis,
+                    vis_rule   = ifelse(is.na(vis), NA_character_, rule.label))
+    },
+    assumptions  = c(
+      paste0("visibility is predicted by a fitted model, ",
+             paste(deparse(formula), collapse = " "),
+             ", rather than derived"),
+      paste0("fitted on ", if (is.data.frame(donor)) "a supplied donor frame"
+                           else "the survey respondents"),
+      "the model is fitted on donors, who are alive and on the frame, and then extrapolated to alters who are frequently neither; the package checks that a prediction is possible, not that it is right"),
+    params       = list(formula    = paste(deparse(formula), collapse = " "),
+                        predictors = if (length(pred.map)) names(pred.map) else NULL,
+                        family     = if (is.character(family)) family else family$family,
+                        donor      = if (is.data.frame(donor)) "<data frame>" else donor,
+                        on_missing = on_missing,
+                        label      = label))
+}
+
+## ---------------------------------------------------------------------------
 ## coalescing rules
 ## ---------------------------------------------------------------------------
 

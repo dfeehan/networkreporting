@@ -743,9 +743,18 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   in provenance which produced which estimate.
 - `vis_from_report()` — ego directly reports the alter's degree. A survey-design choice, and arguably
   the honest answer for non-clique ties.
-- **`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean. The
-  `fit`/`predict` contract and `is_estimated` in Phase 1 exist specifically so this needs no
-  interface change: a new constructor and case 3 of the bootstrap path, nothing else.
+- ~~**`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean.~~
+  **built, 2026-08-26.** The prediction held exactly: a new constructor and case 3, and **no
+  interface change anywhere**. `is_estimated` already routed the bootstrap, non-integer visibility
+  already worked end to end, and `applies_to = NA` already meant it needed no tie.
+
+  One-sided formula in the alter's vocabulary, `predictors` mapping names to the donor frame the
+  way `match_on` does. Recovers the generating group size on simulated data where the process is
+  known, and beats a global donor mean when group size genuinely varies — both asserted as tests.
+
+  A predicted group size at or below zero errors rather than becoming a negative weight, pointing
+  at a log link. Worth knowing that `gaussian()` is the default and *can* produce one when
+  extrapolating; `poisson(link = "log")` cannot.
 - `vis_aggregate()` fed by ARD degree estimates, connecting to `networkreporting` and to
   `code/quantity_quality/02_ard_degree.Rmd` in the Matlab repo.
 - **Splitting ARD / scale-up back out.** With the spine living in `networkreporting`, the plausible
