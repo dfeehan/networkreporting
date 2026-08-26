@@ -793,10 +793,26 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   (`scale_up.r`, `known_population.r`, `summation.r`, `indirect_sampling.r`, `rds.r`) into a package
   of its own that depends on the spine, leaving `networkreporting` as the spine plus its estimators.
   Not this plan's work. Nothing in Phase 1 should assume either arrangement.
-- **Non-ratio estimands** — totals, means, prevalences. The visibility layer already supports them;
-  what remains is separating ratio formation from sum formation in `get_ind_est_from_ec()`,
-  `get_agg_est_from_ec()` and `get_boot_ests_matrix()`. Phase 1's frame-status generalisation of
-  `get_ec_reports()` is the groundwork.
+- **Non-ratio estimands** — totals, means, prevalences. ~~The visibility layer already supports
+  them; what remains is separating ratio formation from sum formation.~~ **Totals done,
+  2026-08-26. Means and prevalences still open, and they need more than separation.**
+
+  The separation turned out to be *almost* already there: `get_ind_est_from_ec()` and
+  `get_agg_est_from_ec()` return `num.hat` and `denom.hat` alongside the ratio, and
+  `get_boot_ests_matrix()` returns replicates of all three. What was missing was that the
+  **summarising step discarded everything but the ratio**, so the sums had no uncertainty and a
+  rate was the only reportable estimand. Both sums now get their own CI, SE and median, and
+  `estimated_total()` reads one out. The rate's interval is unchanged.
+
+  **Still open, and it is not just plumbing.** A total works because the quantity being summed is
+  already in `ec.dat`. A *mean* or *prevalence* needs the numerator to be some other variable —
+  income, a binary attribute — and that variable has to be carried through `get_esc_reports()` and
+  summed by `get_ec_reports()`, neither of which takes a caller-named quantity today. That is the
+  real remaining work, and it is upstream of the estimators rather than in them.
+
+  Also worth recording: a sum is a **population** total only if the weights are population weights.
+  With relative weights it is off by a constant factor, silently. The rate is unaffected because
+  the factor cancels — which is precisely why nobody notices until they ask for a total.
 - **Retiring `network.survival.estimator()`.** Deprecated in Phase 1, removed in a later release.
 - `true_visibility_from_network()` for simulation validation. The socsim code hand-rolls this three
   times today, and one of the three

@@ -288,3 +288,18 @@ test_that("the union check says the union is not the structure of its parts", {
     collapse = " ")
   expect_match(out, "not the structure of either part")
 })
+
+test_that("summary columns are not mistaken for cell variables", {
+  # Regression. tie_cell_vars() worked by enumerating the columns the estimator
+  # computes, so adding intervals for num.hat and denom.hat turned them into
+  # "cell variables" and broke every comparison. It now matches the shape of a
+  # derived column instead, which is what keeps a future addition from doing
+  # the same thing.
+  t   <- two_ties()
+  cmp <- compare_ties(siblings = t$siblings, household = t$household)
+
+  cv <- attr(cmp, "cell.vars")
+  expect_setequal(cv, c("time.period", "sex", "alter.age"))
+  expect_false(any(grepl("[.](ci[.]low|ci[.]high|median|se)$", cv)))
+  expect_false(any(c("num.hat", "denom.hat") %in% cv))
+})

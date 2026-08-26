@@ -1,5 +1,32 @@
 networkreporting 0.3.2
 ========================
+* estimands that are not ratios. A death rate is a ratio of two
+  visibility-adjusted sums, and those sums -- the estimated number of events and
+  the estimated person-time -- are estimands in their own right.
+
+  What was missing was uncertainty on them. The bootstrap already computed
+  replicates of `num.hat` and `denom.hat`, and the summarising step then
+  discarded everything but the ratio, so a rate was the only thing the estimator
+  could report with an interval. Both sums now get their own CI, standard error
+  and median, and `estimated_total()` reads one out.
+
+  The rate's own interval is unchanged, which is what makes this safe: the
+  change adds columns and moves no number. Forming a rate by hand from the two
+  totals reproduces `asdr.hat` exactly, which is the separation of ratio
+  formation from sum formation the plan asked for.
+
+  Worth knowing, and documented on `estimated_total()`: a sum is a *population*
+  total only if the survey weights are population weights. With relative weights
+  it is off by a constant factor -- silently, since nothing in the data says
+  which kind was used. The rate is unaffected either way because the factor
+  cancels, which is exactly why the distinction can go unnoticed until somebody
+  asks for a total.
+
+* `tie_cell_vars()` decides which columns define a cell by matching the shape of
+  a derived column rather than enumerating the estimator's outputs. The
+  enumeration was brittle: adding intervals for `num.hat` and `denom.hat`
+  immediately turned them into cell variables and broke every tie comparison.
+
 * combining estimates across ties: `compare_ties()`, `pool_ties()` and
   `ties_union_check()`.
 
