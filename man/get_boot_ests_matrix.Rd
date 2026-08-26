@@ -11,7 +11,8 @@ get_boot_ests_matrix(
   cell_vars,
   estimator_type,
   visibility = NULL,
-  refit = NULL
+  refit = NULL,
+  refit_sums = NULL
 )
 }
 \arguments{
@@ -30,7 +31,13 @@ rule is refit inside every replicate rather than frozen; see Details}
 
 \item{refit}{optional \verb{function(replicate_index)} returning the group size
 \code{S.hat} for each row of \code{ec_dat} under that replicate. Supplied by
-\code{\link[=apply_visibility_rule]{apply_visibility_rule()}}-aware callers for an estimated rule}
+\code{\link[=apply_visibility_rule]{apply_visibility_rule()}}-aware callers for an estimated rule whose
+visibility is constant within a cell}
+
+\item{refit_sums}{optional \verb{function(replicate_index)} returning a data frame
+of \code{num} and \code{denom}, one row per row of \code{ec_dat}, for an estimated
+rule whose visibility is \emph{not} constant within a cell. Takes
+precedence over \code{refit}; see \code{\link[=make_vis_refit_esc]{make_vis_refit_esc()}}}
 }
 \value{
 long-form data frame with one row per cell per bootstrap replicate

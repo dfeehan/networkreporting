@@ -477,6 +477,18 @@ Phase 2 model rule has somewhere to land.
    case, `warning()` with the projected cost, and let it run. Do not silently fall back to case 2:
    that would freeze the model and reintroduce the bug this section exists to fix.
 
+   **Built 2026-08-26.** `vis_is_cell_constant()` decides, `make_vis_refit_esc()` is the expensive
+   path, and there is no silent fallback. Where cases 2 and 3 are both valid they agree exactly, and
+   that is a test.
+
+   Building it surfaced a **bug in case 2**: the refit vector is one value per `ec_dat` row, but it
+   was indexed by bootstrap-weight row position, so every cell got the same few rows' values. That is
+   invisible when the estimated visibility is constant — which is what the Phase 1 tests used
+   (`match_on = NULL`) — and wrong as soon as it varies by cell, i.e. in the case this list calls
+   *the common one*. Fixed, with a regression test that checks each cell's `S.hat` against a
+   hand-computed value. `vis_from_clique()` estimates are unaffected: not estimated, so never on this
+   path.
+
 **This change must be a no-op for `vis_from_clique()`.** That is what makes it safe to land: the
 DHS/MICS validation numbers and their CIs must not move.
 
@@ -572,7 +584,16 @@ That is the exact failure mode this architecture exists to prevent: a silent
 assumption producing an unquestioned number.
 
 **And the resulting error is differential, so it does not cancel.** Visibility
-survives into a rate only through the on-frame/off-frame asymmetry. For cousins:
+survives into a rate only through the on-frame/off-frame asymmetry.
+
+> **Superseded later on 2026-08-26 --- read the revision below before using these
+> numbers.** The figures in this paragraph came from the saved
+> `net_reporting_*.rds` files in `old_test_Bangladesh_2020`, which have since
+> been retired. They carried a stale `eligible` attribute marking 0.07-0.09% of
+> alters as being in the frame population *while also carrying a date of death* --
+> exactly the miscoding `get_ec_reports(check.frame.consistency = TRUE)` now
+> warns about. The check script builds the censuses live from the raw graphs
+> instead, and the picture changes.
 
 | network | off-frame (deaths) | on-frame (exposure) | differential |
 |---|---|---|---|
@@ -580,11 +601,37 @@ survives into a rate only through the on-frame/off-frame asymmetry. For cousins:
 | paternal cousins | 1.562x too high | 1.277x too high | **1.223** |
 | siblings | 1.000 | 1.000 | 1.000 |
 
-Both cousin networks agree, so this is structural, not noise. A ~20% differential
-biases a cousin-based death rate downward by roughly the same order. The exact
-factor needs working through -- the exposure denominator is a mixture, so it is
-not a clean ratio -- but the direction is unambiguous and the magnitude is not
-small.
+### Revised, later on 2026-08-26
+
+Rebuilt live from `socsim/Bangladesh_2020`, the measurement is:
+
+| roster | complete components | off-frame (deaths) | on-frame (exposure) | differential |
+|---|---|---|---|---|
+| maternal siblings | 100% | exact (100%) | exact (100%) | 1.000 |
+| maternal cousins | 100% | exact (100%) | exact (100%) | 1.000 |
+| paternal cousins | 100% | exact (100%) | exact (100%) | 1.000 |
+| maternal **union** paternal cousins | 68% | 1.089x (65% exact) | 1.061x (63% exact) | **1.026** |
+
+**The correction that matters is conceptual, not arithmetic.** "Cousinship is not
+transitive, so a cousin roster is not a clique" is too coarse, and it was the
+reasoning behind the original entry. Within *one line* cousinship **is**
+transitive: everyone sharing a maternal grandmother forms an equivalence class.
+So a maternal-cousin roster is a clique, and `vis_from_clique()` is exact on it.
+What breaks is the **union** of the two lines, since your maternal cousin and
+your paternal cousin are not each other's cousins --- and that is the genuine
+non-clique case.
+
+So the tie gate is *not* justified by "cousins need care". It is justified by
+something stronger and less obvious: **whether a given roster is a clique is a
+fact about how that roster was built, and two rosters both called "cousins" can
+differ on it.** No amount of inspecting the data distinguishes them, which is
+precisely why the structure has to be declared.
+
+The differential is also smaller than first recorded --- 1.026 rather than
+1.201 --- so the *cost* of getting it wrong on this particular data is more
+modest than the original entry implied. The direction is unchanged, and the
+`complete components` column is the useful diagnostic: 100% means the roster
+really does partition, 68% means it does not.
 
 ### Fixed, 2026-08-26
 
@@ -604,9 +651,9 @@ provenance table that looked clean.
 * `sibling_estimator(tie = )` defaults to `tie_config("clique", "siblings")`,
   so no existing estimate moves; both validation harnesses reproduce exactly.
 
-**Still deferred:** the rest of what `tie_config()` was sketched to carry ---
-`ego.in.group` (which stays on the rule for now), a per-tie `frame.indicator`,
-and the multi-tie estimator. Only the applicability gate was pulled forward.
+**Still deferred:** the multi-tie estimator. `ego.in.group` and the per-tie
+`frame.indicator` were finished later the same day; see the struck `tie_config()`
+item in the deferred list for what was decided and why.
 
 ---
 
@@ -614,37 +661,113 @@ and the multi-tie estimator. Only the applicability gate was pulled forward.
 
 Do **not** build these now; they are recorded so the Phase 1 interfaces do not foreclose them.
 
-> **Read this first if you are starting Phase 2.** Part of `tie_config()` has already been
-> built --- it was pulled forward on 2026-08-26 because the socsim check above showed the
-> API would otherwise produce a biased cousin estimate behind a clean-looking provenance
-> table. See "Finding from verification step 5" for what landed. **Start from that code,
-> not from a fresh design**, and check you are on a branch that contains it:
-> `networkreporting` commit `87f36f2`, `siblingsurvival` commits `1235d6d` and `12a5ff8`.
-> Building `tie_config()` again from this list will conflict with it.
+> **Read this first if you are starting Phase 2.** `tie_config()` is **built and finished**
+> --- pulled forward on 2026-08-26 because the socsim check above showed the API would
+> otherwise produce a biased cousin estimate behind a clean-looking provenance table, and
+> completed the same day. See "Finding from verification step 5" for what landed, and the
+> struck item below for the design decisions taken. **Start from that code, not from a
+> fresh design**, and check you are on a branch that contains it: `networkreporting`
+> commits `87f36f2` and the tie-settings work that follows it, `siblingsurvival` commits
+> `1235d6d` and `12a5ff8` and likewise. Building `tie_config()` again from this list will
+> conflict with it.
 
-- ~~`tie_config()` — declaring tie structure~~ **partly done.** `tie_config(structure, name)`
-  exists, with `"clique"` / `"group"` / `"star"` / `"unbounded"`, and rules carry `applies_to`
-  so an inapplicable one refuses rather than misleads. **Still open**, and both are real
-  decisions rather than leftovers:
-    * **`ego.in.group` was deliberately left on the rule**, not moved onto `tie_config`, to
-      avoid two places to set it and a precedence question to get wrong. Moving it is
-      defensible — it *is* a property of the tie — but it is a change, not a completion, and
-      it needs a rule for what happens when the two disagree.
-    * **A per-tie `frame.indicator`** is not built at all. It matters once ties differ in who
-      is eligible to report or be reported about (neighbours bounded by bari, say).
-- `network_survival_estimator()`. Note the shape assumed here has already drifted:
-  `sibling_estimator()` now *takes* a `tie` argument defaulting to `tie_config("clique")`,
-  rather than being a wrapper over a generic estimator. Either is workable; decide
-  deliberately rather than inheriting this line.
+- ~~`tie_config()` — declaring tie structure, `ego.in.group`, and a per-tie `frame.indicator`~~
+  **done, 2026-08-26.** `tie_config(structure, name, ego.in.group, frame.indicator)`.
+  Rules carry `applies_to`, so an inapplicable one refuses rather than misleads.
+    * **`ego.in.group` and `frame.indicator` moved onto the tie**, where they belong: both
+      are facts about the tie, not about the rule. Both default to `NULL`, meaning "not
+      declared", so a tie that declares neither behaves exactly as before.
+    * **The precedence question is answered by refusing to have one.** Where a tie
+      declaration meets a value set on the rule or passed as an argument, agreement is fine
+      and *disagreement is an error naming both sources*. Silent precedence was rejected
+      because it reintroduces exactly the failure this layer exists to prevent: a number
+      computed under an assumption the caller did not know was in force.
+    * Worth knowing: `ego.in.group` was **already** in two places that did not talk to each
+      other — `vis_from_clique(ego.in.group =)` and `apply_visibility_rule(ego.in.group =)`,
+      the first governing what the rule does and the second how `y.F` is derived. The
+      duplication the plan worried about creating already existed; this removes it.
+    * A rule's `assumptions` are now computed from the *resolved* state, not fixed at
+      construction. Otherwise provenance reported "ego is a member of the group ego reports
+      about" on a tie that had just declared the opposite.
+    * Deliberately **not** enforced: that `structure` and `ego.in.group` agree. It is
+      tempting — `"clique"` is described as ego belonging to the group — but enforcing it
+      removes real configurations. A household roster that excludes the respondent is a
+      clique the respondent is outside of, and the Matlab rosters carry the respondent as a
+      row (so their count is `yprime.F`, not `y.F`). The package's job is to let those be
+      stated, not to rule them out.
+- ~~`network_survival_estimator()`~~ **built, 2026-08-26, as the wrapper shape.**
+  `network_survival_estimator(rel.dat, ego.id, alter.id, frame.indicator, alter.sex,
+  cell.config, weights, ..., visibility, tie)` lives in `networkreporting`, and
+  `siblingsurvival::sibling_estimator()` is now a thin wrapper over it, keeping its exact
+  signature and output.
+
+  The shape was chosen deliberately, per the note this replaces. What settled it: the
+  pipeline turned out to be sibling-specific only in its **naming** --- the argument names,
+  the `sib.age` output column, and the default tie. Nothing in `get_esc_reports()` ->
+  visibility -> `get_ec_reports()` -> estimators -> bootstrap assumes anything about
+  siblings. With the difference that thin, two implementations would have been two copies
+  of the same code waiting to drift, and multi-tie work would have had to switch APIs by
+  tie rather than calling one entry point in a loop.
+
+  Two details worth knowing:
+    * **The generic has no default `tie`**, and refuses to run without one, for the same
+      reason `tie_config()` has no default structure. `sibling_estimator()` supplies
+      `tie_config("clique", "siblings")`, which is correct *there* because siblings are a
+      clique.
+    * The estimator now carries whatever columns the visibility rule declares in
+      `requires` through its covariate join. Without that, `vis_from_group_size()` was
+      usable through `apply_visibility_rule()` but **not** through the estimator, since the
+      join dropped the group-size column. Found by exercising the generic on a group tie;
+      it is the gap that most justified building it.
 - Combination across ties: **compare** (separate estimates, same cells), **union** (visibilities add
   only if alter sets are disjoint — and the package has no cross-tie alter identity today, `sib.id`
   being unique only within ego), **pool** (variance-weighted).
-- `vis_from_other_group()` — the parents case, where visibility for tie A comes from tie B's roster.
-- `vis_from_report()` — ego directly reports the alter's degree. A survey-design choice, and arguably
-  the honest answer for non-clique ties.
-- **`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean. The
-  `fit`/`predict` contract and `is_estimated` in Phase 1 exist specifically so this needs no
-  interface change: a new constructor and case 3 of the bootstrap path, nothing else.
+- ~~`vis_from_other_group()` — the parents case, where visibility for tie A comes from tie B's
+  roster.~~ **mechanism built, 2026-08-26.** `vis_from_group_size(size.var)` takes the group
+  size from a column instead of deriving it, which is exactly what "visibility for tie A comes
+  from tie B's roster" needs: compute the sibship size, pass it as the column. A named
+  `vis_from_other_group()` convenience wrapper is still open, and would have to decide how a
+  caller identifies "tie B" — by name, once ties are first-class objects, which is the
+  multi-tie estimator's problem rather than this rule's.
+
+  The same rule makes `targets_cousins.R`'s bases expressible, which was the open question
+  in the analysis-repo section below. All three are the same arithmetic on differently
+  defined groups: *Pooled cousins* and *True cousins with siblings* are `G_F - in.F` (so
+  `vis_from_group_size(col)`), and *Pooled cousins without siblings* is `G_F` with no frame
+  split (so `subtract.self = FALSE`). Measured against socsim ground truth, the pooled basis
+  had a differential error of 1.056 against 1.865 for the global donor rule, and the
+  pooled-minus-sibship basis erred the other way at 0.902. (Those were measured on the
+  superseded `old_test_Bangladesh_2020` data; see the revision note above. The comparison
+  between bases is still informative, the absolute figures less so.) **Which basis is right for cousins
+  is not settled here** --- the point is that the package can now state all of them and say
+  in provenance which produced which estimate.
+- ~~`vis_from_report()` — ego directly reports the alter's degree.~~ **built, 2026-08-26.**
+  `vis_from_report(report.var, counts.ego, counts.self)`. The plan called it "arguably the honest
+  answer for non-clique ties", and building it sharpened why: it is the *only* rule that can serve
+  an `"unbounded"` tie. Neighbours and acquaintances have no bounded group to count, so nothing can
+  be derived, and there is no reason to think respondents resemble their alters either. Asking is
+  the only route to the quantity.
+
+  `counts.ego` and `counts.self` encode what the question actually asked, which no amount of looking
+  at the numbers reveals. With `counts.self = TRUE` the rule coincides with `vis_from_group_size()`,
+  and the docs point there as the clearer constructor for that case.
+
+  A reported visibility below one errors rather than becoming a large weight, since it contradicts
+  the report it sits on. `targets_neighbors.R:104` (`alter_visibility = 1`) is expressible now, and
+  more honestly than as a degenerate donor: it is a *reported* visibility of one, not an
+  approximation.
+- ~~**`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean.~~
+  **built, 2026-08-26.** The prediction held exactly: a new constructor and case 3, and **no
+  interface change anywhere**. `is_estimated` already routed the bootstrap, non-integer visibility
+  already worked end to end, and `applies_to = NA` already meant it needed no tie.
+
+  One-sided formula in the alter's vocabulary, `predictors` mapping names to the donor frame the
+  way `match_on` does. Recovers the generating group size on simulated data where the process is
+  known, and beats a global donor mean when group size genuinely varies — both asserted as tests.
+
+  A predicted group size at or below zero errors rather than becoming a negative weight, pointing
+  at a log link. Worth knowing that `gaussian()` is the default and *can* produce one when
+  extrapolating; `poisson(link = "log")` cannot.
 - `vis_aggregate()` fed by ARD degree estimates, connecting to `networkreporting` and to
   `code/quantity_quality/02_ard_degree.Rmd` in the Matlab repo.
 - **Splitting ARD / scale-up back out.** With the spine living in `networkreporting`, the plausible
@@ -673,7 +796,10 @@ in this plan. Paths in this section are relative to `~/Dropbox/matlab-mortality`
 - `targets_parents.R:99-101` is `vis_from_other_group(group = "sibling")` — Phase 2.
 - `targets_cousins.R:309-530`'s four `alter_visibility_basis` values are four legitimate estimands,
   not four hacks. They map onto `vis_coalesce` chains once `tie_config` exists.
-- `targets_neighbors.R:104` (`alter_visibility = 1`) is `vis_from_donor(match_on = NULL)` with a
-  degenerate donor — worth re-expressing so the assumption is visible.
+- `targets_neighbors.R:104` (`alter_visibility = 1`) was recorded here as
+  `vis_from_donor(match_on = NULL)` with a degenerate donor. Since 2026-08-26 `vis_from_report()`
+  is the better fit: a flat visibility of one is an *assertion about what respondents could
+  report*, not an approximation borrowed from donors, and the two say different things in the
+  provenance table.
 - Units: the repo's `alter_visibility` is a **count**; the package's `ind_vis` is its **reciprocal**.
   Migration must map `alter_visibility → vis`, not to `vis_weight`.

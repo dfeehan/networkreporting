@@ -201,17 +201,31 @@ rule was used".
 How wrong? Socsim gives the true reporting network, and therefore each alter's
 true visibility, so this is measurable rather than a matter of opinion:
 
-| tie | off-frame (carries the deaths) | on-frame (exposure only) | differential |
+| roster | off-frame (carries the deaths) | on-frame (exposure only) | differential |
 |---|---|---|---|
-| siblings (a clique) | exact | exact | 1.00 |
-| maternal cousins | 1.55x too high | 1.29x too high | **1.20** |
-| paternal cousins | 1.56x too high | 1.28x too high | **1.22** |
+| maternal siblings | exact (100%) | exact (100%) | 1.000 |
+| maternal cousins | exact (100%) | exact (100%) | 1.000 |
+| paternal cousins | exact (100%) | exact (100%) | 1.000 |
+| maternal **union** paternal cousins | 1.089x too high (65% exact) | 1.061x too high (63% exact) | **1.026** |
 
-Siblings are a clique and the rule is exact for 100% of alters. Cousinship is
-not transitive -- your cousins need not be each other's cousins -- and there the
-rule overstates visibility. Note *where* it overstates: more on the off-frame
-side, which carries every death, than on the on-frame side. By the argument
-above, a uniform error would cancel; this differential one does not.
+The interesting row is the last one, and the interesting non-rows are the two
+above it.
+
+"Cousinship is not transitive" is the usual reason given for cousins not being a
+clique, and in general it is true: your maternal cousin and your paternal cousin
+are not each other's cousins. But *within one line* it is transitive --- everyone
+sharing a maternal grandmother forms an equivalence class --- so a
+maternal-cousin roster is a clique, and the rule is exact on it. What breaks is
+pooling the two lines.
+
+So the lesson is not that cousins are a special case to be careful of. It is that
+whether a given roster is a clique is a question about **how that roster was
+built**, which no amount of looking at the data will answer. Hence the
+declaration.
+
+Note *where* the pooled roster goes wrong: more on the off-frame side, which
+carries every death, than on the on-frame side. By the argument above, a uniform
+error would cancel out of the rate; this differential one does not.
 
 So declare the tie:
 
@@ -225,6 +239,227 @@ parents, whose visibility is a fact about the *sibship* rather than the parent
 roster; `"unbounded"` is neighbours and acquaintances. A rule that makes no
 structural assumption, such as `vis_from_donor()`, needs no declaration and
 accepts any.
+
+### What else belongs on the tie
+
+Two further things are facts about the tie rather than about the rule, and a
+`tie_config()` can carry both:
+
+```{r}
+tie_config("star", name = "parents",
+           ego.in.group    = FALSE,     # ego is not in the group being sized
+           frame.indicator = "in.frame") # this tie's own eligibility column
+```
+
+`ego.in.group` is the `+ 1`: it says whether ego is counted among the group
+members who could report an alter. `frame.indicator` names the column saying who
+is in the frame population *for this tie*, which starts to matter once ties
+differ in who is eligible — neighbours bounded by a compound, say, against
+siblings who are not.
+
+Both default to undeclared, in which case nothing changes: the rule's own
+setting is used, and the frame column defaults to `.sib.in.F`.
+
+Where a tie declares one of these and the rule or the call also sets it,
+**agreement is fine and disagreement is an error naming both sources**:
+
+```{r, error = TRUE}
+apply_visibility_rule(
+  vis_from_clique(ego.in.group = TRUE),
+  esc.dat = tibble(.ego.id = 1, .sib.in.F = 0, y.F = 2),
+  tie     = tie_config("clique", name = "siblings", ego.in.group = FALSE))
+```
+
+There is deliberately no rule for which one wins. Silent precedence would
+compute a number under an assumption you did not choose — the same failure the
+tie gate itself exists to prevent — so the package makes you say it once.
+
+Note that what a tie declares reaches the provenance table, including the
+assumptions, which are recomputed from the setting actually used rather than
+from whatever the rule was built with:
+
+```{r}
+apply_visibility_rule(
+  vis_from_clique(),
+  esc.dat = tibble(.ego.id = c(1, 1), .sib.in.F = c(1, 0), y.F = c(2, 2)),
+  tie     = tie_config("clique", name = "households",
+                       ego.in.group = FALSE))$provenance
+```
+
+## When the group is not the roster
+
+`vis_from_clique()` works out the group by counting ego's roster. Sometimes the
+group whose size sets an alter's visibility is *not* the roster the alter was
+reported on, and only you can say what it is:
+
+* **Pooled ties.** Cousins are reported through the maternal and paternal sides
+  separately, but an alter's visibility depends on everyone who could have
+  reported them — both sides, plus ego's own siblings. That group is not any
+  single roster.
+* **Nested ties.** "Pooled cousins, excluding ego's siblings" is a difference of
+  two counts. No roster holds it.
+* **Borrowed groups.** A parent's visibility is the number of their children on
+  the frame — a fact about the *sibship*, not the parent roster.
+
+`vis_from_group_size()` takes the count from a column instead of deriving it:
+
+```{r}
+cousins <- tibble(
+  .ego.id   = c(1, 1, 2),
+  .sib.in.F = c(1, 0, 1),
+  n_pooled_and_F  = c(5, 5, 3),   # ego's pooled cousinship, on frame
+  n_sibship_and_F = c(2, 2, 1))
+cousins$n_pooled_nosib_and_F <-
+  cousins$n_pooled_and_F - cousins$n_sibship_and_F
+
+pooled <- vis_from_group_size("n_pooled_and_F", label = "pooled cousins")
+pooled$predict(cousins, pooled$fit(NULL, NULL))$vis
+```
+
+The rule still does the frame split — an alter who is themselves in the frame
+population cannot report themselves — because that asymmetry is the only route
+by which visibility reaches a rate. A basis that deliberately omits it says so:
+
+```{r}
+nosib <- vis_from_group_size("n_pooled_nosib_and_F",
+                             subtract.self = FALSE,
+                             label = "pooled without siblings")
+nosib$predict(cousins, nosib$fit(NULL, NULL))$vis
+```
+
+Two things to be clear about. This rule makes **no structural assumption**, so
+it needs no `tie` and accepts any — but that is not because it is safe the way
+`vis_from_donor()` is safe. It is because you have taken on the part
+`vis_from_clique()` would have derived. The package checks the arithmetic; it
+cannot check that your column counts the right people, and the assumptions say
+so:
+
+```{r}
+pooled$assumptions
+```
+
+And `label` earns its place when you are comparing bases rather than committing
+to one: run the same cells under each, and the provenance says which produced
+which.
+
+## From a cell mean to a model
+
+`vis_from_donor()` fits a grouped weighted mean. `vis_from_model()` fits a model.
+Everything else about them is the same, which is the point: a cell mean *is* a
+model, with one categorical predictor and no pooling.
+
+```{r}
+set.seed(7)
+donors <- tibble(.ego.id = 1:400, age = runif(400, 20, 60), w = 1)
+donors$y.F <- rpois(400, lambda = exp(0.2 + 0.02 * donors$age))
+
+alters <- tibble(.ego.id = 1:4, .sib.in.F = c(1, 0, 1, 0),
+                 age = c(25, 25, 55, 55))
+
+mod <- vis_from_model(~ age, family = poisson(link = "log"))
+mod$predict(alters, mod$fit(donors, "w"))$vis
+```
+
+Three things a cell mean cannot do, and this can: continuous predictors, several
+covariates at once without the cell counts collapsing, and borrowing strength
+across cells instead of treating each in isolation — which is what makes it
+usable where `min_donors` would empty a cell entirely.
+
+Note the formula is **one-sided** and written in the *alter's* column names. The
+response is always the donor's own group size, so naming it would mean knowing an
+internal. Where the donor frame spells a predictor differently, map it the same
+way `match_on` does: `predictors = c(.sib.age = "age.cat")`.
+
+### Two things to expect
+
+**Bootstrapping it is expensive.** A model with continuous predictors is not
+constant within an estimation cell, so the cheap per-cell shortcut does not
+apply. The estimator detects that, warns, and refits the model inside every
+replicate — roughly M times the cost of a point estimate. That is the only
+correct route: holding a fitted model fixed across replicates would treat an
+estimated quantity as known.
+
+**A non-positive prediction is an error, not a small number.** An identity link
+extrapolating past its donors can predict a group size below zero, which would
+become a negative visibility and then a negative weight. The package refuses it
+and points at a log link, which cannot:
+
+```{r, error = TRUE}
+falling <- tibble(.ego.id = 1:60, age = seq(20, 60, length.out = 60), w = 1)
+falling$y.F <- pmax(0, round(8 - 0.2 * falling$age))
+
+bad <- vis_from_model(~ age)                # gaussian: identity link
+bad$predict(tibble(.ego.id = 1, .sib.in.F = 0, age = 200),
+            bad$fit(falling, "w"))
+```
+
+What the package does **not** check is whether the model is any good. Donors are
+alive and on the frame; many alters needing an imputed visibility are neither. A
+model fitted on donors extrapolates to a population it never saw, and that
+assumption is recorded in the provenance rather than left implied.
+
+## Just asking
+
+Every rule so far recovers visibility from something the survey collected for
+another purpose: the tie's structure, or the respondents' own group sizes. All of
+them are attempts to get at a quantity nobody was asked about.
+
+For an `"unbounded"` tie there is no way round that. Neighbours and
+acquaintances have no bounded group to count, so there is no roster to derive
+from — and no particular reason to think respondents resemble their alters.
+Asking is the only route to the quantity:
+
+```{r}
+asked <- tibble(
+  .ego.id   = 1:4,
+  .sib.in.F = c(1, 0, 1, 0),
+  # "how many people like you does this person know?"
+  n_known   = c(4, 3, 2, 5))
+
+rep_rule <- vis_from_report("n_known")
+rep_rule$predict(asked, rep_rule$fit(NULL, NULL))$vis
+```
+
+This is a **survey-design** choice as much as an analysis one. It costs
+questionnaire time and can only be used if somebody decided in advance to ask.
+Where the question was asked, though, it beats approximating from something else
+— and it puts the uncertainty somewhere visible, in reporting error, rather than
+in an assumption.
+
+Two things the wording of the question decides, which the numbers cannot reveal:
+
+* `counts.ego` — did the respondent count *themselves*? "How many people like you
+  does X know" usually includes them; "how many **other** people like you" does
+  not, and one has to be added back.
+* `counts.self` — did the answer count the alter? A question about a *group*
+  ("how many people are in X's household?") does; one about connections does not.
+  When it does, `vis_from_group_size()` is the clearer constructor.
+
+A reported visibility below one is treated as an error rather than a small
+number, because it contradicts the report it sits on — the alter was named by
+somebody, so at least one frame member could see them. The usual causes are a
+don't-know code stored as `0`, or `counts.ego` set wrongly:
+
+```{r, error = TRUE}
+bad <- asked
+bad$n_known[2] <- 0
+rep_rule$predict(bad, rep_rule$fit(NULL, NULL))
+```
+
+Item non-response on this question is normal, so `on_missing = "na"` and a
+fallback tier is usually the right shape rather than stopping:
+
+```{r}
+partial <- asked
+partial$n_known[3] <- NA
+partial$y.F <- 2
+
+chain <- vis_coalesce(vis_from_report("n_known", on_missing = "na"),
+                      vis_from_clique())
+out <- apply_visibility_rule(chain, partial,
+                             tie = tie_config("clique", name = "siblings"))
+out$values
+```
 
 ## Coalescing: exact where possible, approximate where not
 

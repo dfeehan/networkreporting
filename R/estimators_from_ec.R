@@ -14,7 +14,12 @@
 ##'        rule is refit inside every replicate rather than frozen; see Details
 ##' @param refit optional `function(replicate_index)` returning the group size
 ##'        `S.hat` for each row of `ec_dat` under that replicate. Supplied by
-##'        [apply_visibility_rule()]-aware callers for an estimated rule
+##'        [apply_visibility_rule()]-aware callers for an estimated rule whose
+##'        visibility is constant within a cell
+##' @param refit_sums optional `function(replicate_index)` returning a data frame
+##'        of `num` and `denom`, one row per row of `ec_dat`, for an estimated
+##'        rule whose visibility is *not* constant within a cell. Takes
+##'        precedence over `refit`; see [make_vis_refit_esc()]
 ##' @return long-form data frame with one row per cell per bootstrap replicate
 ##'
 ##' @section Details:
@@ -39,13 +44,18 @@
 get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars,
                                  estimator_type,
                                  visibility = NULL,
-                                 refit      = NULL) {
+                                 refit      = NULL,
+                                 refit_sums = NULL) {
 
   ## Is visibility being re-estimated inside the replicate loop?
   reestimate <- !is.null(visibility) && isTRUE(visibility$is_estimated) &&
                 estimator_type == 'ind'
 
-  if (reestimate && is.null(refit)) {
+  ## refit_sums is the expensive path: visibility recomputed per report rather
+  ## than per cell, for a rule whose prediction is not constant within a cell.
+  use_sums <- reestimate && !is.null(refit_sums)
+
+  if (reestimate && is.null(refit) && is.null(refit_sums)) {
     warning("visibility rule '", visibility$label, "' is estimated from the ",
             "sample, but no refit function was supplied, so visibility is ",
             "frozen across bootstrap replicates. The resulting intervals are ",
@@ -59,6 +69,23 @@ get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars,
   boot_mat <- as.matrix(boot_weights_df[, boot_col_names, drop = FALSE])
   boot_ego_ids <- boot_weights_df[[ego_id_col]]
   M <- ncol(boot_mat)
+
+  ## Row identity has to survive the split. The refit function returns one value
+  ## per row of ec_dat, and the cell groups are subsets of those rows, so the
+  ## group needs to know WHICH rows it holds. Without this the refit vector was
+  ## indexed by bootstrap-weight row position instead, which silently handed
+  ## every cell the same few rows' values -- invisible when the estimated
+  ## visibility is constant, wrong as soon as it varies by cell.
+  ec_dat <- ec_dat %>% dplyr::mutate(.ec.row = dplyr::row_number())
+
+  ## Refit once per replicate, not once per replicate per cell.
+  S_by_rep <- NULL
+  sums_by_rep <- NULL
+  if (use_sums) {
+    sums_by_rep <- lapply(seq_len(ncol(boot_mat)), function(r) refit_sums(r))
+  } else if (reestimate) {
+    S_by_rep <- lapply(seq_len(ncol(boot_mat)), function(r) refit(r))
+  }
 
   # Split ec_dat by cell for vectorized operations within each cell
   cell_groups <- ec_dat %>% dplyr::group_by(dplyr::across(dplyr::all_of(cell_vars))) %>% dplyr::group_split()
@@ -90,11 +117,21 @@ get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars,
       ## Recompute the visibility-adjusted sums per replicate from the
       ## frame-split statistics, keeping the on-frame / off-frame asymmetry
       ## that is the only way visibility survives into a ratio.
-      row_idx_all <- match(grp[[ego_id_col]], boot_ego_ids)
       num.hat   <- numeric(M)
       denom.hat <- numeric(M)
       for (r in seq_len(M)) {
-        S <- refit(r)[row_idx_all]
+
+        if (use_sums) {
+          ## visibility was recomputed per report and re-aggregated, so the
+          ## adjusted sums are already here; just weight them
+          sr <- sums_by_rep[[r]]
+          num.hat[r]   <- sum(sr$num[grp$.ec.row]   * W[, r])
+          denom.hat[r] <- sum(sr$denom[grp$.ec.row] * W[, r])
+          next
+        }
+
+        ## index by ec_dat row, which is what refit() is aligned to
+        S <- S_by_rep[[r]][grp$.ec.row]
         ## S - 1 is the visibility of an on-frame alter; S that of an off-frame
         ## one. A group of size 1 has no on-frame alters to divide, so guard it.
         S_on <- ifelse(S > 1, S - 1, NA_real_)

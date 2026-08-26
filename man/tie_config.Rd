@@ -5,7 +5,7 @@
 \alias{print.tie_config}
 \title{Declare what kind of tie a set of reports is about}
 \usage{
-tie_config(structure, name = NULL)
+tie_config(structure, name = NULL, ego.in.group = NULL, frame.indicator = NULL)
 
 \method{print}{tie_config}(x, ...)
 }
@@ -14,6 +14,18 @@ tie_config(structure, name = NULL)
 Details. There is no default: that is the point.}
 
 \item{name}{optional label for the tie, used in provenance output}
+
+\item{ego.in.group}{is ego a member of the group ego reports about? \code{TRUE}
+for siblings and household members; \code{FALSE} for parents, whose
+visibility is a fact about the sibship rather than the parent roster.
+\code{NULL} (the default) leaves it undeclared, in which case the rule's
+own setting is used}
+
+\item{frame.indicator}{name of the 0/1 column saying whether each alter is
+in the frame population \strong{for this tie}. \code{NULL} (the default) leaves
+it undeclared. Worth setting once ties differ in who is eligible to
+report or be reported about --- neighbours bounded by a compound,
+say, against siblings who are not}
 
 \item{x}{a \code{tie_config}}
 
@@ -43,13 +55,28 @@ number either way. Applied to a non-clique tie it therefore produces a wrong
 answer with no outward sign of trouble --- which is why the structure has to
 be stated rather than inferred or defaulted.
 
-Checked against socsim ground truth on the Bangladesh reporting networks: on
-siblings, \code{vis_from_clique()} recovers the true visibility of \strong{100\%} of
-alters. On maternal cousins --- which are not a clique, since cousinship is
-not transitive --- it overstates visibility by 1.55x for off-frame alters
-and 1.29x for on-frame ones. Because a death is always off-frame while
-exposure is a mixture, that 1.20x \emph{differential} does not cancel out of a
-death rate; it biases it. Both cousin networks agree, so it is structural.
+Checked against socsim ground truth on the Bangladesh reporting networks,
+where the true reporting network is known and so is every alter's true
+visibility.
+
+Where the tie really is a clique, the rule is exact: on maternal siblings, on
+maternal cousins and on paternal cousins it recovers the true visibility of
+\strong{100\%} of alters, on both sides of the frame split.
+
+Maternal cousins being a clique is worth pausing on, because it is the
+opposite of what "cousinship is not transitive" suggests. Within one line it
+\emph{is} transitive: everyone sharing a maternal grandmother forms an
+equivalence class. What breaks is the \strong{union} of the two lines --- your
+maternal cousin and your paternal cousin are not each other's cousins --- and
+that is the genuine non-clique case. There the clique rule overstates
+visibility by 1.089x for off-frame alters against 1.061x for on-frame ones,
+and is exactly right for only 65\% and 63\% of them respectively. Because a
+death is always off-frame while exposure is a mixture, that 1.026x
+\emph{differential} does not cancel out of a death rate; it biases it.
+
+So the lesson is not "cousins are not a clique". It is that whether a
+particular roster is one is a question about how the roster was built, which
+is why it has to be declared rather than guessed at from a name.
 }
 
 \section{The structures}{
@@ -71,9 +98,27 @@ which visibility could be derived. Neighbours, acquaintances.}
 }
 }
 
+\section{Properties of the tie, not of the rule}{
+
+
+\code{ego.in.group} and \code{frame.indicator} are facts about the \emph{tie}, so this is
+where they belong. Both default to \code{NULL}, meaning "not declared", and a tie
+that declares neither behaves exactly as before.
+
+Where a declared value meets one set somewhere else --- \code{ego.in.group} on
+\code{\link[=vis_from_clique]{vis_from_clique()}}, or \code{frame.indicator} passed to
+\code{\link[=apply_visibility_rule]{apply_visibility_rule()}} --- \strong{disagreement is an error, never a silent
+precedence.} Quietly overriding one with the other would reintroduce the
+failure this class exists to prevent: a number produced under an assumption
+the caller did not know was in force. A value declared in only one place is
+simply used.
+}
+
 \examples{
   tie_config("clique", name = "siblings")
   tie_config("group",  name = "maternal cousins")
+  # parents: ego is not a member of the group whose size sets visibility
+  tie_config("star", name = "parents", ego.in.group = FALSE)
 }
 \seealso{
 \code{\link[=vis_from_clique]{vis_from_clique()}}, \code{\link[=apply_visibility_rule]{apply_visibility_rule()}}

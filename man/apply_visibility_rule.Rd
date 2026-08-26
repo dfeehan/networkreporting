@@ -10,9 +10,9 @@ apply_visibility_rule(
   ego.dat = NULL,
   sib.dat = NULL,
   ego.id = ".ego.id",
-  frame.indicator = ".sib.in.F",
+  frame.indicator = NULL,
   weights = NULL,
-  ego.in.group = TRUE,
+  ego.in.group = NULL,
   tie = NULL
 )
 }
@@ -30,11 +30,16 @@ is supplied, one is derived}
 
 \item{ego.id}{name of the ego id column}
 
-\item{frame.indicator}{name of the 0/1 frame membership column}
+\item{frame.indicator}{name of the 0/1 frame membership column. \code{NULL} (the
+default) takes it from \code{tie}, falling back to \code{".sib.in.F"}. Setting
+it here as well as on the tie is an error if the two disagree}
 
 \item{weights}{name of the column holding donor sampling weights}
 
-\item{ego.in.group}{passed through when deriving \code{y.F}}
+\item{ego.in.group}{is ego a member of the group ego reports about? Governs
+how \code{y.F} is derived. \code{NULL} (the default) takes it from \code{tie},
+falling back to \code{TRUE}. Setting it here as well as on the tie is an
+error if the two disagree; the tie is where it belongs}
 
 \item{tie}{a \code{\link[=tie_config]{tie_config()}} saying what kind of tie these reports are about.
 Required when \code{rule} assumes a tie structure --- \code{\link[=vis_from_clique]{vis_from_clique()}}

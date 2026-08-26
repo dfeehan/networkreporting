@@ -1,5 +1,160 @@
 networkreporting 0.3.2
 ========================
+* `vis_from_report()` -- visibility as the respondent reported it. Ego is asked,
+  about each alter, how many frame-population members that alter is connected
+  to, and the answer is used directly.
+
+  Every other rule recovers visibility from something the survey collected for
+  another purpose: the tie's structure, or the respondents' own group sizes. For
+  an `"unbounded"` tie there is no way round that -- neighbours and
+  acquaintances have no bounded group to count, and no reason to think
+  respondents resemble their alters -- so asking is the only honest route, and
+  this is the rule that turns the answer into an estimate.
+
+  Two arguments encode what the question actually asked, which the numbers
+  cannot reveal: `counts.ego` (did the respondent count themselves?) and
+  `counts.self` (did the answer count the alter?). With `counts.self = TRUE` it
+  agrees with `vis_from_group_size()`, which is the clearer constructor for that
+  case.
+
+  A reported visibility below one is an error rather than a small number: it
+  contradicts the report it sits on, since the alter was named by somebody. The
+  message names the usual causes -- a don't-know code stored as 0, or
+  `counts.ego` set wrongly -- and `on_impossible` offers `"floor"` and `"na"`.
+  Item non-response is treated as normal, with a message pointing at
+  `vis_coalesce()` rather than implying the data is broken.
+
+* `vis_from_model()` -- visibility predicted by a fitted model rather than a
+  cell mean. The third member of the predict-from-data family, and the one the
+  fit/predict split was designed to accommodate: it needed a constructor and
+  nothing else, no interface change anywhere.
+
+  A cell mean is a model with one categorical predictor and no pooling. This
+  adds continuous predictors, several covariates without the cell counts
+  collapsing, and borrowing strength across cells rather than treating each in
+  isolation.
+
+  The formula is one-sided and written in the alter's column names -- the
+  response is always the donor's own group size -- with `predictors` mapping
+  names where the donor frame spells one differently, exactly as `match_on`
+  does.
+
+  Two things worth expecting. Bootstrapping it takes the expensive path, since a
+  model with continuous predictors is not constant within a cell; the estimator
+  warns and refits per replicate. And a predicted group size at or below zero is
+  an error rather than a very small weight, since the alter was reported by
+  somebody: the message points at a log link, which cannot predict one.
+
+* **bug fix in the bootstrap for an estimated visibility rule.** The per-replicate
+  refit returns one group size per row of `ec_dat`, but it was being indexed by
+  bootstrap-weight row position instead, so every cell was handed the same few
+  rows' values.
+
+  This was invisible whenever the estimated visibility happened to be constant --
+  a `vis_from_donor(match_on = NULL)` rule, which is what the existing tests
+  used. It was wrong as soon as visibility varied by cell, which is the *common*
+  case: matching on alter sex or age group means matching on the cells
+  themselves. In a two-cell example the affected cell's denominator was out by a
+  factor of nearly three.
+
+  Estimates from `vis_from_clique()` are unaffected: it is not estimated, so it
+  never took this path. That covers every DHS and MICS figure the packages
+  produce.
+
+* the third bootstrap case is implemented, completing the design in
+  `dev/VISIBILITY-PLAN.md`. An estimated rule whose visibility is *not* constant
+  within a cell -- one matching on a covariate that cuts across cells, or a
+  future model rule with continuous predictors -- cannot use the frame-split
+  identity. It is now refit and re-predicted for every report inside each
+  replicate, with a warning naming the cost. `vis_is_cell_constant()` decides
+  which path applies, and there is deliberately no silent fallback to the cheap
+  one: that would freeze a sample quantity and reinstate the bug `is_estimated`
+  exists to prevent.
+
+  Where both paths are valid they agree exactly, which is asserted as a test.
+
+* `vis_from_donor()` declares its `match_on` columns in `requires`. Without that
+  the estimator did not carry them onto the report rows, so matching on anything
+  that was not already a cell variable failed at the point estimate.
+
+* `network_survival_estimator()` -- the generic entry point. Given reports about
+  alters connected to respondents by some tie, it produces age-specific rates
+  under both the individual- and aggregate-visibility estimators.
+
+  `siblingsurvival::sibling_estimator()` is now a thin wrapper over it, keeping
+  its exact signature and output, so there is one implementation rather than two
+  that can drift. The estimator was never sibling-specific in anything but
+  naming: nothing in the pipeline assumes anything about siblings, only about a
+  tie.
+
+  It has NO default `tie`, and refuses to run without one, for the same reason
+  `tie_config()` has no default structure. `sibling_estimator()` supplies the
+  clique tie, which is correct there.
+
+  Output columns are generic: `alter.age` where the sibling wrapper returns
+  `sib.age`.
+
+* the estimator carries whatever columns a visibility rule declares in
+  `requires` through its covariate join. Without this `vis_from_group_size()`
+  was usable through `apply_visibility_rule()` but not through the estimator,
+  because the join dropped the group-size column.
+
+* `vis_from_group_size()` -- visibility from a group size the CALLER supplies,
+  rather than one derived by counting ego's roster.
+
+  Sometimes the group whose size sets an alter's visibility is not the roster
+  the alter was reported on, and only the caller can say what it is. Cousins
+  are reported through the maternal and paternal sides separately, but an
+  alter's visibility depends on everyone who could have reported them -- both
+  sides, plus ego's own siblings. "Pooled cousins excluding ego's siblings" is
+  a difference of two counts, which no roster holds at all. A parent's
+  visibility is the number of their children on the frame, a fact about the
+  sibship rather than the parent roster. None of those can be derived; all
+  three are now expressible.
+
+  The rule still does the frame split for you -- an alter in the frame
+  population cannot report themselves -- since that asymmetry is the only route
+  by which visibility reaches a rate. `subtract.self = FALSE` turns it off for
+  a basis that deliberately omits it, and says so in the assumptions.
+
+  It makes no structural assumption, so it needs no `tie` and accepts any. That
+  is not because it is safe the way `vis_from_donor()` is safe: it is because
+  the caller has taken on the part `vis_from_clique()` would have derived. The
+  package checks the arithmetic; it cannot check that the column counts the
+  right people, and the assumptions say so.
+
+  Checked against socsim ground truth on the Bangladesh reporting networks:
+  given the group `vis_from_clique()` would itself derive, the two agree
+  exactly, on both sides of the frame split. On a pooled cousinship the
+  differential error against ground truth is 1.056, against 1.865 for the
+  global donor rule the tie gate currently falls through to.
+
+* `tie_config()` gains `ego.in.group` and `frame.indicator`. Both are facts
+  about the tie rather than about the rule, so this is where they belong. Both
+  default to NULL, meaning "not declared", and a tie that declares neither
+  behaves exactly as before.
+
+  Where a tie declaration meets a value set on the rule or passed to
+  `apply_visibility_rule()`, agreement is fine and **disagreement is an error
+  naming both sources**. There is deliberately no silent precedence: quietly
+  preferring one would produce a number computed under an assumption the caller
+  did not know was in force, which is the failure this layer exists to prevent.
+
+  Note that `ego.in.group` was already in two places that did not talk to each
+  other -- on `vis_from_clique()`, governing what the rule does, and on
+  `apply_visibility_rule()`, governing how `y.F` is derived. They could disagree
+  and nothing said so. That is now reconciled.
+
+  A rule's assumptions are computed from the resolved state rather than fixed at
+  construction, so provenance can no longer report "ego is a member of the group
+  ego reports about" for a tie that declared the opposite. The resolved
+  `ego.in.group` and a non-default `frame.indicator` are both reported.
+
+  Not enforced, deliberately: that `structure` and `ego.in.group` agree. A
+  household roster that excludes the respondent is a clique the respondent is
+  outside of, and rosters that carry the respondent as a row count `yprime.F`
+  rather than `y.F`. Both are real; the package lets them be stated.
+
 * a visibility rule that assumes a tie structure now REFUSES to run until the
   caller declares one, with `tie_config()`. There is no default and no
   inference.
@@ -14,8 +169,8 @@ networkreporting 0.3.2
   Measured against socsim ground truth on the Bangladesh reporting networks:
   exact for 100% of sibling alters, on both sides of the frame split. On
   maternal cousins -- not a clique, since cousinship is not transitive -- it
-  overstates visibility by 1.55x off-frame against 1.29x on-frame. Because every
-  death is off-frame while exposure is a mixture, that 1.20x *differential* does
+  overstates visibility by 1.089x off-frame against 1.061x on-frame. Because every
+  death is off-frame while exposure is a mixture, that 1.026x *differential* does
   not cancel out of a death rate; it biases it. The paternal cousin network
   agrees at 1.22x, so it is structural, not noise.
 
