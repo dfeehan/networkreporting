@@ -11,7 +11,8 @@ visibility_rule(
   fit,
   predict,
   assumptions = character(0),
-  params = list()
+  params = list(),
+  applies_to = NA_character_
 )
 }
 \arguments{

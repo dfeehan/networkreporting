@@ -1,5 +1,41 @@
 networkreporting 0.3.2
 ========================
+* a visibility rule that assumes a tie structure now REFUSES to run until the
+  caller declares one, with `tie_config()`. There is no default and no
+  inference.
+
+  `vis_from_clique()` computes `y.F` on frame and `y.F + 1` off it. That is a
+  theorem about cliques, and given a roster of reports nothing distinguishes a
+  clique from a tie that is not one: the rule returns a finite, plausible number
+  either way. Applied where it does not hold it was therefore wrong with no
+  outward sign, and the provenance table said `clique: 100%`, which reads as
+  "the exact rule was used".
+
+  Measured against socsim ground truth on the Bangladesh reporting networks:
+  exact for 100% of sibling alters, on both sides of the frame split. On
+  maternal cousins -- not a clique, since cousinship is not transitive -- it
+  overstates visibility by 1.55x off-frame against 1.29x on-frame. Because every
+  death is off-frame while exposure is a mixture, that 1.20x *differential* does
+  not cancel out of a death rate; it biases it. The paternal cousin network
+  agrees at 1.22x, so it is structural, not noise.
+
+  `tie_config()` takes one of `"clique"` (siblings, household members),
+  `"group"` (cousins), `"star"` (parents) or `"unbounded"` (neighbours,
+  acquaintances).
+
+* `vis_coalesce()` now falls through for a non-clique tie, which it previously
+  could not. A tier that does not apply to the declared tie is **dropped**,
+  rather than being skipped when it returns `NA` -- the clique tier never
+  returns `NA`, which is why the chain used to claim 100% of cousin alters. The
+  dropped tiers are named in the provenance output, so an estimate that
+  discarded its exact tier says so.
+
+* `siblingsurvival::sibling_estimator()` gains a `tie` argument defaulting to
+  `tie_config("clique", name = "siblings")`. Siblings are a clique, so the
+  default changes nothing and no existing estimate moves. Set it when using that
+  function for a tie that is not a clique, as the socsim work does for maternal
+  cousins and cousins-plus-siblings.
+
 * visibility is now a declared, composable rule rather than a hardcoded
   assumption. A rule is a `fit`/`predict` pair, and three are supplied:
 

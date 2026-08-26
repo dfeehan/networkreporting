@@ -543,6 +543,73 @@ derive expected values analytically, and show the arithmetic in comments.
 
 ---
 
+## Finding from verification step 5 (socsim, 2026-08-26)
+
+The socsim smoke test was run against the Bangladesh reporting networks
+(`matlab-mortality/code/socsim/04_visibility_rule_check.R`). Two results, and the
+second changes Phase 2's priority.
+
+**1. `vis_from_clique()` is exactly right on a clique.** On the sibling network,
+100.0% of alters, on **both** sides of the frame split, get exactly their true
+visibility. Theory confirmed against ground truth.
+
+  A caveat that cost an hour: the raw sibling census carries 16,068 duplicate
+  (ego, alter) pairs -- full siblings are linked once through each parent -- which
+  double-counts `y.F` and makes the exact rule look 27% wrong. This is the open
+  question in `20250205-refactor/simulate_surveys.qmd` ("why are there duplicate
+  (.ego_id, alter_id) pairs?"). Dedup first; the answer is a data artifact, not a
+  package defect.
+
+**2. `vis_coalesce()` does NOT fall through for a non-clique tie, and the plan was
+wrong to assume it would.** The expectation recorded below was that the donor tier
+would activate for cousins. It does not, and it cannot: `vis_from_clique()` always
+returns a finite number, because inapplicability is not detectable from the data.
+The clique tier claims **100% of cousin alters**, and the provenance table then
+reports `clique: 100%` -- which reads as "we used the exact rule" when the exact
+rule did not apply.
+
+That is the exact failure mode this architecture exists to prevent: a silent
+assumption producing an unquestioned number.
+
+**And the resulting error is differential, so it does not cancel.** Visibility
+survives into a rate only through the on-frame/off-frame asymmetry. For cousins:
+
+| network | off-frame (deaths) | on-frame (exposure) | differential |
+|---|---|---|---|
+| maternal cousins | 1.552x too high | 1.293x too high | **1.201** |
+| paternal cousins | 1.562x too high | 1.277x too high | **1.223** |
+| siblings | 1.000 | 1.000 | 1.000 |
+
+Both cousin networks agree, so this is structural, not noise. A ~20% differential
+biases a cousin-based death rate downward by roughly the same order. The exact
+factor needs working through -- the exposure denominator is a mixture, so it is
+not a clean ratio -- but the direction is unambiguous and the magnitude is not
+small.
+
+### Fixed, 2026-08-26
+
+`tie_config()` was pulled forward out of Phase 2 and implemented, because the
+current API would otherwise produce the biased cousin estimate above with a
+provenance table that looked clean.
+
+* `tie_config(structure, name)` --- `"clique"`, `"group"`, `"star"`,
+  `"unbounded"`. No default; that is the point.
+* Rules carry `applies_to`. `vis_from_clique()` is `"clique"`-only;
+  `vis_from_donor()` makes no structural assumption and is valid anywhere.
+* `apply_visibility_rule(..., tie = )` refuses a structure-restricted rule when
+  no tie is declared, and refuses it against the wrong structure.
+* `vis_coalesce()` **drops** tiers inapplicable to the declared tie, which is
+  the fall-through this plan originally expected and did not get. Dropped tiers
+  are named in the provenance output.
+* `sibling_estimator(tie = )` defaults to `tie_config("clique", "siblings")`,
+  so no existing estimate moves; both validation harnesses reproduce exactly.
+
+**Still deferred:** the rest of what `tie_config()` was sketched to carry ---
+`ego.in.group` (which stays on the rule for now), a per-tie `frame.indicator`,
+and the multi-tie estimator. Only the applicability gate was pulled forward.
+
+---
+
 ## Deliberately deferred to a Phase 2 plan
 
 Do **not** build these now; they are recorded so the Phase 1 interfaces do not foreclose them.

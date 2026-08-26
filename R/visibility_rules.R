@@ -49,11 +49,13 @@ visibility_rule <- function(label,
                             fit,
                             predict,
                             assumptions = character(0),
-                            params = list()) {
+                            params = list(),
+                            applies_to = NA_character_) {
 
   stopifnot(is.character(label), length(label) == 1)
   stopifnot(is.logical(is_estimated), length(is_estimated) == 1)
   stopifnot(is.function(fit), is.function(predict))
+  stopifnot(is.character(applies_to))
 
   structure(list(label        = label,
                  requires     = requires,
@@ -61,7 +63,11 @@ visibility_rule <- function(label,
                  fit          = fit,
                  predict      = predict,
                  assumptions  = assumptions,
-                 params       = params),
+                 params       = params,
+                 ## which tie structures this rule is valid for; NA = any.
+                 ## Checked by apply_visibility_rule() against a tie_config,
+                 ## because applicability is not detectable from the data.
+                 applies_to   = applies_to),
             class = "visibility_rule")
 }
 
@@ -272,7 +278,11 @@ vis_from_clique <- function(ego.in.group = TRUE) {
       "the tie partitions the population into disjoint groups",
       if (isTRUE(ego.in.group)) "ego is a member of the group ego reports about",
       "reporting within the group is complete"),
-    params       = list(ego.in.group = ego.in.group))
+    params       = list(ego.in.group = ego.in.group),
+    ## The 1/y.F vs 1/(y.F+1) rule is a theorem about cliques. On a tie that is
+    ## not one it still returns a finite, plausible number -- silently wrong.
+    ## See tie_config() for the socsim measurement of how wrong.
+    applies_to   = "clique")
 }
 
 ## ---------------------------------------------------------------------------
@@ -534,7 +544,14 @@ vis_coalesce <- function(...) {
   label <- paste0("coalesce(", paste(vapply(rules, function(r) r$label, ""),
                                      collapse = " > "), ")")
 
-  visibility_rule(
+  ## A chain is applicable wherever at least one of its tiers is. A tier with
+  ## applies_to = NA is valid anywhere, so it makes the whole chain so.
+  aa <- lapply(rules, function(r) r$applies_to)
+  applies_to <- if (any(vapply(aa, function(a) length(a) == 1 && is.na(a), logical(1))))
+                  NA_character_
+                else unique(unlist(aa))
+
+  out <- visibility_rule(
     label        = label,
     requires     = unique(unlist(lapply(rules, function(r) r$requires))),
     ## if any tier estimates from the sample, the whole chain does
@@ -575,7 +592,52 @@ vis_coalesce <- function(...) {
                      paste0("tier ", i, " (", rules[[i]]$label, "): ",
                             rules[[i]]$assumptions)
                    })),
-    params       = stats::setNames(rules, paste0("tier", seq_along(rules))))
+    params       = stats::setNames(rules, paste0("tier", seq_along(rules))),
+    applies_to   = applies_to)
+
+  ## Keep the tiers reachable so that apply_visibility_rule() can drop the ones
+  ## that do not apply to the declared tie. This is what makes a chain fall
+  ## through for a non-clique tie: the clique tier is *removed* because it is
+  ## inapplicable, not skipped because it happened to return NA. It never
+  ## returns NA -- that was the bug.
+  out$tiers <- rules
+  out
+}
+
+##' Restrict a coalesced rule to the tiers valid for a declared tie
+##'
+##' Internal. Returns the rule unchanged when it has no tiers or all of them
+##' apply; otherwise a rebuilt chain of the applicable ones, or the single
+##' applicable rule. Attaches the dropped tier labels as an attribute so that
+##' provenance can report them.
+##'
+##' @param rule a `visibility_rule`
+##' @param tie a `tie_config`
+##' @return a `visibility_rule`
+##' @keywords internal
+restrict_to_tie <- function(rule, tie) {
+
+  if (is.null(rule$tiers) || is.null(tie)) return(rule)
+
+  keep <- vapply(rule$tiers, rule_applies_to, logical(1), tie = tie)
+  if (all(keep)) return(rule)
+
+  dropped <- vapply(rule$tiers[!keep], function(r) r$label, "")
+
+  if (!any(keep)) {
+    stop("no tier of '", rule$label, "' applies to a tie declared as '",
+         tie$structure, "'.
+",
+         "Dropped: ", paste(dropped, collapse = ", "), ".
+",
+         "Add a rule that makes no structural assumption, such as ",
+         "vis_from_donor().")
+  }
+
+  kept <- rule$tiers[keep]
+  out  <- if (length(kept) == 1) kept[[1]] else do.call(vis_coalesce, kept)
+  attr(out, "dropped_tiers") <- dropped
+  out
 }
 
 ## ---------------------------------------------------------------------------
@@ -599,6 +661,14 @@ vis_coalesce <- function(...) {
 ##' @param frame.indicator name of the 0/1 frame membership column
 ##' @param weights name of the column holding donor sampling weights
 ##' @param ego.in.group passed through when deriving `y.F`
+##' @param tie a [tie_config()] saying what kind of tie these reports are about.
+##'        Required when `rule` assumes a tie structure --- [vis_from_clique()]
+##'        does --- because applicability cannot be read off the data: on a tie
+##'        that is not a clique the clique rule still returns a finite,
+##'        plausible number, and it is wrong. A rule that makes no structural
+##'        assumption, such as [vis_from_donor()], needs no `tie`. When `rule`
+##'        is a [vis_coalesce()] chain, tiers inapplicable to `tie` are dropped,
+##'        and named in the returned provenance.
 ##' @return a list with `values` (a tibble of `vis`, `vis_weight`, `vis_rule`,
 ##'         one row per row of `esc.dat`) and `provenance` (a `vis_provenance`
 ##'         tibble)
@@ -610,12 +680,56 @@ apply_visibility_rule <- function(rule,
                                   ego.id          = ".ego.id",
                                   frame.indicator = ".sib.in.F",
                                   weights         = NULL,
-                                  ego.in.group    = TRUE) {
+                                  ego.in.group    = TRUE,
+                                  tie             = NULL) {
 
   if (!is_visibility_rule(rule)) {
     stop("rule must be a visibility_rule, such as vis_from_clique(). Got: ",
          paste(class(rule), collapse = "/"))
   }
+
+  ## ---- applicability -----------------------------------------------------
+  ## A rule that assumes a tie structure may not be used until the caller has
+  ## said what the structure is. There is no default, and no inference: given a
+  ## roster of reports, a clique and a non-clique look identical, and
+  ## vis_from_clique() returns a plausible number for both. See tie_config().
+  restricted <- rule$applies_to
+  restricted <- !(length(restricted) == 1 && is.na(restricted))
+
+  if (!is.null(tie) && !is_tie_config(tie)) {
+    stop("tie must be a tie_config(), or NULL. Got: ",
+         paste(class(tie), collapse = "/"))
+  }
+
+  if (is.null(tie)) {
+    if (restricted) {
+      stop("visibility rule '", rule$label, "' is only valid for tie ",
+           "structure(s): ", paste(rule$applies_to, collapse = ", "), ",
+",
+           "and no tie was declared. Pass tie = tie_config(\"...\").
+
+",
+           "This is deliberate. Applicability cannot be read off the data: on a ",
+           "tie that is not a clique, vis_from_clique() still returns a finite, ",
+           "plausible number, and it is wrong. Siblings and household members ",
+           "are 'clique'; cousins are 'group'; parents are 'star'; neighbours ",
+           "and acquaintances are 'unbounded'.")
+    }
+  } else if (!rule_applies_to(rule, tie)) {
+    stop("visibility rule '", rule$label, "' is only valid for tie ",
+         "structure(s): ", paste(rule$applies_to, collapse = ", "),
+         ", but the tie was declared '", tie$structure, "'",
+         if (!is.null(tie$name)) paste0(" (", tie$name, ")") else "", ".\n\n",
+         "Applied anyway it would return a plausible, wrong number rather than ",
+         "fail. Use a rule that makes no structural assumption -- ",
+         "vis_from_donor() -- or vis_coalesce() them so the inapplicable tier ",
+         "is dropped.")
+  }
+
+  ## Drop coalesce tiers that do not apply to this tie. This is what makes a
+  ## chain fall through for a non-clique tie.
+  rule <- restrict_to_tie(rule, tie)
+  dropped.tiers <- attr(rule, "dropped_tiers")
 
   ## work on standard internal names, so a rule never has to know how the
   ## caller spells things
@@ -704,7 +818,8 @@ apply_visibility_rule <- function(rule,
        data       = esc.dat,
        donor.dat  = donor.dat,
        state      = state,
-       provenance = vis_provenance(rule, values, esc.dat))
+       provenance = vis_provenance(rule, values, esc.dat,
+                                   tie = tie, dropped.tiers = dropped.tiers))
 }
 
 ##' Build a per-replicate refit function for an estimated visibility rule
@@ -760,7 +875,8 @@ make_vis_refit <- function(rule, donor.dat, boot.weights, ec.dat, ego.id = ".ego
 ##' @param esc.dat the report data the rule was applied to
 ##' @return a `vis_provenance` object
 ##' @keywords internal
-vis_provenance <- function(rule, values, esc.dat) {
+vis_provenance <- function(rule, values, esc.dat,
+                           tie = NULL, dropped.tiers = NULL) {
 
   n <- nrow(values)
 
@@ -786,6 +902,13 @@ vis_provenance <- function(rule, values, esc.dat) {
   structure(
     list(rule              = rule$label,
          is_estimated      = rule$is_estimated,
+         ## what the caller declared the tie to be, and which tiers were
+         ## dropped as inapplicable to it. Both belong in output: an estimate
+         ## that silently discarded its exact tier should say so.
+         tie               = if (is.null(tie)) NA_character_ else tie$structure,
+         tie_name          = if (is.null(tie) || is.null(tie$name)) NA_character_
+                             else tie$name,
+         dropped_tiers     = dropped.tiers,
          n_alters          = n,
          by_rule           = by_rule,
          n_unresolved      = sum(is.na(values$vis)),
@@ -807,6 +930,15 @@ print.vis_provenance <- function(x, ...) {
   cat("<vis_provenance>\n")
   cat("  rule:         ", x$rule, "\n", sep = "")
   cat("  is_estimated: ", x$is_estimated, "\n", sep = "")
+  if (!is.na(x$tie)) {
+    cat("  tie:          ", x$tie,
+        if (!is.na(x$tie_name)) paste0(" (", x$tie_name, ")") else "",
+        "\n", sep = "")
+  }
+  if (length(x$dropped_tiers)) {
+    cat("  dropped:      ", paste(x$dropped_tiers, collapse = ", "),
+        " -- inapplicable to this tie\n", sep = "")
+  }
   cat("  alters:       ", x$n_alters, "\n", sep = "")
   cat("  resolved by:\n")
   for (i in seq_len(nrow(x$by_rule))) {
