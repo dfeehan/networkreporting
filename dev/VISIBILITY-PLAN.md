@@ -786,22 +786,76 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   A predicted group size at or below zero errors rather than becoming a negative weight, pointing
   at a log link. Worth knowing that `gaussian()` is the default and *can* produce one when
   extrapolating; `poisson(link = "log")` cannot.
-- `vis_aggregate()` fed by ARD degree estimates, connecting to `networkreporting` and to
-  `code/quantity_quality/02_ard_degree.Rmd` in the Matlab repo.
-- **Splitting ARD / scale-up back out.** With the spine living in `networkreporting`, the plausible
+- ~~`vis_aggregate()` fed by ARD degree estimates~~ **built, 2026-08-26.**
+  `vis_aggregate(degree.var, frame.ratio)`. Donors are respondents with a degree estimated by
+  `kp.degree.estimator()`; the summary of their degrees becomes the alters' visibility, with the
+  frame split preserved.
+
+  The load-bearing detail is `frame.ratio`, which has **no default**. ARD reports connections to
+  the *whole population*; visibility counts connections to *frame-population members*. Only the
+  caller knows the share, nothing in the data supplies it, and getting it wrong scales every
+  estimate by a constant silently.
+
+  **This closes half of the gap the `network.survival.estimator_()` deprecation note describes, not
+  all of it.** ARD can now supply the spine's visibility. The spine still needs an ego X alter
+  roster to attach it to, so a survey with aggregate counts and no roster remains outside it. The
+  deprecation note is corrected to say so rather than to promise a bridge that only half exists —
+  and that means **retiring `network.survival.estimator()` is still blocked**, on the roster
+  requirement and on `within.alter.weights`.
+- **Splitting ARD / scale-up back out.** *(Now tracked in `dev/FUTURE-IMPROVEMENTS.md` item 1,
+  along with everything else left open at the end of this plan.)* With the spine living in `networkreporting`, the plausible
   next structural move is the reverse of this one: lift the ARD / known-population / scale-up code
   (`scale_up.r`, `known_population.r`, `summation.r`, `indirect_sampling.r`, `rds.r`) into a package
   of its own that depends on the spine, leaving `networkreporting` as the spine plus its estimators.
   Not this plan's work. Nothing in Phase 1 should assume either arrangement.
-- **Non-ratio estimands** — totals, means, prevalences. The visibility layer already supports them;
-  what remains is separating ratio formation from sum formation in `get_ind_est_from_ec()`,
-  `get_agg_est_from_ec()` and `get_boot_ests_matrix()`. Phase 1's frame-status generalisation of
-  `get_ec_reports()` is the groundwork.
+- **Non-ratio estimands** — totals, means, prevalences. ~~The visibility layer already supports
+  them; what remains is separating ratio formation from sum formation.~~ **Totals done,
+  2026-08-26. Means and prevalences still open, and they need more than separation.**
+
+  The separation turned out to be *almost* already there: `get_ind_est_from_ec()` and
+  `get_agg_est_from_ec()` return `num.hat` and `denom.hat` alongside the ratio, and
+  `get_boot_ests_matrix()` returns replicates of all three. What was missing was that the
+  **summarising step discarded everything but the ratio**, so the sums had no uncertainty and a
+  rate was the only reportable estimand. Both sums now get their own CI, SE and median, and
+  `estimated_total()` reads one out. The rate's interval is unchanged.
+
+  **Still open, and it is not just plumbing.** A total works because the quantity being summed is
+  already in `ec.dat`. A *mean* or *prevalence* needs the numerator to be some other variable —
+  income, a binary attribute — and that variable has to be carried through `get_esc_reports()` and
+  summed by `get_ec_reports()`, neither of which takes a caller-named quantity today. That is the
+  real remaining work, and it is upstream of the estimators rather than in them.
+
+  Also worth recording: a sum is a **population** total only if the weights are population weights.
+  With relative weights it is off by a constant factor, silently. The rate is unaffected because
+  the factor cancels — which is precisely why nobody notices until they ask for a total.
 - **Retiring `network.survival.estimator()`.** Deprecated in Phase 1, removed in a later release.
-- `true_visibility_from_network()` for simulation validation. The socsim code hand-rolls this three
-  times today, and one of the three
-  (`code/socsim/20250205-refactor/simulate_surveys.qmd:300`) computes the alter-side in-degree, which
-  is a *different* quantity from `y.F` — a good argument for one canonical definition.
+- ~~`true_visibility_from_network()` for simulation validation.~~ **built, 2026-08-26**, together
+  with `visibility_accuracy()`, which was the more useful half.
+
+  The diagnosis in this line was right and the fix is worth stating precisely. Two things go wrong
+  when the definition is written inline, and neither announces itself:
+    * **Whose frame membership counts.** Visibility is the number of frame members who could report
+      an alter, so it is the **reporter's** status that matters, never the alter's. Filtering on the
+      alter's gives a different quantity that is equally plausible-looking — which is the
+      "alter-side in-degree" this line flagged.
+    * **Duplicate ties.** A census linking a pair by two routes carries it twice; counting rows then
+      doubles the answer. That is the 16,068-pair artifact that made an exact rule look 27% wrong.
+
+  `visibility_accuracy()` scores on-frame and off-frame alters separately and reports the ratio
+  between them, because that ratio is the only part that reaches a rate. An overall accuracy figure
+  is close to useless: a rule can be badly wrong on both sides and still give an almost unbiased
+  rate.
+
+  Validated against the socsim Bangladesh networks: reproduces the hand-rolled truth **exactly** on
+  30,193 sibling alters and 49,886 cousin-union alters, and the scoring reproduces the published
+  differentials of 1.000 and 1.026. `04_visibility_rule_check.R` could now call these instead of
+  computing truth inline, which is an analysis-repo change and out of scope here.
+
+> **Where the rest went.** The deferred list above has been worked through. What remains open ---
+> splitting ARD/scale-up out, means and prevalences, union across ties, retiring
+> `network.survival.estimator()` --- is tracked in `dev/FUTURE-IMPROVEMENTS.md`, with the reason
+> each is still open rather than merely undone. This plan is a record of what was decided and
+> measured; that document is the running list.
 
 ## Interface the Matlab analysis repo will need
 

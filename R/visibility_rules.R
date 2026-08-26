@@ -1057,6 +1057,225 @@ vis_from_report <- function(report.var,
 }
 
 ## ---------------------------------------------------------------------------
+## visibility from ARD degree estimates
+## ---------------------------------------------------------------------------
+
+##' Visibility from aggregate relational data
+##'
+##' Uses respondents' estimated personal network sizes --- the output of the
+##' known-population scale-up method --- as the basis for visibility. It is the
+##' bridge between this package's two halves: the ARD / scale-up side estimates
+##' how many people a respondent knows, and the estimator spine needs to know
+##' how many people could have reported an alter.
+##'
+##' @section What it assumes, and why one argument has no default:
+##'
+##' [kp.degree.estimator()] returns each respondent's degree with respect to the
+##' **whole population**: how many people they know, full stop. Visibility is a
+##' narrower thing --- how many *frame-population members* could report an alter.
+##' Converting one into the other needs the share of the population that is in
+##' the frame, and nothing in the data supplies it. That is `frame.ratio`, and it
+##' deliberately has no default, for the same reason [tie_config()] has no
+##' default structure: getting it wrong scales every estimate by a constant and
+##' nothing complains.
+##'
+##' Two further assumptions come with the method rather than with this function,
+##' and are recorded in the provenance:
+##'
+##' * the tie is roughly symmetric, so that an alter's connections to frame
+##'   members can be inferred from respondents' connections in general;
+##' * respondents' degrees stand in for alters'. Where the two populations
+##'   differ --- and for mortality they differ in the most relevant way, since
+##'   the alters include the dead --- this is the same substitution
+##'   [vis_from_donor()] makes, with the same direction of error.
+##'
+##' @section Why the frame split still matters here:
+##'
+##' This assigns what is essentially one number per matched cell, and a
+##' visibility constant within a cell cancels out of a rate. Preserving the
+##' on-frame / off-frame asymmetry is therefore not a refinement: without it
+##' this rule reduces exactly to the aggregate estimator, and the ARD does no
+##' work at all.
+##'
+##' @param degree.var name of the column in the donor frame holding each
+##'        donor's estimated degree, as from [kp.degree.estimator()]
+##' @param frame.ratio the share of the population that is in the frame
+##'        population, `N_F / N`. Required when `degree.counts = "population"`
+##' @param degree.counts does `degree.var` count connections to the whole
+##'        population (`"population"`, the default, and what
+##'        [kp.degree.estimator()] returns) or only to frame members
+##'        (`"frame"`, where no conversion is needed)?
+##' @param donor `"egos"` to use the survey respondents, or a data frame
+##' @param statistic how to summarise donors' degrees: `"harmonic"` (the
+##'        default, for the reason given in [vis_from_donor()]), `"arithmetic"`
+##'        or `"median"`
+##' @param match_on optional covariates to match alters to donors on, as in
+##'        [vis_from_donor()]
+##' @param label optional short name for provenance
+##' @return a [visibility_rule]
+##' @examples
+##' # respondents know ~250 people; a fifth of the population is in the frame
+##' vis_aggregate("d.hat", frame.ratio = 0.2)
+##' @seealso [kp.degree.estimator()], [vis_from_donor()]
+##' @export
+##' @md
+vis_aggregate <- function(degree.var,
+                          frame.ratio   = NULL,
+                          degree.counts = c("population", "frame"),
+                          donor         = "egos",
+                          statistic     = c("harmonic", "arithmetic", "median"),
+                          match_on      = NULL,
+                          label         = NULL) {
+
+  if (missing(degree.var) || !is.character(degree.var) ||
+      length(degree.var) != 1) {
+    stop("vis_aggregate() needs degree.var: the name of one column holding ",
+         "each donor's estimated degree, as returned by kp.degree.estimator().")
+  }
+
+  degree.counts <- match.arg(degree.counts)
+  statistic     <- match.arg(statistic)
+  match.map     <- normalise_match_on(match_on)
+
+  if (degree.counts == "population") {
+    if (is.null(frame.ratio)) {
+      stop("vis_aggregate() needs frame.ratio, and deliberately has no ",
+           "default.\n",
+           "kp.degree.estimator() reports how many people a respondent knows in ",
+           "the WHOLE population. Visibility is how many FRAME-POPULATION ",
+           "members could report an alter, and converting between the two needs ",
+           "the share of the population that is in the frame -- which nothing in ",
+           "the data can tell you.\n",
+           "Get it wrong and every estimate is scaled by a constant with nothing ",
+           "to show for it. If degree.var already counts only frame members, say ",
+           "degree.counts = 'frame' instead.")
+    }
+    if (!is.numeric(frame.ratio) || length(frame.ratio) != 1 ||
+        is.na(frame.ratio) || frame.ratio <= 0 || frame.ratio > 1) {
+      stop("frame.ratio must be a single number in (0, 1]: the share of the ",
+           "population that is in the frame population. Got: ",
+           paste(format(frame.ratio), collapse = ", "))
+    }
+  }
+
+  ratio <- if (degree.counts == "frame") 1 else frame.ratio
+
+  rule.label <- if (is.null(label)) paste0("ard(", degree.var, ")") else label
+
+  visibility_rule(
+    label        = rule.label,
+    requires     = c(".sib.in.F", names(match.map)),
+    ## the summary of donors' degrees is a sample quantity
+    is_estimated = TRUE,
+    ## no structural assumption: ARD does not care how the tie is shaped, which
+    ## is what makes it usable where there is no roster to derive from
+    applies_to   = NA_character_,
+    fit          = function(donor.dat, weights) {
+
+      if (is.data.frame(donor)) donor.dat <- donor
+      if (is.null(donor.dat)) {
+        stop("vis_aggregate() has no donor data. Pass donor = <a data frame>, ",
+             "or call apply_visibility_rule() with ego.dat.")
+      }
+      if (!degree.var %in% names(donor.dat)) {
+        stop("donor data has no '", degree.var, "' column.\n",
+             "donor data has: ", paste(names(donor.dat), collapse = ", "), "\n",
+             "This should hold each donor's estimated degree; see ",
+             "kp.degree.estimator().")
+      }
+
+      ## the degree, converted to frame-member connections
+      donor.dat$.ard.vis <- as.numeric(donor.dat[[degree.var]]) * ratio
+
+      ok <- !is.na(donor.dat$.ard.vis) & donor.dat$.ard.vis > 0
+      if (!any(ok)) {
+        stop("no donor has a usable degree: every value in '", degree.var,
+             "' is missing or non-positive.")
+      }
+
+      w <- if (!is.null(weights) && weights %in% names(donor.dat)) {
+             donor.dat[[weights]]
+           } else {
+             rep(1, nrow(donor.dat))
+           }
+      donor.dat$.ard.w <- w
+
+      d <- donor.dat[ok, , drop = FALSE]
+      global <- vis_statistic(d$.ard.vis, d$.ard.w, statistic)
+
+      cells <- NULL
+      if (length(match.map)) {
+        missing.cols <- setdiff(unname(match.map), names(d))
+        if (length(missing.cols)) {
+          stop("donor data is missing the column(s) needed to match on: ",
+               paste(missing.cols, collapse = ", "), ".")
+        }
+        cells <- d %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(unname(match.map)))) %>%
+          dplyr::summarize(.S.hat   = vis_statistic(.ard.vis, .ard.w, statistic),
+                           n_donors = dplyr::n(),
+                           .groups  = "drop")
+        names(cells)[match(unname(match.map), names(cells))] <- names(match.map)
+      }
+
+      list(global = global, cells = cells, match_map = match.map)
+    },
+    predict      = function(alter.rows, state) {
+
+      n <- nrow(alter.rows)
+
+      S.hat <- if (is.null(state$cells)) {
+        rep(state$global, n)
+      } else {
+        key <- names(state$match_map)
+        missing.cols <- setdiff(key, names(alter.rows))
+        if (length(missing.cols)) {
+          stop("alter data is missing the column(s) named in match_on: ",
+               paste(missing.cols, collapse = ", "))
+        }
+        joined <- alter.rows %>%
+          dplyr::select(dplyr::all_of(key)) %>%
+          dplyr::left_join(state$cells, by = key)
+        ifelse(is.na(joined$.S.hat), state$global, joined$.S.hat)
+      }
+
+      ## Keep the on-frame / off-frame split. Without it every alter in a cell
+      ## gets the same number, that number divides out of the rate, and this
+      ## rule silently becomes the aggregate estimator.
+      vis <- S.hat - alter.rows$.sib.in.F
+
+      if (any(!is.na(vis) & vis <= 0)) {
+        stop(sum(!is.na(vis) & vis <= 0), " alter(s) come out with a visibility ",
+             "at or below zero.\n",
+             "That usually means frame.ratio is too small for the degrees: a ",
+             "mean degree of d and a frame share of f give a visibility around ",
+             "d * f, and it has to exceed 1 for an on-frame alter to have been ",
+             "reportable at all.")
+      }
+
+      dplyr::tibble(vis        = as.numeric(vis),
+                    vis_weight = 1 / vis,
+                    vis_rule   = rule.label)
+    },
+    assumptions  = c(
+      paste0("visibility comes from respondents' estimated degrees in '",
+             degree.var, "', summarised by their weighted ", statistic, " mean"),
+      if (degree.counts == "population")
+        paste0("degrees count connections to the whole population and are ",
+               "scaled by frame.ratio = ", format(ratio),
+               " to get frame-member connections")
+      else "degrees already count only frame-population members",
+      "the tie is roughly symmetric, so alters' connections to frame members can be inferred from respondents' connections in general",
+      "respondents' degrees stand in for alters'; for mortality the alters include the dead, so this substitution errs in the same direction as any donor rule"),
+    params       = list(degree.var    = degree.var,
+                        frame.ratio   = ratio,
+                        degree.counts = degree.counts,
+                        statistic     = statistic,
+                        match_on      = if (length(match.map)) names(match.map) else NULL,
+                        label         = label))
+}
+
+## ---------------------------------------------------------------------------
 ## coalescing rules
 ## ---------------------------------------------------------------------------
 

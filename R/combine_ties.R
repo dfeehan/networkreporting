@@ -70,11 +70,18 @@ tie_estimate_tables <- function(results, estimator = c("ind", "agg"),
 ##' @keywords internal
 tie_cell_vars <- function(tabs) {
 
+  ## Everything the estimator computes, as opposed to everything that defines a
+  ## cell. Enumerating the derived columns by name was a mistake: adding
+  ## intervals for num.hat and denom.hat immediately turned them into "cell
+  ## variables" and broke every comparison. Match the shape instead, so a new
+  ## summary column does not silently become part of the grouping.
   computed <- c("num.hat", "denom.hat", "ind.y.F", "n", "wgt.sum", "asdr.hat",
-                "estimator", "asdr.hat.ci.low", "asdr.hat.ci.high",
-                "asdr.hat.median", "asdr.hat.se", "boot_idx", "event.name")
+                "estimator", "boot_idx", "event.name")
+  derived  <- "[.](ci[.]low|ci[.]high|median|se)$"
 
-  cols <- lapply(tabs, function(x) setdiff(names(x), computed))
+  cols <- lapply(tabs, function(x) {
+    setdiff(names(x), c(computed, grep(derived, names(x), value = TRUE)))
+  })
   common <- Reduce(intersect, cols)
 
   if (!length(common)) {
@@ -533,4 +540,89 @@ print.ties_union_check <- function(x, ...) {
     cat("  are generally not a clique.\n")
   }
   invisible(x)
+}
+
+## ---------------------------------------------------------------------------
+## estimands that are not ratios
+## ---------------------------------------------------------------------------
+
+##' Read a population total off an estimate
+##'
+##' A death rate is a ratio of two visibility-adjusted sums. Those sums are
+##' estimands in their own right, and this reads one of them out with its
+##' uncertainty.
+##'
+##' @section Why this is a separate step:
+##'
+##' [network_survival_estimator()] computes visibility-adjusted weighted sums
+##' and then divides one by the other. The division is the last thing it does,
+##' and nothing before it assumes a ratio is what you want --- the visibility
+##' layer in particular has no idea what is being summed. So a total needs no
+##' new estimation, only a different final step.
+##'
+##' @section What makes it a population total:
+##'
+##' The sum is only an estimate of a *population* total if the survey weights
+##' are population weights. With relative or normalised weights it is a total
+##' on whatever scale those weights carry, and the number will be wrong by a
+##' constant factor --- silently, since nothing in the data says which kind of
+##' weight was used. The rate is unaffected either way, because the factor
+##' cancels; that is exactly why this distinction can go unnoticed until
+##' somebody asks for a total.
+##'
+##' @param res a result from [network_survival_estimator()]
+##' @param of `"events"` for the numerator --- deaths, for a mortality estimate
+##'        --- or `"exposure"` for the denominator, the estimated person-time
+##' @param estimator `"ind"` (individual visibility) or `"agg"` (aggregate)
+##' @return a tibble with one row per cell: the estimate, and its interval and
+##'         standard error where the estimate was bootstrapped
+##' @examples
+##' \dontrun{
+##' estimated_total(res, "events")     # estimated deaths in the population
+##' estimated_total(res, "exposure")   # estimated person-time
+##' }
+##' @seealso [network_survival_estimator()]
+##' @export
+##' @md
+estimated_total <- function(res,
+                            of        = c("events", "exposure"),
+                            estimator = c("ind", "agg")) {
+
+  of        <- match.arg(of)
+  estimator <- match.arg(estimator)
+
+  slot <- paste0("asdr.", estimator)
+  tab  <- res[[slot]]
+  if (is.null(tab)) {
+    stop("no '", slot, "' table in this result. estimated_total() takes a ",
+         "result from network_survival_estimator().")
+  }
+
+  stem <- if (of == "events") "num.hat" else "denom.hat"
+  if (!stem %in% names(tab)) {
+    stop("this result has no '", stem, "' column, so there is no total to ",
+         "read off it.")
+  }
+
+  computed <- c("num.hat", "denom.hat", "ind.y.F", "n", "wgt.sum", "asdr.hat",
+                "estimator")
+  cell.vars <- setdiff(names(tab),
+                       c(computed, grep("[.]ci[.]|[.]median$|[.]se$",
+                                        names(tab), value = TRUE)))
+
+  out <- tab[, cell.vars, drop = FALSE]
+  out$quantity <- of
+  out$estimate <- tab[[stem]]
+
+  for (suffix in c("ci.low", "ci.high", "se")) {
+    col <- paste0(stem, ".", suffix)
+    out[[paste0("estimate.", suffix)]] <-
+      if (col %in% names(tab)) tab[[col]] else NA_real_
+  }
+
+  if (all(is.na(out$estimate.se))) {
+    message("no interval available: estimate with boot.weights to get one.")
+  }
+
+  tibble::as_tibble(out)
 }

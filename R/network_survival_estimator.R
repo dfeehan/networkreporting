@@ -301,15 +301,30 @@ network_survival_estimator <- function(rel.dat,
       warning(glue::glue("Individual estimates have {n.na} out of {n.all} values missing. These have been removed in the summary statistics. Beware!\n"))
     }
 
+  ## Summarise the replicates for EVERY visibility-adjusted quantity, not only
+  ## the ratio. num.hat and denom.hat are population totals in their own right
+  ## -- the estimated number of events, and the estimated person-time -- and a
+  ## total is a perfectly good estimand. Until now their replicates were
+  ## computed and then thrown away at this step, which is what made a rate the
+  ## only thing this function could report with uncertainty.
+  summarise_reps <- function(boot.ests) {
+    qtys <- intersect(c("asdr.hat", "num.hat", "denom.hat"), names(boot.ests))
+    out <- boot.ests %>%
+      ungroup() %>%
+      group_by(across(all_of(cell.vars)))
+    exprs <- list()
+    for (q in qtys) {
+      exprs[[paste0(q, ".ci.low")]]  <- rlang::expr(quantile(!!sym(q), .025, na.rm = TRUE))
+      exprs[[paste0(q, ".ci.high")]] <- rlang::expr(quantile(!!sym(q), .975, na.rm = TRUE))
+      exprs[[paste0(q, ".median")]]  <- rlang::expr(quantile(!!sym(q), .5,   na.rm = TRUE))
+      exprs[[paste0(q, ".se")]]      <- rlang::expr(sd(!!sym(q), na.rm = TRUE))
+    }
+    dplyr::summarise(out, !!!exprs, .groups = "drop")
+  }
+
     # get estimated sampling uncertainty for the
     # individual and aggregate visibility estimates
-    boot.ind.varest <- boot.ind.ests %>%
-      ungroup() %>%
-      group_by(across(all_of(cell.vars))) %>%
-      summarise(asdr.hat.ci.low = quantile(asdr.hat, .025, na.rm=TRUE),
-                asdr.hat.ci.high = quantile(asdr.hat, 0.975, na.rm=TRUE),
-                asdr.hat.median = quantile(asdr.hat, 0.5, na.rm=TRUE),
-                asdr.hat.se = sd(asdr.hat, na.rm=TRUE))
+    boot.ind.varest <- summarise_reps(boot.ind.ests)
 
     if (any(is.na(boot.agg.ests$asdr.hat))) {
       n.na <- sum(is.na(boot.agg.ests$asdr.hat))
@@ -318,13 +333,7 @@ network_survival_estimator <- function(rel.dat,
     }
 
 
-    boot.agg.varest <- boot.agg.ests %>%
-      ungroup() %>%
-      group_by(across(all_of(cell.vars))) %>%
-      summarise(asdr.hat.ci.low = quantile(asdr.hat, .025, na.rm=TRUE),
-                asdr.hat.ci.high = quantile(asdr.hat, 0.975, na.rm=TRUE),
-                asdr.hat.median = quantile(asdr.hat, 0.5, na.rm=TRUE),
-                asdr.hat.se = sd(asdr.hat, na.rm=TRUE))
+    boot.agg.varest <- summarise_reps(boot.agg.ests)
 
     # and join the estimated sampling uncertainty onto the returned asdrs
     asdr.ind.dat <- asdr.ind.dat %>%

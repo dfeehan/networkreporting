@@ -1,5 +1,109 @@
 networkreporting 0.3.2
 ========================
+* the *Approximating visibility* vignette moves to `vignettes/draft/`, so it no
+  longer ships or is checked. It covers the whole rule family and its examples
+  all ran when it was moved; what makes it a draft is shape rather than
+  correctness -- it grew a section per rule in the order the rules were built,
+  not the order a reader needs them. Note that out of the build nothing runs its
+  code, which cost a real check: while it was a vignette, `R CMD check`
+  confirmed that `vis_from_donor(statistic = "arithmetic")` reproduces the
+  historical `adj.factor`. The substantive claims remain covered by unit tests.
+
+* `dev/FUTURE-IMPROVEMENTS.md` tracks what is left open and why, in the style
+  siblingsurvival uses: splitting the ARD/scale-up half into its own package,
+  means and prevalences, union across ties, and retiring
+  `network.survival.estimator()`.
+
+* `vis_aggregate()` -- visibility from aggregate relational data, bridging this
+  package's two halves. The ARD / scale-up side estimates how many people a
+  respondent knows; the estimator spine needs to know how many people could have
+  reported an alter. Those are different quantities.
+
+  `frame.ratio` is the conversion between them, and it deliberately has no
+  default. `kp.degree.estimator()` reports connections to the WHOLE population;
+  visibility counts connections to FRAME-POPULATION members, and only the caller
+  knows what share of the population the frame is. Getting it wrong scales every
+  estimate by a constant with nothing to show for it. Pass
+  `degree.counts = "frame"` where the degree already counts frame members only,
+  and no conversion is needed.
+
+  The on-frame / off-frame split matters here more than anywhere: this rule
+  assigns essentially one number per matched cell, and a visibility constant
+  within a cell cancels out of a rate. Without the split it would reduce exactly
+  to the aggregate estimator and the ARD would do no work at all.
+
+  Two assumptions come with the method rather than the function, and are
+  recorded in the provenance: that the tie is roughly symmetric, and that
+  respondents' degrees stand in for alters'. For mortality the alters include
+  the dead, so the second errs in the same direction as any donor rule.
+
+* the deprecation note on `network.survival.estimator_()` is corrected. It said
+  the spine had no path from ARD data and that `vis_aggregate()` was the planned
+  bridge. `vis_aggregate()` now exists and closes half of that -- ARD degrees can
+  supply the spine's visibility -- but not the other half: the spine still needs
+  an ego X alter roster to attach that visibility to, so a survey with aggregate
+  counts and no roster still has no way in.
+
+* `true_visibility_from_network()` and `visibility_accuracy()`, for checking a
+  visibility rule against a known network.
+
+  Where the whole reporting network is known -- so, in practice, simulation --
+  every alter's real visibility is known too, and a rule can be asked not
+  "which tier fired" but "was it right". That is the only way to catch a rule
+  that returns finite, plausible, wrong numbers, which is the failure this whole
+  layer exists to prevent.
+
+  The definition is short enough that it kept being written inline, and kept
+  being written differently. Two things go wrong and neither announces itself,
+  so both are now settled in one place:
+
+    - WHOSE frame membership counts. Visibility is the number of frame-population
+      members who could report an alter, so it is the REPORTER's frame status
+      that matters, never the alter's. Filtering on the alter's yields a
+      different quantity that looks just as reasonable.
+    - DUPLICATE ties. A census linking a pair by more than one route carries it
+      more than once, and counting rows then doubles the answer. In one socsim
+      census this made an exact rule look 27% wrong.
+
+  `visibility_accuracy()` scores predictions separately for on-frame and
+  off-frame alters and reports the ratio between the two errors. That ratio is
+  the number to read: every death is off-frame while exposure is a mixture, so
+  an error of the same size on both sides largely cancels out of a rate and a
+  differential one biases it. An overall accuracy figure is close to useless
+  here.
+
+  Checked against the socsim Bangladesh networks: the canonical definition
+  reproduces the hand-rolled truth exactly on 30,193 sibling alters and 49,886
+  cousin-union alters, and the scoring reproduces the published differentials of
+  1.000 and 1.026.
+
+* estimands that are not ratios. A death rate is a ratio of two
+  visibility-adjusted sums, and those sums -- the estimated number of events and
+  the estimated person-time -- are estimands in their own right.
+
+  What was missing was uncertainty on them. The bootstrap already computed
+  replicates of `num.hat` and `denom.hat`, and the summarising step then
+  discarded everything but the ratio, so a rate was the only thing the estimator
+  could report with an interval. Both sums now get their own CI, standard error
+  and median, and `estimated_total()` reads one out.
+
+  The rate's own interval is unchanged, which is what makes this safe: the
+  change adds columns and moves no number. Forming a rate by hand from the two
+  totals reproduces `asdr.hat` exactly, which is the separation of ratio
+  formation from sum formation the plan asked for.
+
+  Worth knowing, and documented on `estimated_total()`: a sum is a *population*
+  total only if the survey weights are population weights. With relative weights
+  it is off by a constant factor -- silently, since nothing in the data says
+  which kind was used. The rate is unaffected either way because the factor
+  cancels, which is exactly why the distinction can go unnoticed until somebody
+  asks for a total.
+
+* `tie_cell_vars()` decides which columns define a cell by matching the shape of
+  a derived column rather than enumerating the estimator's outputs. The
+  enumeration was brittle: adding intervals for `num.hat` and `denom.hat`
+  immediately turned them into cell variables and broke every tie comparison.
+
 * combining estimates across ties: `compare_ties()`, `pool_ties()` and
   `ties_union_check()`.
 
