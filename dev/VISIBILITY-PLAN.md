@@ -719,9 +719,27 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
       usable through `apply_visibility_rule()` but **not** through the estimator, since the
       join dropped the group-size column. Found by exercising the generic on a group tie;
       it is the gap that most justified building it.
-- Combination across ties: **compare** (separate estimates, same cells), **union** (visibilities add
-  only if alter sets are disjoint — and the package has no cross-tie alter identity today, `sib.id`
-  being unique only within ego), **pool** (variance-weighted).
+- ~~Combination across ties: **compare**, **union**, **pool**.~~ **compare and pool built,
+  2026-08-26; union scoped and deliberately not built.**
+
+  The three are not variants of one operation, which this line assumed. `compare_ties()` and
+  `pool_ties()` combine **results**; union combines **data** — it pools the reports and
+  re-estimates — so it cannot be done from finished estimates and does not share their interface.
+
+  What `pool_ties()` had to get right is that **the ties are not independent**. Every tie in a
+  multi-tie survey is reported by the same respondents, so variance-weighted pooling in the usual
+  form assumes away exactly the correlation that matters. Where the ties were bootstrapped with the
+  *same replicate weights*, pooling within each replicate measures it instead, and that is the
+  default; `method = "analytic"` warns. On the test fixture the two intervals differ by about a
+  quarter. Note the direction is **not** guaranteed — the original expectation was that assuming
+  independence would always understate, and the fixture shows it can go the other way. Which way is
+  a property of the data.
+
+  `ties_union_check()` reports whether a union is possible rather than doing one, since the blocker
+  this line records is real: alter ids are unique only within an ego. Given a key it measures the
+  overlap. It also surfaces something this line did not anticipate — **the union of two ties is
+  generally not the structure of either**, so it needs its own `tie_config()`. Two cliques unioned
+  are usually not a clique, which is exactly the socsim finding about maternal and paternal cousins.
 - ~~`vis_from_other_group()` — the parents case, where visibility for tie A comes from tie B's
   roster.~~ **mechanism built, 2026-08-26.** `vis_from_group_size(size.var)` takes the group
   size from a column instead of deriving it, which is exactly what "visibility for tie A comes

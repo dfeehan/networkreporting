@@ -1,5 +1,36 @@
 networkreporting 0.3.2
 ========================
+* combining estimates across ties: `compare_ties()`, `pool_ties()` and
+  `ties_union_check()`.
+
+  The plan listed compare, union and pool as three variants of one operation.
+  They are not. `compare_ties()` and `pool_ties()` combine RESULTS; union
+  combines DATA -- it pools the reports and re-estimates -- so it cannot be done
+  from finished estimates at all, and the three do not share an interface.
+
+  `compare_ties()` lines the ties up on shared cells and assumes nothing. Where
+  two ties disagree by more than their intervals allow, that is information
+  about how they differ, and averaging it away before looking at it would be a
+  mistake.
+
+  `pool_ties()` averages them. The thing it has to get right is that the ties
+  are NOT independent: a multi-tie survey asks the same respondents about every
+  tie, so a respondent weighted up perturbs all of them at once. Inverse-variance
+  pooling assumes that away. Where the ties were bootstrapped with the same
+  replicate weights, pooling within each replicate measures the correlation
+  instead -- and that is the default. `method = "analytic"` is available and
+  warns. On the package's own test fixture the two intervals differ by about a
+  quarter, in a direction that is a property of the data rather than something
+  that can be reasoned out beforehand.
+
+  `ties_union_check()` reports whether a union is possible rather than
+  performing one. Union needs an identity for alters that holds ACROSS ties, and
+  alter ids here are unique only within an ego; given a key it measures the
+  overlap and says what the union would involve. It also flags the part that is
+  easy to miss: the union of two ties is generally not the structure of either,
+  so it needs its own `tie_config()`. Two cliques unioned are usually not a
+  clique.
+
 * `vis_from_report()` -- visibility as the respondent reported it. Ego is asked,
   about each alter, how many frame-population members that alter is connected
   to, and the answer is used directly.
