@@ -614,10 +614,28 @@ and the multi-tie estimator. Only the applicability gate was pulled forward.
 
 Do **not** build these now; they are recorded so the Phase 1 interfaces do not foreclose them.
 
-- `tie_config()` — declaring tie structure (`clique` / `star` / `unbounded`), `ego.in.group`, and a
-  per-tie `frame.indicator`, in the spirit of `cell_config()`.
-- `network_survival_estimator()`, with `sibling_estimator()` surviving as a wrapper for
-  `tie_config(structure = "clique")`.
+> **Read this first if you are starting Phase 2.** Part of `tie_config()` has already been
+> built --- it was pulled forward on 2026-08-26 because the socsim check above showed the
+> API would otherwise produce a biased cousin estimate behind a clean-looking provenance
+> table. See "Finding from verification step 5" for what landed. **Start from that code,
+> not from a fresh design**, and check you are on a branch that contains it:
+> `networkreporting` commit `87f36f2`, `siblingsurvival` commits `1235d6d` and `12a5ff8`.
+> Building `tie_config()` again from this list will conflict with it.
+
+- ~~`tie_config()` — declaring tie structure~~ **partly done.** `tie_config(structure, name)`
+  exists, with `"clique"` / `"group"` / `"star"` / `"unbounded"`, and rules carry `applies_to`
+  so an inapplicable one refuses rather than misleads. **Still open**, and both are real
+  decisions rather than leftovers:
+    * **`ego.in.group` was deliberately left on the rule**, not moved onto `tie_config`, to
+      avoid two places to set it and a precedence question to get wrong. Moving it is
+      defensible — it *is* a property of the tie — but it is a change, not a completion, and
+      it needs a rule for what happens when the two disagree.
+    * **A per-tie `frame.indicator`** is not built at all. It matters once ties differ in who
+      is eligible to report or be reported about (neighbours bounded by bari, say).
+- `network_survival_estimator()`. Note the shape assumed here has already drifted:
+  `sibling_estimator()` now *takes* a `tie` argument defaulting to `tie_config("clique")`,
+  rather than being a wrapper over a generic estimator. Either is workable; decide
+  deliberately rather than inheriting this line.
 - Combination across ties: **compare** (separate estimates, same cells), **union** (visibilities add
   only if alter sets are disjoint — and the package has no cross-tie alter identity today, `sib.id`
   being unique only within ego), **pool** (variance-weighted).
