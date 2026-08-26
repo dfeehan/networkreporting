@@ -134,6 +134,39 @@ network.survival.estimator_ <- function(resp.data,
                                         verbose=TRUE,
                                         boot.chunk.size=500) {
 
+    ## Superseded by the estimator spine (get_esc_reports() ->
+    ## get_ec_reports() -> get_ind_est_from_ec() / get_agg_est_from_ec()), which
+    ## arrived in 0.3.2 and makes visibility an explicit, declared rule via
+    ## vis_from_clique() and friends. See dev/VISIBILITY-PLAN.md.
+    ##
+    ## Not removed yet, because the spine cannot currently reproduce two things
+    ## this function does, and losing them silently would be worse than keeping
+    ## a deprecated entry point:
+    ##
+    ##  1. It works from AGGREGATE reports plus known populations -- respondents'
+    ##     own network-size estimates -- rather than from an ego X alter roster.
+    ##     The spine's whole decomposition assumes a roster, so there is as yet
+    ##     no path from ARD / scale-up data into it. vis_aggregate() is the
+    ##     planned bridge and does not exist.
+    ##  2. within.alter.weights, which corrects for respondents who report about
+    ##     only a subset of their alters. The spine has no equivalent.
+    ##
+    ## Deprecated rather than defunct: it still runs and still returns what it
+    ## always returned.
+    .Deprecated(msg = paste0(
+      "network.survival.estimator_() is deprecated.
+",
+      "It is an aggregate multiplicity estimator driven by respondents' own ",
+      "network-size estimates, and it is superseded by the estimator spine: ",
+      "get_esc_reports() -> get_ec_reports() -> get_ind_est_from_ec(), with ",
+      "visibility declared through vis_from_clique() or vis_from_donor().
+",
+      "It still works, and will keep working until a later release removes it. ",
+      "Two things it does that the spine does not yet: it estimates from ",
+      "aggregate reports plus known populations rather than from an ego X alter ",
+      "roster, and it supports within.alter.weights. If you rely on either, say ",
+      "so before it is removed."))
+
     ## estimate the average personal network size of the respondents
     ## for each combination of attributes
     deg.by.att <- kp.estimator_(resp.data=resp.data,

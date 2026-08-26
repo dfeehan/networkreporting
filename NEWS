@@ -1,5 +1,77 @@
 networkreporting 0.3.2
 ========================
+* visibility is now a declared, composable rule rather than a hardcoded
+  assumption. A rule is a `fit`/`predict` pair, and three are supplied:
+
+    - `vis_from_clique()` -- the exact rule, and the default everywhere. `y.F`
+      for an on-frame alter, `y.F + 1` otherwise. It reproduces the previous
+      behaviour bit for bit, so no existing estimate moves.
+    - `vis_from_donor()` -- borrow visibility from a donor population, matched
+      on covariates. This is the approximation that any tie which is not a
+      clique needs, and it is the first rule whose fit consumes the sample.
+    - `vis_coalesce()` -- try rules in priority order, recording which tier
+      resolved each alter.
+
+  `apply_visibility_rule()` applies a rule and returns a `vis_provenance`
+  object alongside the values: which rule resolved how many alters, and what
+  share of the *deaths* and of the *exposure* were approximated. Those two are
+  different numbers and both are reported, since an approximation touching
+  little exposure but most deaths is not a small one.
+
+  Three points that shaped the design and are worth knowing:
+
+    - A visibility that is constant within a cell CANCELS out of a rate and
+      reduces the estimator exactly to the aggregate one. Visibility survives
+      into a rate only through the on-frame/off-frame asymmetry -- every death
+      is off-frame, exposure is a mixture -- so `vis_from_donor()` estimates a
+      group size and reconstructs the split, rather than estimating a
+      visibility directly. `tests/testthat/test_visibility_rules.R` asserts
+      this as executable documentation.
+    - The donor default is the weighted HARMONIC mean, not the arithmetic one.
+      The individual estimator averages `1/v`, so `(E[1/v])^-1` is the
+      functional that makes the plug-in unbiased. `"arithmetic"` remains
+      available, since it is what the historical `y.F.bar / (y.F.bar + 1)`
+      adjustment factor used.
+    - Donor coverage failure is routine, not exceptional: `match_on` describes
+      the alter but donors are respondents, and a survey of women aged 15-49
+      has no donor for an alter aged 60. `min_donors` and `on_missing` make
+      that loud instead of letting NA propagate into rates.
+
+* `get_boot_ests_matrix()` now takes `visibility` and `refit`. Visibility used
+  to be frozen across bootstrap replicates unconditionally. For
+  `vis_from_clique()` that is correct -- visibility is a function of ego's own
+  reports, not of who was sampled -- but for any rule estimated from the sample
+  it understates the variance. `is_estimated` now decides, and an estimated
+  rule with no refit function warns rather than silently freezing. This is a
+  no-op for the clique rule, which is what makes it safe to land.
+
+* `get_ec_reports()` splits occurrences by frame status
+  (`y.DandFcell` / `y.DandnotFcell`) alongside the exposure pair it already
+  produced, and warns if any occurrence is attributed to an on-frame alter. For
+  mortality that is impossible -- a dead alter is never on the frame -- so a
+  non-zero value means a miscoded frame indicator, a data-quality check the
+  package did not previously have. Verified zero across the Rwanda 2010 DHS and
+  Zimbabwe 2019 MICS prep paths. Existing column names are unchanged.
+
+* `get_group_info()` generalises `get_sibship_info()`: the `+ 1` is now the
+  explicit argument `ego.in.group` rather than a constant. It encodes "ego is a
+  member of the group ego reports about", which holds for households as well as
+  siblings and fails for parents and neighbours. `get_sibship_info()` is kept
+  as the sibling-named wrapper.
+
+* `add_esc_ind_vis()` is now implemented in terms of `vis_from_clique()`, so
+  that it and the rule layer cannot drift apart. It also now honours its
+  `varname` argument, which it previously ignored -- a caller passing
+  `varname = 'foo'` silently got a column called `ind_vis`.
+
+* new vignette, *Approximating visibility*.
+
+* `network.survival.estimator_()` is deprecated, superseded by the spine. It
+  still runs and still returns what it always did. The deprecation message
+  records the two things it does that the spine cannot yet reproduce:
+  estimating from aggregate reports plus known populations rather than from an
+  ego X alter roster, and `within.alter.weights`.
+
 * the tie-agnostic network survival estimator spine moved here from
   `siblingsurvival`, which now depends on this package. New here:
   `occ.exp()`, `cell_config()` and its `make.age.groups()` /

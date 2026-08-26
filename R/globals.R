@@ -8,5 +8,6 @@ utils::globalVariables(c(
   "N.Fminusalpha", "normalized_diff", "num.hat", "occ", "qty", "rawqty", "sex",
   "sib.exp", "sib.occ", "sib.size", "time.period", "total", "value", "wwgt", "y.Dcell",
   "y.Dcell.ind", "y.F", "y.F.bar", "y.Falpha.Fminusalpha", "y.Fminusalpha.Falpha",
-  "y.NandFcell", "y.Ncell", "y.Ncell.ind"
+  "y.NandFcell", "y.Ncell", "y.Ncell.ind",
+  ".S.hat", ".donor.S", ".donor.w", ".rule", "n_donors", "vis", "vis_rule", "vis_weight", "y.DandFcell", "y.DandnotFcell", "y.NandnotFcell", "yprime.F"
 ))

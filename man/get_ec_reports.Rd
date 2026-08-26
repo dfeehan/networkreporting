@@ -12,7 +12,8 @@ get_ec_reports(
   cell.vars,
   weights,
   ind.vis.var = NULL,
-  discretize.exp = FALSE
+  discretize.exp = FALSE,
+  check.frame.consistency = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,11 @@ get_ec_reports(
 \item{ind.vis.var}{String with the name of the column in \code{esc.dat} that has the individual visibility for each sibling; defaults to NULL. If NULL, the individual visibilities are calculated}
 
 \item{discretize.exp}{Boolean for whether or not expsoure should be discretized. Not yet implemented.}
+
+\item{check.frame.consistency}{Boolean; if TRUE (the default), warn when any
+occurrence is attributed to an alter marked as being in the frame
+population. For mortality that is impossible and indicates a miscoded
+frame indicator. Set FALSE when the event being counted is not death.}
 }
 \value{
 A dataframe that has a row for each respondent X cell containing respondent's reported deaths and exposure among siblings in the cell.

@@ -9,7 +9,9 @@ get_boot_ests_matrix(
   boot_weights_df,
   ego_id_col,
   cell_vars,
-  estimator_type
+  estimator_type,
+  visibility = NULL,
+  refit = NULL
 )
 }
 \arguments{
@@ -22,6 +24,13 @@ get_boot_ests_matrix(
 \item{cell_vars}{vector of column names defining cells (age, sex, time period, etc)}
 
 \item{estimator_type}{either 'ind' (individual visibility) or 'agg' (aggregate visibility)}
+
+\item{visibility}{optional \link{visibility_rule}. If it is \code{is_estimated}, the
+rule is refit inside every replicate rather than frozen; see Details}
+
+\item{refit}{optional \verb{function(replicate_index)} returning the group size
+\code{S.hat} for each row of \code{ec_dat} under that replicate. Supplied by
+\code{\link[=apply_visibility_rule]{apply_visibility_rule()}}-aware callers for an estimated rule}
 }
 \value{
 long-form data frame with one row per cell per bootstrap replicate
@@ -32,3 +41,24 @@ matrix multiplication. For each cell, computes weighted sums across all M bootst
 replicates simultaneously using BLAS routines, avoiding the creation of 10k-column
 intermediate dataframes.
 }
+\section{Details}{
+
+Visibility is normally baked into \code{y.Dcell.ind} and \code{y.Ncell.ind} at
+\code{\link[=get_ec_reports]{get_ec_reports()}} time, which freezes it across replicates. For
+\code{\link[=vis_from_clique]{vis_from_clique()}} that is \emph{correct}: visibility is a function of ego's own
+reports, not of which egos happened to be sampled.
+
+For any rule with \code{is_estimated = TRUE} it is wrong. The estimated group
+size is a sample quantity, and holding it fixed understates the variance. So
+when such a rule is passed, each replicate recomputes the estimate from the
+frame-split sufficient statistics that \code{\link[=get_ec_reports]{get_ec_reports()}} already produces:
+
+\deqn{num = y.DandFcell / (S - 1) + y.DandnotFcell / S}
+\deqn{denom = y.NandFcell / (S - 1) + y.NandnotFcell / S}
+
+which needs one length-M vector per cell and no per-alter recomputation.
+This holds whenever the estimated visibility is constant within a cell,
+which is the common case, since matching on alter sex and age group means
+matching on the cells themselves.
+}
+

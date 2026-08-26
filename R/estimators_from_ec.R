@@ -10,9 +10,49 @@
 ##' @param ego_id_col name of the ego id column in ec_dat and boot_weights_df
 ##' @param cell_vars vector of column names defining cells (age, sex, time period, etc)
 ##' @param estimator_type either 'ind' (individual visibility) or 'agg' (aggregate visibility)
+##' @param visibility optional [visibility_rule]. If it is `is_estimated`, the
+##'        rule is refit inside every replicate rather than frozen; see Details
+##' @param refit optional `function(replicate_index)` returning the group size
+##'        `S.hat` for each row of `ec_dat` under that replicate. Supplied by
+##'        [apply_visibility_rule()]-aware callers for an estimated rule
 ##' @return long-form data frame with one row per cell per bootstrap replicate
+##'
+##' @section Details:
+##' Visibility is normally baked into `y.Dcell.ind` and `y.Ncell.ind` at
+##' [get_ec_reports()] time, which freezes it across replicates. For
+##' [vis_from_clique()] that is *correct*: visibility is a function of ego's own
+##' reports, not of which egos happened to be sampled.
+##'
+##' For any rule with `is_estimated = TRUE` it is wrong. The estimated group
+##' size is a sample quantity, and holding it fixed understates the variance. So
+##' when such a rule is passed, each replicate recomputes the estimate from the
+##' frame-split sufficient statistics that [get_ec_reports()] already produces:
+##'
+##' \deqn{num = y.DandFcell / (S - 1) + y.DandnotFcell / S}
+##' \deqn{denom = y.NandFcell / (S - 1) + y.NandnotFcell / S}
+##'
+##' which needs one length-M vector per cell and no per-alter recomputation.
+##' This holds whenever the estimated visibility is constant within a cell,
+##' which is the common case, since matching on alter sex and age group means
+##' matching on the cells themselves.
 ##' @export
-get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars, estimator_type) {
+get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars,
+                                 estimator_type,
+                                 visibility = NULL,
+                                 refit      = NULL) {
+
+  ## Is visibility being re-estimated inside the replicate loop?
+  reestimate <- !is.null(visibility) && isTRUE(visibility$is_estimated) &&
+                estimator_type == 'ind'
+
+  if (reestimate && is.null(refit)) {
+    warning("visibility rule '", visibility$label, "' is estimated from the ",
+            "sample, but no refit function was supplied, so visibility is ",
+            "frozen across bootstrap replicates. The resulting intervals are ",
+            "too narrow. This is the bug that is.estimated exists to prevent; ",
+            "pass refit = to fix it.")
+    reestimate <- FALSE
+  }
 
   # Build boot weight matrix: rows = respondents, cols = bootstrap replicates
   boot_col_names <- stringr::str_subset(colnames(boot_weights_df), 'ego.id', negate = TRUE)
@@ -40,10 +80,32 @@ get_boot_ests_matrix <- function(ec_dat, boot_weights_df, ego_id_col, cell_vars,
       denom_vec <- grp$y.Ncell
     }
 
-    # Matrix multiply: length-N_cell vector %*% N_cell x M matrix = length-M vector
-    # This uses BLAS and runs in milliseconds even for large M
-    num.hat   <- as.vector(num_vec   %*% W)
-    denom.hat <- as.vector(denom_vec %*% W)
+    if (!reestimate) {
+      # Matrix multiply: length-N_cell vector %*% N_cell x M matrix = length-M vector
+      # This uses BLAS and runs in milliseconds even for large M
+      num.hat   <- as.vector(num_vec   %*% W)
+      denom.hat <- as.vector(denom_vec %*% W)
+    } else {
+      ## Visibility is a sample quantity here, so it moves with the replicate.
+      ## Recompute the visibility-adjusted sums per replicate from the
+      ## frame-split statistics, keeping the on-frame / off-frame asymmetry
+      ## that is the only way visibility survives into a ratio.
+      row_idx_all <- match(grp[[ego_id_col]], boot_ego_ids)
+      num.hat   <- numeric(M)
+      denom.hat <- numeric(M)
+      for (r in seq_len(M)) {
+        S <- refit(r)[row_idx_all]
+        ## S - 1 is the visibility of an on-frame alter; S that of an off-frame
+        ## one. A group of size 1 has no on-frame alters to divide, so guard it.
+        S_on <- ifelse(S > 1, S - 1, NA_real_)
+        num_r   <- grp$y.DandFcell / S_on + grp$y.DandnotFcell / S
+        denom_r <- grp$y.NandFcell / S_on + grp$y.NandnotFcell / S
+        num_r[is.na(num_r)]     <- 0
+        denom_r[is.na(denom_r)] <- 0
+        num.hat[r]   <- sum(num_r   * W[, r])
+        denom.hat[r] <- sum(denom_r * W[, r])
+      }
+    }
 
     estimator_label <- if (estimator_type == 'ind') 'sib_ind' else 'sib_agg'
 

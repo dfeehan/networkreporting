@@ -12,23 +12,15 @@ get_sibship_info <- function(sib.dat,
                              ego.id,
                              sib.frame.indicator) {
 
-  sib.dat <- sib.dat %>% rename(.ego.id = !!sym(ego.id),
-                                .sib.in.F = !!sym(sib.frame.indicator))
-
-  # y_F for each sibship, based on summing reports across cells
-  vis.dat <- sib.dat %>%
-    group_by(.ego.id) %>%
-    summarize(# number of sibs in the sampling frame
-              y.F = sum(.sib.in.F),
-              # total size of sibship, which is number of reported
-              # siblings plus one (for the respondent)
-              sib.size = n() + 1) %>%
-    # number of sibs in the sampling frame, including respondent
-    mutate(yprime.F = y.F + 1)
-
-  vis.dat <- vis.dat %>% rename(!!ego.id := .ego.id)
-
-  return(vis.dat)
+  ## This is get_group_info() with ego.in.group = TRUE. The `+ 1` that used to
+  ## be written here as a constant is not about siblings: it encodes "ego is a
+  ## member of the group ego reports about", which holds for households too and
+  ## fails for parents and neighbours. Keeping the sibling-named wrapper means
+  ## existing callers are undisturbed while the general form is available.
+  get_group_info(sib.dat,
+                 ego.id          = ego.id,
+                 frame.indicator = sib.frame.indicator,
+                 ego.in.group    = TRUE)
 }
 
 ##' calculate visibility for each sibship and ego
@@ -180,18 +172,26 @@ add_esc_ind_vis <- function(esc.dat,
                             ego.id=".ego.id",
                             sib.frame.indicator=".sib.in.F")
 
-  # add individual visibility weights to the esc data
-  # (these are sibling individual visibility weights)
-  esc.dat.with.indviswgt <- esc.dat %>%
+  ## Add individual visibility weights to the esc data. This is now the clique
+  ## rule applied through the general machinery rather than an inline case_when,
+  ## so that this path and sibling_estimator(visibility = ...) cannot drift
+  ## apart. The arithmetic is identical: 1/y.F on frame, 1/(y.F + 1) off it.
+  esc.with.yF <- esc.dat %>%
     left_join(yFdat %>% select(.ego.id, y.F),
-              by='.ego.id') %>%
-    calculate_sib_ind_visibility(sib.frame.indicator = '.sib.in.F',
-                                 num.sibs.on.frame.var = 'y.F',
-                                 varname = 'ind_vis')
-    #mutate(ind_vis_weight = case_when(.sib.in.F == 1 ~ 1 / y.F,
-    #                                  .sib.in.F == 0 ~ 1 / (y.F + 1)))
+              by='.ego.id')
 
-  if (any(is.na(esc.dat.with.indviswgt$ind_vis))) {
+  vis <- vis_from_clique()
+  vis.vals <- vis$predict(esc.with.yF, vis$fit(NULL, NULL))
+
+  esc.dat.with.indviswgt <- esc.with.yF
+  ## `ind_vis` is the visibility WEIGHT -- the reciprocal of the count. The
+  ## name predates the distinction; vis_weight is the same number.
+  esc.dat.with.indviswgt[[varname]] <- vis.vals$vis_weight
+
+  ## NB: this used to test `$ind_vis` by name while the column was also written
+  ## as `ind_vis` regardless of `varname`, so a caller passing varname = 'foo'
+  ## silently got a column called ind_vis. Both now honour varname.
+  if (any(is.na(esc.dat.with.indviswgt[[varname]]))) {
     stop("esc data has rows for which we have no individual visibility weight. something must be wrong. is there any missingness in the indicator variable for sibling frame membership?")
   }
 
