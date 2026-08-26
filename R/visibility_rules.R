@@ -405,7 +405,13 @@ vis_from_donor <- function(donor      = "egos",
     label        = label,
     ## the alter side needs the frame indicator to keep the on-frame /
     ## off-frame split; the group size itself comes from the donors
-    requires     = ".sib.in.F",
+    ## The frame indicator, to keep the on-frame / off-frame split, plus the
+    ## alter-side match_on columns: predict() joins on those, so a caller who
+    ## matches on a covariate needs it carried through to the report rows. They
+    ## belong in `requires` for the same reason anything else does -- it is what
+    ## the up-front check reads, and what the estimator uses to decide which
+    ## columns to keep.
+    requires     = c(".sib.in.F", names(match_map)),
     ## S.hat is a sample quantity. Holding it fixed across bootstrap replicates
     ## would understate the variance, so this must be refit per replicate.
     is_estimated = TRUE,
@@ -1148,6 +1154,91 @@ make_vis_refit <- function(rule, donor.dat, boot.weights, ec.dat, ego.id = ".ego
                        by = ego.id)
     state <- rule$fit(dd, wcol)
     rule$predict(ec.for.pred, state)$vis
+  }
+}
+
+##' Can a rule's visibility be predicted from ego X cell data?
+##'
+##' Internal. Decides between the two bootstrap paths for an estimated rule.
+##' The cheap path recomputes visibility-adjusted sums from the frame-split
+##' statistics in `ec.dat`, which is valid only when the rule's prediction is
+##' constant within an ego X cell row --- equivalently, when everything the rule
+##' needs is present in `ec.dat`.
+##'
+##' A rule matching on a covariate that is also a cell variable satisfies this,
+##' which is the common case. One matching on something that cuts across cells,
+##' or a model with continuous predictors, does not.
+##'
+##' @param rule a `visibility_rule`
+##' @param ec.dat the ego X cell data
+##' @return `TRUE` if the cheap per-cell path applies
+##' @export
+vis_is_cell_constant <- function(rule, ec.dat) {
+  ## the frame indicator is supplied by the caller, not read from ec.dat
+  needed <- setdiff(rule$requires, ".sib.in.F")
+  ## a coalesced rule needs everything any of its tiers needs
+  if (!is.null(rule$tiers)) {
+    needed <- setdiff(unique(unlist(lapply(rule$tiers, function(r) r$requires))),
+                      ".sib.in.F")
+  }
+  all(needed %in% names(ec.dat))
+}
+
+##' Build a per-replicate refit that recomputes visibility at the report level
+##'
+##' Internal. The expensive bootstrap path, for an estimated rule whose
+##' visibility is *not* constant within an ego X cell row. There the frame-split
+##' identity does not apply, and the only correct route is to refit the rule and
+##' re-predict for every report inside each replicate, then re-aggregate.
+##'
+##' Costs roughly M times a point estimate. That is the price of not freezing a
+##' sample quantity; falling back to the cheap path here would silently reinstate
+##' the very bug the refit exists to prevent.
+##'
+##' @param rule the [visibility_rule]
+##' @param donor.dat the donor frame
+##' @param boot.weights data frame of replicate weights
+##' @param esc.dat the ego X alter X cell reports, carrying `ind_vis`'s inputs
+##' @param ec.dat the ego X cell data the estimate is computed from
+##' @param cell.vars the columns defining a cell
+##' @param ego.id name of the ego id column
+##' @return `function(r)` returning a two-column data frame of `num` and `denom`,
+##'         one row per row of `ec.dat`, or `NULL` if the rule is not estimated
+##' @export
+make_vis_refit_esc <- function(rule, donor.dat, boot.weights, esc.dat, ec.dat,
+                               cell.vars, ego.id = ".ego.id") {
+
+  if (!isTRUE(rule$is_estimated)) return(NULL)
+
+  key <- c(ego.id, cell.vars)
+
+  function(r) {
+    wcol <- paste0("boot_weight_", r)
+    if (!wcol %in% names(boot.weights)) {
+      stop("bootstrap weight column '", wcol, "' not found.")
+    }
+    dd <- donor.dat %>%
+      dplyr::left_join(boot.weights %>%
+                         dplyr::select(dplyr::all_of(c(ego.id, wcol))),
+                       by = ego.id)
+    state <- rule$fit(dd, wcol)
+    vw    <- rule$predict(esc.dat, state)$vis_weight
+
+    sums <- esc.dat %>%
+      dplyr::mutate(.vw = vw) %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(key))) %>%
+      dplyr::summarize(num   = sum(sib.occ * .vw, na.rm = TRUE),
+                       denom = sum(sib.exp * .vw, na.rm = TRUE),
+                       .groups = "drop")
+
+    ## align to ec.dat row order, so the caller can index by row like the
+    ## cheap path does
+    out <- ec.dat %>%
+      dplyr::select(dplyr::all_of(key)) %>%
+      dplyr::left_join(sums, by = key)
+    out$num[is.na(out$num)]     <- 0
+    out$denom[is.na(out$denom)] <- 0
+    out[, c("num", "denom")]
   }
 }
 

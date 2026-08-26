@@ -477,6 +477,18 @@ Phase 2 model rule has somewhere to land.
    case, `warning()` with the projected cost, and let it run. Do not silently fall back to case 2:
    that would freeze the model and reintroduce the bug this section exists to fix.
 
+   **Built 2026-08-26.** `vis_is_cell_constant()` decides, `make_vis_refit_esc()` is the expensive
+   path, and there is no silent fallback. Where cases 2 and 3 are both valid they agree exactly, and
+   that is a test.
+
+   Building it surfaced a **bug in case 2**: the refit vector is one value per `ec_dat` row, but it
+   was indexed by bootstrap-weight row position, so every cell got the same few rows' values. That is
+   invisible when the estimated visibility is constant — which is what the Phase 1 tests used
+   (`match_on = NULL`) — and wrong as soon as it varies by cell, i.e. in the case this list calls
+   *the common one*. Fixed, with a regression test that checks each cell's `S.hat` against a
+   hand-computed value. `vis_from_clique()` estimates are unaffected: not estimated, so never on this
+   path.
+
 **This change must be a no-op for `vis_from_clique()`.** That is what makes it safe to land: the
 DHS/MICS validation numbers and their CIs must not move.
 

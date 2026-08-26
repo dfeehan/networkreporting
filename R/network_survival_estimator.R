@@ -245,15 +245,53 @@ network_survival_estimator <- function(rel.dat,
     ## replicate, so it has to be refit inside the loop rather than frozen.
     ## For vis_from_clique() this is NULL and nothing changes -- which is what
     ## makes the change safe to land: the clique CIs must not move.
-    vis.refit <- make_vis_refit(
-      rule         = visibility,
-      donor.dat    = vis.res$donor.dat,
-      boot.weights = boot.weights,
-      ec.dat       = ec.dat,
-      ego.id       = '.ego.id')
+    ## Two paths, and which one applies is a fact about the rule rather than a
+    ## preference. If everything the rule needs is present in ec.dat, its
+    ## visibility is constant within an ego X cell row and the frame-split
+    ## identity recovers the replicate estimate cheaply. If not -- a rule
+    ## matching on something that cuts across cells, or a model with continuous
+    ## predictors -- that identity does not hold, and the only correct route is
+    ## to refit and re-predict for every report inside each replicate.
+    ##
+    ## Falling back to the cheap path in the second case would freeze what the
+    ## rule estimates and reinstate exactly the bug is_estimated exists to
+    ## prevent, so it is not offered.
+    vis.refit      <- NULL
+    vis.refit.sums <- NULL
+
+    if (isTRUE(visibility$is_estimated) &&
+        !vis_is_cell_constant(visibility, ec.dat)) {
+
+      warning(glue::glue(
+        "visibility rule '{visibility$label}' is estimated from the sample and ",
+        "its prediction is not constant within a cell, so it has to be refit ",
+        "and re-predicted for every report inside each of the {M} bootstrap ",
+        "replicates.\n",
+        "That costs roughly {M} times a point estimate. It is the only correct ",
+        "route: reusing the per-cell shortcut would hold a sample quantity ",
+        "fixed and understate the variance."))
+
+      vis.refit.sums <- make_vis_refit_esc(
+        rule         = visibility,
+        donor.dat    = vis.res$donor.dat,
+        boot.weights = boot.weights,
+        esc.dat      = esc.dat,
+        ec.dat       = ec.dat,
+        cell.vars    = cell.vars,
+        ego.id       = '.ego.id')
+
+    } else {
+      vis.refit <- make_vis_refit(
+        rule         = visibility,
+        donor.dat    = vis.res$donor.dat,
+        boot.weights = boot.weights,
+        ec.dat       = ec.dat,
+        ego.id       = '.ego.id')
+    }
 
     boot.ind.ests <- get_boot_ests_matrix(ec.dat, boot.weights, '.ego.id', cell.vars, 'ind',
-                                          visibility = visibility, refit = vis.refit)
+                                          visibility = visibility,
+                                          refit = vis.refit, refit_sums = vis.refit.sums)
     boot.agg.ests <- get_boot_ests_matrix(ec.dat, boot.weights, '.ego.id', cell.vars, 'agg')
 
     if (any(is.na(boot.ind.ests$asdr.hat))) {

@@ -1,5 +1,37 @@
 networkreporting 0.3.2
 ========================
+* **bug fix in the bootstrap for an estimated visibility rule.** The per-replicate
+  refit returns one group size per row of `ec_dat`, but it was being indexed by
+  bootstrap-weight row position instead, so every cell was handed the same few
+  rows' values.
+
+  This was invisible whenever the estimated visibility happened to be constant --
+  a `vis_from_donor(match_on = NULL)` rule, which is what the existing tests
+  used. It was wrong as soon as visibility varied by cell, which is the *common*
+  case: matching on alter sex or age group means matching on the cells
+  themselves. In a two-cell example the affected cell's denominator was out by a
+  factor of nearly three.
+
+  Estimates from `vis_from_clique()` are unaffected: it is not estimated, so it
+  never took this path. That covers every DHS and MICS figure the packages
+  produce.
+
+* the third bootstrap case is implemented, completing the design in
+  `dev/VISIBILITY-PLAN.md`. An estimated rule whose visibility is *not* constant
+  within a cell -- one matching on a covariate that cuts across cells, or a
+  future model rule with continuous predictors -- cannot use the frame-split
+  identity. It is now refit and re-predicted for every report inside each
+  replicate, with a warning naming the cost. `vis_is_cell_constant()` decides
+  which path applies, and there is deliberately no silent fallback to the cheap
+  one: that would freeze a sample quantity and reinstate the bug `is_estimated`
+  exists to prevent.
+
+  Where both paths are valid they agree exactly, which is asserted as a test.
+
+* `vis_from_donor()` declares its `match_on` columns in `requires`. Without that
+  the estimator did not carry them onto the report rows, so matching on anything
+  that was not already a cell variable failed at the point estimate.
+
 * `network_survival_estimator()` -- the generic entry point. Given reports about
   alters connected to respondents by some tie, it produces age-specific rates
   under both the individual- and aggregate-visibility estimators.
