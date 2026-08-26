@@ -69,6 +69,10 @@ size of the frame population is not changed.
 future versions may have other options}
 
 \item{verbose}{if TRUE, print information to screen}
+
+\item{boot.chunk.size}{number of bootstrap weight columns to process at a time;
+see the \code{boot.chunk.size} argument of \code{\link{report.aggregator_}}.
+Affects speed and peak memory only, not the results. Defaults to 500}
 }
 \value{
 the estimated average degree (\code{dbar.Fcell.F}) for respondents in each

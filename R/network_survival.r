@@ -92,6 +92,9 @@
 ##' @param return.boot If TRUE, and if \code{boot.weights} is specified, then return each bootstrap estimate 
 ##' @param dropmiss How to handle missingness in reported connections to known populations and number of deaths. See \code{\link{report.aggregator}}
 ##' @param verbose If TRUE, print information to screen
+##' @param boot.chunk.size number of bootstrap weight columns to process at a time;
+##' see the \code{boot.chunk.size} argument of \code{\link{report.aggregator_}}.
+##' Affects speed and peak memory only, not the results. Defaults to 500
 ##' @return the network reporting estimate of the hidden population's size
 ##'         (as a prevalence) broken down by the categories defined by all combinations
 ##'         of \code{attribute.names}.

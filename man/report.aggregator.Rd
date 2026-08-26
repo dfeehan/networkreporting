@@ -46,6 +46,12 @@ these weights must be named "boot_weight_1", "boot_weight_2", ...}
 sum to 100, and dropping rows with missing values leads to weights that sum to 80, then the remaining rows will have
 their weights multiplied by (100/80) to ensure the weights still add up to 100 after dropping the rows with missing values.
 Defaults to FALSE}
+
+\item{boot.chunk.size}{number of bootstrap weight columns to process at a time.
+The bootstrap path reshapes an intermediate frame whose width grows with the
+number of weight columns, and whose cost grows super-linearly in that width, so
+the columns are processed in chunks and the results combined. Affects speed and
+peak memory only, never the returned values. Defaults to 500}
 }
 \value{
 the aggregated reported quantities

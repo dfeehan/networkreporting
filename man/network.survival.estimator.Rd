@@ -78,6 +78,10 @@ most often the id of the ego making the reports.}
 \item{dropmiss}{How to handle missingness in reported connections to known populations and number of deaths. See \code{\link{report.aggregator}}}
 
 \item{verbose}{If TRUE, print information to screen}
+
+\item{boot.chunk.size}{number of bootstrap weight columns to process at a time;
+see the \code{boot.chunk.size} argument of \code{\link{report.aggregator_}}.
+Affects speed and peak memory only, not the results. Defaults to 500}
 }
 \value{
 the network reporting estimate of the hidden population's size
