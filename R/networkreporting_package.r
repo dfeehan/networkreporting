@@ -7,9 +7,12 @@
 ##'
 ##' @aliases package-networkreporting
 ##' @import reshape2 functional ggplot2 dplyr lazyeval surveybootstrap
+##' @useDynLib networkreporting, .registration = TRUE
+##' @importFrom Rcpp sourceCpp
 "_PACKAGE"
 
-##' @importFrom stats setNames
+##' @importFrom stats setNames quantile sd weighted.mean
+##' @importFrom rlang sym :=
 
 ##' @importFrom plyr aaply
 ##' @importFrom plyr ldply

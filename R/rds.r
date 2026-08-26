@@ -8,7 +8,7 @@
 ##'
 ##' compute an estimate for the prevalence of a trait
 ##' from an RDS sample, using the estimator described
-##' in TODO [Volz + Heckathorn '08]
+##' in TODO: Volz + Heckathorn '08
 ##'
 ##' NOTE: we have no weights for now, right? RDS doesn't
 ##' get used with weights?

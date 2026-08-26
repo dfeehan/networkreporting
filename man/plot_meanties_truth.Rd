@@ -10,10 +10,10 @@ plot_meanties_truth(survey.data, weights = NULL, known.popns = NULL)
 \item{survey.data}{the dataframe with the survey results}
 
 \item{weights}{if not NULL, weights to use in computing the estimate. this
- should be the name of the column in the survey.data which
+should be the name of the column in the survey.data which
 has the variable with the appropriate weights. these weights
- should be construted so that, eg, the mean of the degrees
- is estimated as (1/n) * \\sum_i {w_i * d_i}}
+should be construted so that, eg, the mean of the degrees
+is estimated as (1/n) * \\sum_i {w_i * d_i}}
 
 \item{known.popns}{if not NULL, a vector whose entries are the
 size of the known

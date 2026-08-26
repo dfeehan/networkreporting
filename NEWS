@@ -1,5 +1,36 @@
 networkreporting 0.3.2
 ========================
+* the tie-agnostic network survival estimator spine moved here from
+  `siblingsurvival`, which now depends on this package. New here:
+  `occ.exp()`, `cell_config()` and its `make.age.groups()` /
+  `make.even.age.groups()` / `make.time.periods()` helpers,
+  `get_esc_reports()`, `get_ec_reports()`, `get_ind_est_from_ec()`,
+  `get_agg_est_from_ec()`, `get_boot_ests_matrix()`, `get_visibility()`,
+  `add_esc_ind_vis()`, `sib_ic_checks()`, `nmx_to_nqx()` and `q15_to_50()`.
+  Nothing in this package's own behaviour changes; the spine arrives alongside
+  the existing estimators rather than replacing any of them.
+
+  The move is a pure relocation: no expected value in either package's test
+  suite was edited, and the DHS and MICS validation harnesses in
+  `siblingsurvival` reproduce every published figure unchanged.
+
+  Only the sibling-specific parts stayed behind in `siblingsurvival` -- the DHS
+  and MICS prep functions, maternal classification, and `sibling_estimator()`
+  itself. `get_visibility()` and the sibship helpers are named for siblings but
+  are really *clique*-specific, holding for any tie that partitions the
+  population into disjoint groups containing ego. A later release turns that
+  into a declared, composable visibility rule; see `dev/VISIBILITY-PLAN.md`.
+
+* this package now contains compiled code for the first time (`src/`,
+  `LinkingTo: Rcpp`), for the occurrence/exposure calculation
+* `Roxygen: list(markdown = TRUE)`, matching the moved documentation. Existing
+  help pages are unaffected apart from whitespace, two `*...*` spans that now
+  render as emphasis, and one `*` list that now renders as a bulleted list
+* documented the `boot.chunk.size` argument of `report.aggregator_()`,
+  `kp.estimator_()` and `network.survival.estimator_()`
+* removed a stale `R/RcppExports.R` that declared `resample_stratum()` against a
+  `src/` this package did not have; that routine lives in `surveybootstrap`
+* adopted testthat edition 3; `tests/test_all.r` is now `tests/testthat.R`
 * replaced defunct dplyr `select_()` and `rename_()` calls (underscore SE
   interface) with `select(all_of())` and `rename()` throughout
   `report_aggregator.r`, `known_population.r`, and `scale_up.r`

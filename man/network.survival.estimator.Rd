@@ -44,8 +44,8 @@ connections to the groups of known size, as well as the attributes.
 Note that the column names of the attributes should match
 their names in \code{attribute.data}}
 
-\item{attribute.data}{A dataframe with the reported attributes of hidden population 
-members reported by survey respondents. There should be one 
+\item{attribute.data}{A dataframe with the reported attributes of hidden population
+members reported by survey respondents. There should be one
 row for each time a respondent reports a hidden population member.
 For example, to estimate death rates, there should be one row for
 each report of a death.}
@@ -61,7 +61,7 @@ population sizes}
 
 \item{weights}{The weights or weights column for the respondent data}
 
-\item{attribute.weights}{The weights or weights column for the alter data (this should typically 
+\item{attribute.weights}{The weights or weights column for the alter data (this should typically
 be the weight of the respondent who reported the alter)}
 
 \item{within.alter.weights}{The weight or weights column for within-alter weights. This could be useful if,
@@ -85,8 +85,8 @@ Affects speed and peak memory only, not the results. Defaults to 500}
 }
 \value{
 the network reporting estimate of the hidden population's size
-        (as a prevalence) broken down by the categories defined by all combinations
-        of \code{attribute.names}.
+(as a prevalence) broken down by the categories defined by all combinations
+of \code{attribute.names}.
 }
 \description{
 use an aggregate multiplicity estimator
@@ -100,27 +100,27 @@ the hidden population. For example, if we are asking about emigres and
 we collect the age and sex of each reported emigrant, then the long form
 dataset might look like:
 \tabular{ccc}{
-  age \tab sex \tab weight\cr
-   15 \tab m   \tab 2.10  \cr
-   58 \tab f   \tab 1.15  \cr
-   33 \tab m   \tab 3.67  \cr
+age \tab sex \tab weight\cr
+15 \tab m   \tab 2.10  \cr
+58 \tab f   \tab 1.15  \cr
+33 \tab m   \tab 3.67  \cr
 }
- 
- The second source of data we need is the known population responses for the
- respondents, along with the *same* attributes for each respondent. For
- example, in the situation above, we would also require a dataset like this
- to be passed in
- \tabular{cccccc}{
-  age  \tab sex  \tab  weight \tab hm.teachers \tab  hm.nurses  \tab ...  \cr
-  20   \tab   f  \tab  2.10   \tab 4           \tab  0          \tab ...  \cr
-  44   \tab   m  \tab  1.65   \tab 0           \tab  2          \tab ...  \cr
-  60   \tab   m  \tab  2.75   \tab 1           \tab  1          \tab ...  \cr
+
+The second source of data we need is the known population responses for the
+respondents, along with the \emph{same} attributes for each respondent. For
+example, in the situation above, we would also require a dataset like this
+to be passed in
+\tabular{cccccc}{
+age  \tab sex  \tab  weight \tab hm.teachers \tab  hm.nurses  \tab ...  \cr
+20   \tab   f  \tab  2.10   \tab 4           \tab  0          \tab ...  \cr
+44   \tab   m  \tab  1.65   \tab 0           \tab  2          \tab ...  \cr
+60   \tab   m  \tab  2.75   \tab 1           \tab  1          \tab ...  \cr
 }
 }
 \section{Technical note}{
 
 This function assumes that the sampling weights are standard analysis weights
-and *not* relative weights. Standard analysis weights should provide an estimate
+and \emph{not} relative weights. Standard analysis weights should provide an estimate
 for the size of the frame population when added up; relative weights, on the other hand,
 will sum to the number of respondents in the sample.  Demographic and Health surveys
 typically have relative weights, which must be converted into standard sampling weights

@@ -21,9 +21,9 @@ are not yet implemented.}
 }
 \value{
 a vector with an estimate of the degree for each row
-        in survey.data. if na.rm=TRUE, then the degree for rows that have
-        missingness in the summation questions will be set
-        to NA
+in survey.data. if na.rm=TRUE, then the degree for rows that have
+missingness in the summation questions will be set
+to NA
 }
 \description{
 compute an estimate of the respondents' degrees using

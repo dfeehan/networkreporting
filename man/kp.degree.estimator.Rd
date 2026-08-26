@@ -34,9 +34,9 @@ computations. care must be taken in using this second option}
 }
 \value{
 a vector with an estimate of the degree for each row
-        in survey.data. if missing=="ignore", then the degree for rows that have
-        missingness in the 'how many X' questions will be set
-        to NA
+in survey.data. if missing=="ignore", then the degree for rows that have
+missingness in the 'how many X' questions will be set
+to NA
 }
 \description{
 see \code{\link{kp.individual.estimator}} instead.

@@ -78,9 +78,9 @@ if \code{bootstrap} is TRUE}
 }
 \value{
 a list with a dataset containing the subpopn-specific estimates, as well as
-        several summaries of the accuracy of those estimates, including
-        mae (mean absolute error), mse (mean squared error),
-        rmse (root mean squared error), and are (average relative error)
+several summaries of the accuracy of those estimates, including
+mae (mean absolute error), mse (mean squared error),
+rmse (root mean squared error), and are (average relative error)
 }
 \description{
 use a leave-one-out method to estimate the predictive
@@ -96,9 +96,10 @@ each known population in turn, using the non-dropped
 populations to compute the degree and an estimate of the
 size of the known population, and comparing the result
 to the actual size of the known population
-
-* TODO -- document bootstrap ci option better\cr   
-* TODO -- make amenable to parallelization\cr
+\itemize{
+\item TODO -- document bootstrap ci option better\cr
+\item TODO -- make amenable to parallelization\cr
+}
 }
 \examples{
 \dontrun{

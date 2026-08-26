@@ -76,17 +76,17 @@ Affects speed and peak memory only, not the results. Defaults to 500}
 }
 \value{
 the estimated average degree (\code{dbar.Fcell.F}) for respondents in each
-        of the categories given by \code{attribute.names}
+of the categories given by \code{attribute.names}
 }
 \description{
 If given \code{attribute.names}, then this function produces
-estimated average network sizes given by the groups that are defined by 
+estimated average network sizes given by the groups that are defined by
 all combinations of the attributes; otherwise, it estimates the
 average personal network size for the entire frame population.
 }
 \section{Technical note}{
 
-The estimated average degree is 
+The estimated average degree is
 \eqn{(\sum y_{F_\alpha, A} / N_A) \times
      N_F / N_{F_\alpha}}
 here, we estimate \eqn{N_F / N_{F_\alpha}} by dividing the
@@ -106,7 +106,7 @@ the weights for respondents in each cell \eqn{\alpha}.
 
 If you want estimated sampling variances, you can pass in a data frame \code{boot.weights}.
 \code{boot.weights} is assumed to have a column that is named whatever the \code{ego.id} is,
-and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.  
+and then a series of columns named \code{boot_weight_1}, ..., \code{boot_weight_M}.
 
 The two options for missing values are 'ignore' or 'complete.obs'.
 'ignore' adds up each respondent's nonmissing reported connections to the known populations,

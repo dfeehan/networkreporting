@@ -30,12 +30,20 @@ Imports:
     dplyr,
     surveybootstrap,
     glue,
-    tidyr
+    tidyr,
+    Rcpp,
+    rlang,
+    purrr,
+    tidyselect
+LinkingTo:
+    Rcpp
 SystemRequirements: GNU make
 Suggests:
     knitr,
     testthat,
-    rmarkdown
+    rmarkdown,
+    tibble
 Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: http://dennisfeehan.org/networkreporting/
