@@ -786,8 +786,22 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   A predicted group size at or below zero errors rather than becoming a negative weight, pointing
   at a log link. Worth knowing that `gaussian()` is the default and *can* produce one when
   extrapolating; `poisson(link = "log")` cannot.
-- `vis_aggregate()` fed by ARD degree estimates, connecting to `networkreporting` and to
-  `code/quantity_quality/02_ard_degree.Rmd` in the Matlab repo.
+- ~~`vis_aggregate()` fed by ARD degree estimates~~ **built, 2026-08-26.**
+  `vis_aggregate(degree.var, frame.ratio)`. Donors are respondents with a degree estimated by
+  `kp.degree.estimator()`; the summary of their degrees becomes the alters' visibility, with the
+  frame split preserved.
+
+  The load-bearing detail is `frame.ratio`, which has **no default**. ARD reports connections to
+  the *whole population*; visibility counts connections to *frame-population members*. Only the
+  caller knows the share, nothing in the data supplies it, and getting it wrong scales every
+  estimate by a constant silently.
+
+  **This closes half of the gap the `network.survival.estimator_()` deprecation note describes, not
+  all of it.** ARD can now supply the spine's visibility. The spine still needs an ego X alter
+  roster to attach it to, so a survey with aggregate counts and no roster remains outside it. The
+  deprecation note is corrected to say so rather than to promise a bridge that only half exists —
+  and that means **retiring `network.survival.estimator()` is still blocked**, on the roster
+  requirement and on `within.alter.weights`.
 - **Splitting ARD / scale-up back out.** With the spine living in `networkreporting`, the plausible
   next structural move is the reverse of this one: lift the ARD / known-population / scale-up code
   (`scale_up.r`, `known_population.r`, `summation.r`, `indirect_sampling.r`, `rds.r`) into a package

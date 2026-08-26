@@ -145,9 +145,12 @@ network.survival.estimator_ <- function(resp.data,
     ##
     ##  1. It works from AGGREGATE reports plus known populations -- respondents'
     ##     own network-size estimates -- rather than from an ego X alter roster.
-    ##     The spine's whole decomposition assumes a roster, so there is as yet
-    ##     no path from ARD / scale-up data into it. vis_aggregate() is the
-    ##     planned bridge and does not exist.
+    ##     The spine's whole decomposition assumes a roster. vis_aggregate()
+    ##     (added 0.3.2) closes half of this: ARD degree estimates can now
+    ##     supply the VISIBILITY the spine uses. What it does not close is the
+    ##     other half -- the spine still needs an ego X alter roster of reports
+    ##     to attach that visibility to, so a survey with aggregate counts and
+    ##     no roster still has no path in.
     ##  2. within.alter.weights, which corrects for respondents who report about
     ##     only a subset of their alters. The spine has no equivalent.
     ##
@@ -162,10 +165,12 @@ network.survival.estimator_ <- function(resp.data,
       "visibility declared through vis_from_clique() or vis_from_donor().
 ",
       "It still works, and will keep working until a later release removes it. ",
-      "Two things it does that the spine does not yet: it estimates from ",
+      "Two things it does that the spine does not yet. It estimates from ",
       "aggregate reports plus known populations rather than from an ego X alter ",
-      "roster, and it supports within.alter.weights. If you rely on either, say ",
-      "so before it is removed."))
+      "roster -- vis_aggregate() now lets ARD degrees supply the spine's ",
+      "visibility, but the spine still needs a roster to attach it to. And it ",
+      "supports within.alter.weights, for which there is no equivalent. If you ",
+      "rely on either, say so before it is removed."))
 
     ## estimate the average personal network size of the respondents
     ## for each combination of attributes

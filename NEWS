@@ -1,5 +1,35 @@
 networkreporting 0.3.2
 ========================
+* `vis_aggregate()` -- visibility from aggregate relational data, bridging this
+  package's two halves. The ARD / scale-up side estimates how many people a
+  respondent knows; the estimator spine needs to know how many people could have
+  reported an alter. Those are different quantities.
+
+  `frame.ratio` is the conversion between them, and it deliberately has no
+  default. `kp.degree.estimator()` reports connections to the WHOLE population;
+  visibility counts connections to FRAME-POPULATION members, and only the caller
+  knows what share of the population the frame is. Getting it wrong scales every
+  estimate by a constant with nothing to show for it. Pass
+  `degree.counts = "frame"` where the degree already counts frame members only,
+  and no conversion is needed.
+
+  The on-frame / off-frame split matters here more than anywhere: this rule
+  assigns essentially one number per matched cell, and a visibility constant
+  within a cell cancels out of a rate. Without the split it would reduce exactly
+  to the aggregate estimator and the ARD would do no work at all.
+
+  Two assumptions come with the method rather than the function, and are
+  recorded in the provenance: that the tie is roughly symmetric, and that
+  respondents' degrees stand in for alters'. For mortality the alters include
+  the dead, so the second errs in the same direction as any donor rule.
+
+* the deprecation note on `network.survival.estimator_()` is corrected. It said
+  the spine had no path from ARD data and that `vis_aggregate()` was the planned
+  bridge. `vis_aggregate()` now exists and closes half of that -- ARD degrees can
+  supply the spine's visibility -- but not the other half: the spine still needs
+  an ego X alter roster to attach that visibility to, so a survey with aggregate
+  counts and no roster still has no way in.
+
 * `true_visibility_from_network()` and `visibility_accuracy()`, for checking a
   visibility rule against a known network.
 
