@@ -12,7 +12,8 @@ report.aggregator_(
   weights,
   qoi.name,
   scaling.factor = NULL,
-  dropmiss = FALSE
+  dropmiss = FALSE,
+  boot.chunk.size = 500
 )
 
 report.aggregator(

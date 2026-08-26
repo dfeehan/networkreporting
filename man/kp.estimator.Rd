@@ -16,7 +16,8 @@ kp.estimator_(
   total.kp.size = NULL,
   alter.popn.size = NULL,
   dropmiss = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  boot.chunk.size = 500
 )
 
 kp.estimator(

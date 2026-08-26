@@ -5,11 +5,9 @@
 ##' indirect sampling, network scale-up, network reporting, and sibling history
 ##' methods.
 ##'
-##' @docType package
-##' @name networkreporting
-##' @aliases networkreporting package-networkreporting
+##' @aliases package-networkreporting
 ##' @import reshape2 functional ggplot2 dplyr lazyeval surveybootstrap
-NULL
+"_PACKAGE"
 
 ##' @importFrom stats setNames
 

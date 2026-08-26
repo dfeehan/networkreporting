@@ -18,7 +18,8 @@ network.survival.estimator_(
   ego.id = NULL,
   return.boot = FALSE,
   dropmiss = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  boot.chunk.size = 500
 )
 
 network.survival.estimator(
