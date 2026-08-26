@@ -898,6 +898,165 @@ vis_from_model <- function(formula,
 }
 
 ## ---------------------------------------------------------------------------
+## visibility as reported by ego
+## ---------------------------------------------------------------------------
+
+##' Visibility as reported by the respondent
+##'
+##' Ego is asked, about each alter, how many frame-population members that alter
+##' is connected to. The answer is the alter's visibility, read straight off the
+##' questionnaire instead of derived from a roster or borrowed from donors.
+##'
+##' @section Why this is the honest option for some ties:
+##'
+##' Every other rule here recovers visibility from something the survey happened
+##' to collect for another purpose. [vis_from_clique()] exploits the tie's
+##' structure, [vis_from_donor()] and [vis_from_model()] substitute the
+##' respondents' own. All three are attempts to get at a quantity nobody was
+##' asked about.
+##'
+##' For an `"unbounded"` tie there is no way round that. Neighbours and
+##' acquaintances have no bounded group to count, so there is no roster to
+##' derive from and nothing that makes the respondents a good stand-in for the
+##' alters. Asking is the only route to the quantity, and this rule is what
+##' turns the answer into an estimate.
+##'
+##' It is a **survey-design choice** as much as an analysis one: it costs
+##' questionnaire time, and it can only be used if somebody decided in advance
+##' to ask. Where the question was asked, though, it beats an approximation
+##' derived from something else --- and unlike the other rules, it puts the
+##' uncertainty somewhere visible, in reporting error rather than in an
+##' assumption.
+##'
+##' @section Two things the answer may or may not include:
+##'
+##' The wording of the question decides both, and the package cannot tell from
+##' the numbers which was meant.
+##'
+##' * `counts.ego` --- did the respondent count *themselves* among the alter's
+##'   connections? "How many people like you does X know?" usually includes
+##'   them; "how many *other* people like you" does not, and then one has to be
+##'   added back.
+##' * `counts.self` --- did the answer count the alter? A question phrased about
+##'   a *group* ("how many people are in X's household?") does; one phrased about
+##'   connections does not. When it does, this rule behaves like
+##'   [vis_from_group_size()], which is the better constructor to reach for.
+##'
+##' @param report.var name of the column holding ego's reported count for each
+##'        alter
+##' @param counts.ego did the respondent count themselves? When `FALSE`, one is
+##'        added back
+##' @param counts.self did the answer count the alter themselves? When `TRUE`,
+##'        one is subtracted for an alter who is in the frame population, since
+##'        an alter cannot report themselves
+##' @param on_missing what to do about an alter with no reported value:
+##'        `"error"` or `"na"` (leave unresolved, so [vis_coalesce()] can try the
+##'        next tier)
+##' @param on_impossible what to do about a reported visibility below one:
+##'        `"error"`, `"floor"` (raise it to one) or `"na"`. An alter who was
+##'        reported was, by construction, visible to at least one person, so a
+##'        zero is a data problem rather than a small number
+##' @param label optional short name for provenance
+##' @return a [visibility_rule]
+##' @examples
+##' vis_from_report("n_known_by")
+##' vis_from_report("n_other_known_by", counts.ego = FALSE)
+##' @seealso [vis_from_group_size()], for a reported *group size* rather than a
+##'   reported degree
+##' @export
+##' @md
+vis_from_report <- function(report.var,
+                            counts.ego    = TRUE,
+                            counts.self   = FALSE,
+                            on_missing    = c("error", "na"),
+                            on_impossible = c("error", "floor", "na"),
+                            label         = NULL) {
+
+  if (missing(report.var) || !is.character(report.var) ||
+      length(report.var) != 1) {
+    stop("vis_from_report() needs report.var: the name of one column holding ",
+         "ego's reported count of how many frame-population members each alter ",
+         "is connected to.")
+  }
+
+  on_missing    <- match.arg(on_missing)
+  on_impossible <- match.arg(on_impossible)
+
+  rule.label <- if (is.null(label)) paste0("reported(", report.var, ")")
+                else label
+
+  visibility_rule(
+    label        = rule.label,
+    requires     = c(report.var, ".sib.in.F"),
+    ## read off the data, not fitted to the sample, so it is frozen across
+    ## bootstrap replicates exactly as the clique rule is
+    is_estimated = FALSE,
+    ## no structural assumption whatever: this is the rule that works when the
+    ## tie has no structure to exploit
+    applies_to   = NA_character_,
+    fit          = function(donor.dat, weights) list(),
+    predict      = function(alter.rows, state) {
+
+      reported <- as.numeric(alter.rows[[report.var]])
+
+      ego.term  <- if (isTRUE(counts.ego)) 0 else 1
+      self.term <- if (isTRUE(counts.self)) alter.rows$.sib.in.F else 0
+
+      vis <- reported + ego.term - self.term
+
+      missing.vis <- is.na(vis)
+      if (any(missing.vis) && on_missing == "error") {
+        stop(sum(missing.vis), " of ", nrow(alter.rows), " alter row(s) have no ",
+             "reported visibility in '", report.var, "'.\n",
+             "Item non-response on this question is normal, so this is usually ",
+             "a reason to wrap the rule in vis_coalesce() with a fallback tier ",
+             "rather than to stop. Use on_missing = 'na' to let it fall ",
+             "through.")
+      }
+
+      ## An alter who was reported was visible to at least the person reporting
+      ## them, so a visibility below one is not a small number -- it contradicts
+      ## the existence of the report it sits on.
+      impossible <- !is.na(vis) & vis < 1
+      if (any(impossible)) {
+        if (on_impossible == "error") {
+          stop(sum(impossible), " of ", nrow(alter.rows), " reported ",
+               "visibilities are below 1.\n",
+               "That contradicts the report itself: this alter was named by a ",
+               "respondent, so at least one frame member could see them. Common ",
+               "causes are a don't-know code stored as 0, or counts.ego = TRUE ",
+               "when the question actually excluded the respondent.\n",
+               "Use on_impossible = 'floor' to raise them to 1, or 'na' to ",
+               "leave them for another tier.")
+        } else if (on_impossible == "floor") {
+          vis[impossible] <- 1
+        } else {
+          vis[impossible] <- NA_real_
+        }
+      }
+
+      dplyr::tibble(vis        = as.numeric(vis),
+                    vis_weight = 1 / vis,
+                    vis_rule   = ifelse(is.na(vis), NA_character_, rule.label))
+    },
+    assumptions  = c(
+      paste0("visibility is taken from the respondent's reported count in '",
+             report.var, "'"),
+      if (isTRUE(counts.ego)) "the reported count includes the respondent"
+      else "the reported count excludes the respondent, who is added back",
+      if (isTRUE(counts.self))
+        "the reported count includes the alter, who is subtracted when in the frame population"
+      else "the reported count excludes the alter",
+      "respondents report their alters' connections accurately; reporting error in this question passes straight into the estimate, where the other rules would instead carry an assumption"),
+    params       = list(report.var    = report.var,
+                        counts.ego    = counts.ego,
+                        counts.self   = counts.self,
+                        on_missing    = on_missing,
+                        on_impossible = on_impossible,
+                        label         = label))
+}
+
+## ---------------------------------------------------------------------------
 ## coalescing rules
 ## ---------------------------------------------------------------------------
 

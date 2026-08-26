@@ -398,6 +398,69 @@ alive and on the frame; many alters needing an imputed visibility are neither. A
 model fitted on donors extrapolates to a population it never saw, and that
 assumption is recorded in the provenance rather than left implied.
 
+## Just asking
+
+Every rule so far recovers visibility from something the survey collected for
+another purpose: the tie's structure, or the respondents' own group sizes. All of
+them are attempts to get at a quantity nobody was asked about.
+
+For an `"unbounded"` tie there is no way round that. Neighbours and
+acquaintances have no bounded group to count, so there is no roster to derive
+from — and no particular reason to think respondents resemble their alters.
+Asking is the only route to the quantity:
+
+```{r}
+asked <- tibble(
+  .ego.id   = 1:4,
+  .sib.in.F = c(1, 0, 1, 0),
+  # "how many people like you does this person know?"
+  n_known   = c(4, 3, 2, 5))
+
+rep_rule <- vis_from_report("n_known")
+rep_rule$predict(asked, rep_rule$fit(NULL, NULL))$vis
+```
+
+This is a **survey-design** choice as much as an analysis one. It costs
+questionnaire time and can only be used if somebody decided in advance to ask.
+Where the question was asked, though, it beats approximating from something else
+— and it puts the uncertainty somewhere visible, in reporting error, rather than
+in an assumption.
+
+Two things the wording of the question decides, which the numbers cannot reveal:
+
+* `counts.ego` — did the respondent count *themselves*? "How many people like you
+  does X know" usually includes them; "how many **other** people like you" does
+  not, and one has to be added back.
+* `counts.self` — did the answer count the alter? A question about a *group*
+  ("how many people are in X's household?") does; one about connections does not.
+  When it does, `vis_from_group_size()` is the clearer constructor.
+
+A reported visibility below one is treated as an error rather than a small
+number, because it contradicts the report it sits on — the alter was named by
+somebody, so at least one frame member could see them. The usual causes are a
+don't-know code stored as `0`, or `counts.ego` set wrongly:
+
+```{r, error = TRUE}
+bad <- asked
+bad$n_known[2] <- 0
+rep_rule$predict(bad, rep_rule$fit(NULL, NULL))
+```
+
+Item non-response on this question is normal, so `on_missing = "na"` and a
+fallback tier is usually the right shape rather than stopping:
+
+```{r}
+partial <- asked
+partial$n_known[3] <- NA
+partial$y.F <- 2
+
+chain <- vis_coalesce(vis_from_report("n_known", on_missing = "na"),
+                      vis_from_clique())
+out <- apply_visibility_rule(chain, partial,
+                             tie = tie_config("clique", name = "siblings"))
+out$values
+```
+
 ## Coalescing: exact where possible, approximate where not
 
 `vis_coalesce()` takes rules in priority order. For each row the first rule

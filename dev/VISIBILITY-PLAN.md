@@ -741,8 +741,21 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   between bases is still informative, the absolute figures less so.) **Which basis is right for cousins
   is not settled here** --- the point is that the package can now state all of them and say
   in provenance which produced which estimate.
-- `vis_from_report()` — ego directly reports the alter's degree. A survey-design choice, and arguably
-  the honest answer for non-clique ties.
+- ~~`vis_from_report()` — ego directly reports the alter's degree.~~ **built, 2026-08-26.**
+  `vis_from_report(report.var, counts.ego, counts.self)`. The plan called it "arguably the honest
+  answer for non-clique ties", and building it sharpened why: it is the *only* rule that can serve
+  an `"unbounded"` tie. Neighbours and acquaintances have no bounded group to count, so nothing can
+  be derived, and there is no reason to think respondents resemble their alters either. Asking is
+  the only route to the quantity.
+
+  `counts.ego` and `counts.self` encode what the question actually asked, which no amount of looking
+  at the numbers reveals. With `counts.self = TRUE` the rule coincides with `vis_from_group_size()`,
+  and the docs point there as the clearer constructor for that case.
+
+  A reported visibility below one errors rather than becoming a large weight, since it contradicts
+  the report it sits on. `targets_neighbors.R:104` (`alter_visibility = 1`) is expressible now, and
+  more honestly than as a degenerate donor: it is a *reported* visibility of one, not an
+  approximation.
 - ~~**`vis_from_model()`** — visibility predicted from a fitted model rather than a cell mean.~~
   **built, 2026-08-26.** The prediction held exactly: a new constructor and case 3, and **no
   interface change anywhere**. `is_estimated` already routed the bootstrap, non-integer visibility
@@ -783,7 +796,10 @@ in this plan. Paths in this section are relative to `~/Dropbox/matlab-mortality`
 - `targets_parents.R:99-101` is `vis_from_other_group(group = "sibling")` — Phase 2.
 - `targets_cousins.R:309-530`'s four `alter_visibility_basis` values are four legitimate estimands,
   not four hacks. They map onto `vis_coalesce` chains once `tie_config` exists.
-- `targets_neighbors.R:104` (`alter_visibility = 1`) is `vis_from_donor(match_on = NULL)` with a
-  degenerate donor — worth re-expressing so the assumption is visible.
+- `targets_neighbors.R:104` (`alter_visibility = 1`) was recorded here as
+  `vis_from_donor(match_on = NULL)` with a degenerate donor. Since 2026-08-26 `vis_from_report()`
+  is the better fit: a flat visibility of one is an *assertion about what respondents could
+  report*, not an approximation borrowed from donors, and the two say different things in the
+  provenance table.
 - Units: the repo's `alter_visibility` is a **count**; the package's `ind_vis` is its **reciprocal**.
   Migration must map `alter_visibility → vis`, not to `vis_weight`.

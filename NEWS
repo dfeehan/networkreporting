@@ -1,5 +1,29 @@
 networkreporting 0.3.2
 ========================
+* `vis_from_report()` -- visibility as the respondent reported it. Ego is asked,
+  about each alter, how many frame-population members that alter is connected
+  to, and the answer is used directly.
+
+  Every other rule recovers visibility from something the survey collected for
+  another purpose: the tie's structure, or the respondents' own group sizes. For
+  an `"unbounded"` tie there is no way round that -- neighbours and
+  acquaintances have no bounded group to count, and no reason to think
+  respondents resemble their alters -- so asking is the only honest route, and
+  this is the rule that turns the answer into an estimate.
+
+  Two arguments encode what the question actually asked, which the numbers
+  cannot reveal: `counts.ego` (did the respondent count themselves?) and
+  `counts.self` (did the answer count the alter?). With `counts.self = TRUE` it
+  agrees with `vis_from_group_size()`, which is the clearer constructor for that
+  case.
+
+  A reported visibility below one is an error rather than a small number: it
+  contradicts the report it sits on, since the alter was named by somebody. The
+  message names the usual causes -- a don't-know code stored as 0, or
+  `counts.ego` set wrongly -- and `on_impossible` offers `"floor"` and `"na"`.
+  Item non-response is treated as normal, with a message pointing at
+  `vis_coalesce()` rather than implying the data is broken.
+
 * `vis_from_model()` -- visibility predicted by a fitted model rather than a
   cell mean. The third member of the predict-from-data family, and the one the
   fit/predict split was designed to accommodate: it needed a constructor and
