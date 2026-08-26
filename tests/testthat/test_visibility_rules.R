@@ -277,7 +277,7 @@ test_that("vis_coalesce needs at least two rules", {
 # ---------------------------------------------------------------------------
 test_that("provenance tier counts sum to the number of alters", {
   dat <- make_alters()
-  res <- apply_visibility_rule(vis_from_clique(), dat)
+  res <- apply_visibility_rule(vis_from_clique(), dat, tie = tie_config("clique"))
 
   expect_equal(sum(res$provenance$by_rule$n_alters), nrow(dat))
   expect_equal(res$provenance$n_alters, nrow(dat))
@@ -312,7 +312,8 @@ test_that("provenance reports the approximated share of deaths and of exposure s
 })
 
 test_that("provenance carries the rule's assumptions into output", {
-  res <- apply_visibility_rule(vis_from_clique(), make_alters())
+  res <- apply_visibility_rule(vis_from_clique(), make_alters(),
+                               tie = tie_config("clique"))
   expect_true(any(grepl("ego is a member of the group",
                         res$provenance$assumptions)))
 })
@@ -361,7 +362,7 @@ test_that("the arithmetic statistic reproduces the historical adjustment factor"
 # ---------------------------------------------------------------------------
 test_that("a missing required column is reported with what is present", {
   dat <- make_alters() %>% dplyr::select(-y.F)
-  expect_error(apply_visibility_rule(vis_from_clique(), dat),
+  expect_error(apply_visibility_rule(vis_from_clique(), dat, tie = tie_config("clique")),
                "needs a 'y.F' column")
 })
 
@@ -374,7 +375,8 @@ test_that("apply_visibility_rule derives y.F from sib.dat when asked", {
   dat     <- make_alters() %>% dplyr::select(-y.F)
   sib.dat <- make_alters() %>% dplyr::select(.ego.id, .sib.id, .sib.in.F)
 
-  res <- apply_visibility_rule(vis_from_clique(), dat, sib.dat = sib.dat)
+  res <- apply_visibility_rule(vis_from_clique(), dat, sib.dat = sib.dat,
+                               tie = tie_config("clique"))
 
   expect_equal(res$data$y.F, c(2, 2, 2, 1, 1))
   expect_equal(res$values$vis, c(2, 2, 3, 1, 2))

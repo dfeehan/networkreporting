@@ -4,7 +4,7 @@
 \alias{vis_provenance}
 \title{Summarise how a set of visibilities was arrived at}
 \usage{
-vis_provenance(rule, values, esc.dat)
+vis_provenance(rule, values, esc.dat, tie = NULL, dropped.tiers = NULL)
 }
 \arguments{
 \item{rule}{the \link{visibility_rule} that produced \code{values}}

@@ -12,7 +12,8 @@ apply_visibility_rule(
   ego.id = ".ego.id",
   frame.indicator = ".sib.in.F",
   weights = NULL,
-  ego.in.group = TRUE
+  ego.in.group = TRUE,
+  tie = NULL
 )
 }
 \arguments{
@@ -34,6 +35,15 @@ is supplied, one is derived}
 \item{weights}{name of the column holding donor sampling weights}
 
 \item{ego.in.group}{passed through when deriving \code{y.F}}
+
+\item{tie}{a \code{\link[=tie_config]{tie_config()}} saying what kind of tie these reports are about.
+Required when \code{rule} assumes a tie structure --- \code{\link[=vis_from_clique]{vis_from_clique()}}
+does --- because applicability cannot be read off the data: on a tie
+that is not a clique the clique rule still returns a finite,
+plausible number, and it is wrong. A rule that makes no structural
+assumption, such as \code{\link[=vis_from_donor]{vis_from_donor()}}, needs no \code{tie}. When \code{rule}
+is a \code{\link[=vis_coalesce]{vis_coalesce()}} chain, tiers inapplicable to \code{tie} are dropped,
+and named in the returned provenance.}
 }
 \value{
 a list with \code{values} (a tibble of \code{vis}, \code{vis_weight}, \code{vis_rule},

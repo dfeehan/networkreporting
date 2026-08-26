@@ -181,6 +181,51 @@ The three options are `"error"` (the default, above), `"fallback"` (use the glob
 value and say so), and `"na"` (leave it unresolved, so that a coalesced rule can
 try the next tier).
 
+## You must say what the tie is
+
+`vis_from_clique()` will not run until you declare what kind of tie the reports
+are about:
+
+```{r, error = TRUE}
+apply_visibility_rule(vis_from_clique(), esc.dat = tibble(
+  .ego.id = 1, .sib.in.F = 0, y.F = 2))
+```
+
+This is deliberate, and it is the most important safety property in this
+vignette. The clique rule returns a finite, plausible number for *any* roster.
+Nothing in the data distinguishes a tie that satisfies its assumptions from one
+that does not, so applied in the wrong place it is wrong with no outward sign --
+and the provenance table then reports `clique: 100%`, which reads as "the exact
+rule was used".
+
+How wrong? Socsim gives the true reporting network, and therefore each alter's
+true visibility, so this is measurable rather than a matter of opinion:
+
+| tie | off-frame (carries the deaths) | on-frame (exposure only) | differential |
+|---|---|---|---|
+| siblings (a clique) | exact | exact | 1.00 |
+| maternal cousins | 1.55x too high | 1.29x too high | **1.20** |
+| paternal cousins | 1.56x too high | 1.28x too high | **1.22** |
+
+Siblings are a clique and the rule is exact for 100% of alters. Cousinship is
+not transitive -- your cousins need not be each other's cousins -- and there the
+rule overstates visibility. Note *where* it overstates: more on the off-frame
+side, which carries every death, than on the on-frame side. By the argument
+above, a uniform error would cancel; this differential one does not.
+
+So declare the tie:
+
+```{r}
+tie_config("clique", name = "siblings")
+tie_config("group",  name = "maternal cousins")
+```
+
+`"clique"` is siblings and household members; `"group"` is cousins; `"star"` is
+parents, whose visibility is a fact about the *sibship* rather than the parent
+roster; `"unbounded"` is neighbours and acquaintances. A rule that makes no
+structural assumption, such as `vis_from_donor()`, needs no declaration and
+accepts any.
+
 ## Coalescing: exact where possible, approximate where not
 
 `vis_coalesce()` takes rules in priority order. For each row the first rule
@@ -208,6 +253,25 @@ out
 Ego 1 is resolved exactly by tier 1; the others fall through to the donor tier.
 `vis_tier` records which one caught each row.
 
+That example falls through because tier 1 had no `y.F` to work with. The other
+way a chain falls through is by *declaration*: on a tie the clique rule does not
+apply to, the tier is dropped outright.
+
+```{r}
+res <- apply_visibility_rule(
+  vis_coalesce(vis_from_clique(), vis_from_donor(match_on = NULL, min_donors = 1)),
+  esc.dat = tibble(.ego.id = c(1, 2), .sib.in.F = c(0, 1), y.F = c(2, 2)),
+  ego.dat = donors, weights = "w",
+  tie     = tie_config("group", name = "cousins"))
+
+res$provenance$dropped_tiers
+```
+
+This is the distinction worth holding onto: the clique tier is removed because
+it is *inapplicable*, not skipped because it returned `NA`. It never returns
+`NA` -- which is why, before the tie had to be declared, a chain like this one
+claimed every cousin alter for the exact tier.
+
 ## Reading the provenance table
 
 `apply_visibility_rule()` returns the values alongside a provenance object, and
@@ -221,7 +285,7 @@ res <- apply_visibility_rule(vis_from_clique(), esc.dat = tibble(
   y.F       = c(2, 2, 2, 1, 1),
   sib.occ   = c(0, 0, 1, 0, 1),
   sib.exp   = c(10, 10, 4, 10, 6)
-))
+), tie = tie_config("clique", name = "siblings"))
 
 res$provenance
 ```
