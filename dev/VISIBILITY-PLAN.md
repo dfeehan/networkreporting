@@ -814,10 +814,27 @@ Do **not** build these now; they are recorded so the Phase 1 interfaces do not f
   With relative weights it is off by a constant factor, silently. The rate is unaffected because
   the factor cancels — which is precisely why nobody notices until they ask for a total.
 - **Retiring `network.survival.estimator()`.** Deprecated in Phase 1, removed in a later release.
-- `true_visibility_from_network()` for simulation validation. The socsim code hand-rolls this three
-  times today, and one of the three
-  (`code/socsim/20250205-refactor/simulate_surveys.qmd:300`) computes the alter-side in-degree, which
-  is a *different* quantity from `y.F` — a good argument for one canonical definition.
+- ~~`true_visibility_from_network()` for simulation validation.~~ **built, 2026-08-26**, together
+  with `visibility_accuracy()`, which was the more useful half.
+
+  The diagnosis in this line was right and the fix is worth stating precisely. Two things go wrong
+  when the definition is written inline, and neither announces itself:
+    * **Whose frame membership counts.** Visibility is the number of frame members who could report
+      an alter, so it is the **reporter's** status that matters, never the alter's. Filtering on the
+      alter's gives a different quantity that is equally plausible-looking — which is the
+      "alter-side in-degree" this line flagged.
+    * **Duplicate ties.** A census linking a pair by two routes carries it twice; counting rows then
+      doubles the answer. That is the 16,068-pair artifact that made an exact rule look 27% wrong.
+
+  `visibility_accuracy()` scores on-frame and off-frame alters separately and reports the ratio
+  between them, because that ratio is the only part that reaches a rate. An overall accuracy figure
+  is close to useless: a rule can be badly wrong on both sides and still give an almost unbiased
+  rate.
+
+  Validated against the socsim Bangladesh networks: reproduces the hand-rolled truth **exactly** on
+  30,193 sibling alters and 49,886 cousin-union alters, and the scoring reproduces the published
+  differentials of 1.000 and 1.026. `04_visibility_rule_check.R` could now call these instead of
+  computing truth inline, which is an analysis-repo change and out of scope here.
 
 ## Interface the Matlab analysis repo will need
 

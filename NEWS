@@ -1,5 +1,38 @@
 networkreporting 0.3.2
 ========================
+* `true_visibility_from_network()` and `visibility_accuracy()`, for checking a
+  visibility rule against a known network.
+
+  Where the whole reporting network is known -- so, in practice, simulation --
+  every alter's real visibility is known too, and a rule can be asked not
+  "which tier fired" but "was it right". That is the only way to catch a rule
+  that returns finite, plausible, wrong numbers, which is the failure this whole
+  layer exists to prevent.
+
+  The definition is short enough that it kept being written inline, and kept
+  being written differently. Two things go wrong and neither announces itself,
+  so both are now settled in one place:
+
+    - WHOSE frame membership counts. Visibility is the number of frame-population
+      members who could report an alter, so it is the REPORTER's frame status
+      that matters, never the alter's. Filtering on the alter's yields a
+      different quantity that looks just as reasonable.
+    - DUPLICATE ties. A census linking a pair by more than one route carries it
+      more than once, and counting rows then doubles the answer. In one socsim
+      census this made an exact rule look 27% wrong.
+
+  `visibility_accuracy()` scores predictions separately for on-frame and
+  off-frame alters and reports the ratio between the two errors. That ratio is
+  the number to read: every death is off-frame while exposure is a mixture, so
+  an error of the same size on both sides largely cancels out of a rate and a
+  differential one biases it. An overall accuracy figure is close to useless
+  here.
+
+  Checked against the socsim Bangladesh networks: the canonical definition
+  reproduces the hand-rolled truth exactly on 30,193 sibling alters and 49,886
+  cousin-union alters, and the scoring reproduces the published differentials of
+  1.000 and 1.026.
+
 * estimands that are not ratios. A death rate is a ratio of two
   visibility-adjusted sums, and those sums -- the estimated number of events and
   the estimated person-time -- are estimands in their own right.
